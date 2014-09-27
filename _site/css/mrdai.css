@@ -11,6 +11,7 @@ body {
     margin: 0;
     background: #252525;
     color: rgb(34,34,34);
+    font-family: Monaco, "Microsoft Yahei", Tahoma, sans-serif;
 }
 
 #banner_wrapper {
@@ -45,17 +46,19 @@ body {
 #post_container {
     padding: 20px;
     font-size: 18px;
+    line-height: 35px;
 }
 
 #right_wrapper {
     border-left: solid 1px rgb(231,231,231);
     background: rgb(242,242,242);
     padding: 10px 5px;
-    height: 320px;
+    height: 100%;
 }
 
 #right_wrapper ul {
     list-style-type: none;
+    padding-left: 20px;
     padding-right: 40px;
 }
 
@@ -72,6 +75,7 @@ body {
 #right_wrapper li:first-child {
     border-top: solid 0 rgb(255,255,255);
     margin-right: 0;
+    padding-left: 0;
 }
 
 #right_wrapper li:last-child {
@@ -80,10 +84,6 @@ body {
 
 .navbar-header {
     width: 100%
-}
-
-#post_list_container {
-    height: 200px;
 }
 
 #banner_wrapper h1 {

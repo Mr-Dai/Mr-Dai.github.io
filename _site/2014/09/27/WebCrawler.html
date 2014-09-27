@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/mrdai.css" rel="stylesheet">
+    <link href="/css/prettify.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="/js/google-code-prettify/prettify.js"></script>
+    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></scripte>
+    <title>网络爬虫小入门 - Mr.Dai</title>
+</head>
+<body>
+    <script>
+    $(document).ready(function(){
+        prettyPrint();
+    });
+    </script>
+    <div id="main_wrapper">
+    <div id="banner_wrapper">
+    <h1>Mr.Dai's Blog</h1>
+    </div>
+    <nav id="navbar" class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">首页</a>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">分类<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li class="divider"></li>
+            <li><a href="#">One more separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+    </nav>
+    <div id="content_wrapper" class="container-fluid">
+    
+    <div id="left_wrapper" class="col-xs-14 col-md-9">
+<div id="post_container">
+    <h1><strong>网络爬虫小入门</strong></h1>
+    <h3><em>By Mr.Dai</em></h3>
+    <p style="color: gray; font-size:14px;">27 Sep 2014</p>
+    <!-- content begins here -->
+    <p>
+        说起网络爬虫，大部分的人印象中想到的都是些比较复杂、需要涉及人工智能的脚本。然而实际上，
+    </p>
+    <blockquote>
+        <p>网络爬虫（又被称为网页蜘蛛，网络机器人，在FOAF社区中间，更经常的称为网页追逐者），是一种按照一定的规则，自动的抓取万维网信息的程序或者脚本。另外一些不常使用的名字还有蚂蚁，自动索引，模拟程序或者蠕虫。</p>
+        <footer><cite title="百度百科">百度百科</cite></footer>
+    </blockquote>
+    <p>
+        因此，简单的网络爬虫开发实际上相当容易。本文便是要为大家介绍如何开发一个简单的网络爬虫程序。
+    </p>
+    <h2 id="jump1">先导知识</h2>
+    <blockquote>
+        <p>Web2.0</p>
+        <p>Python</p>
+        <blockquote>
+            <p>requests库</p>
+            <p>BeautifulSoup库</p>
+            <p>re库</p>
+        </blockquote>
+        <p>正则表达式</p>
+        <p>Shell或Windows批处理</p>
+    </blockquote>
+    <h2 id="jump2">需求描述</h2>
+    <p>
+        有需求才会有动力。既然是要抓取万维网信息，那自然是要抓取自己想要的信息了，而且抓取的规则不能太过复杂，于是我选择抓取<a href="http://www.hearthhead.com">hearthhead炉石传说数据库</a>里的所有炉石传说卡牌图片，用于日后炉石传说数据库软件的开发。
+    </p>
+    <h2 id="jump3">第一步：找准规则</h2>
+        制作网络爬虫的关键在于找准所需的信息，然后根据需求和信息找准抓取的规则。我假设你们都了解如何使用requests库和BeautifulSoup库。首先随意打开hearthhead的<a href="http://www.hearthhead.com/card=90">一个卡牌页面</a>（4费王者仆从——冰风雪人是也！）。打开开发者平台可看到网页代码如下（无关部分已被忽略）：</p>
+        <pre class="prettyprint Lang-html">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    ...<span style="color:red">
+    &lt;title&gt;Chillwind Yeti - Card - Hearthstone&lt;/title&gt;</span>
+    ...<span style="color:red">
+    &lt;meta name="description"
+          content="He&#x20;always&#x20;dreamed&#x20;of&#x20;coming&#x20;down&#x20;from&#x20;the&#x20;mountains&#x20;and&#x20;opening&#x20;a&#x20;noodle&#x20;shop,
+                   but&#x20;he&#x20;never&#x20;got&#x20;the&#x20;nerve."&gt;</span>
+    ...
+    ...<span style="color:red">
+    &lt;meta property="twitter&#x3A;image&#x3A;src"
+          content="&#x2F;&#x2F;wow.zamimg.com&#x2F;images&#x2F;hearthstone&#x2F;cards&#x2F;enus&#x2F;original&#x2F;CS2_182.png&#x3F;6485" &gt;</span>
+    ...
+&lt;/head&gt;
+
+&lt;body class="hearthhead card"&gt;
+...<span style="color:red">
+&lt;div id="tttext90"</span>
+     class="wowhead-tooltip"
+     style="float: left;
+            padding-top: 1px; 
+            width: 320px; 
+            visibility: visible;"&gt;
+    &lt;table&gt;
+        &lt;tbody&gt;
+            &lt;tr&gt;
+                &lt;td&gt;
+                    &lt;table style="white-space: nowrap; width: 100%;"&gt;
+                        &lt;tbody&gt;
+                            &lt;tr&gt;
+                                &lt;td&gt;
+                                    &lt;table width="100%"&gt;
+                                        &lt;tbody&gt;
+                                            &lt;tr&gt;<span style="color:red">
+                                                &lt;td&gt;
+                                                    &lt;b class="q"&gt;Chillwind Yeti&lt;/b&gt;
+                                                &lt;/td&gt;
+                                                &lt;th&gt;Minion&lt;/th&gt;</span>
+                                            &lt;/tr&gt;
+                                        &lt;/tbody&gt;
+                                    &lt;/table&gt;
+                                &lt;/td&gt;
+                            &lt;/tr&gt;
+                            &lt;tr&gt;
+                                &lt;td&gt;<span style="color:red">
+                                    &lt;table class="hearthstone-stats"&gt;
+                                        &lt;tbody&gt;
+                                            &lt;tr&gt;
+                                                &lt;td&gt;
+                                                    &lt;span class="hearthstone-cost" title="Cost"&gt;
+                                                        4
+                                                    &lt;/span&gt;
+                                                &lt;/td&gt;
+                                                &lt;td&gt;
+                                                    &lt;span class="hearthstone-attack" title="Attack"&gt;
+                                                        4
+                                                    &lt;/span&gt;
+                                                &lt;/td&gt;
+                                                &lt;td&gt;
+                                                    &lt;span class="hearthstone-health" title="Health"&gt;
+                                                        5
+                                                    &lt;/span&gt;
+                                                &lt;/td&gt;
+                                            &lt;/tr&gt;
+                                        &lt;/tbody&gt;
+                                    &lt;/table&gt;</span>
+                                &lt;/td&gt;
+                            &lt;/tr&gt;
+                        &lt;/tbody&gt;
+                    &lt;/table&gt;
+                    &lt;table style="width: 100%;"&gt;
+                        &lt;tbody&gt;
+                            &lt;tr&gt;
+                                &lt;td class="hearthstone-desc"&gt;
+                                    &lt;div&gt;
+                                        &lt;span class="q"&gt;<span style="color:red">
+                                            &lt;i&gt;
+                                                He always dreamed of coming down from the mountains
+                                                and opening a noodle shop,
+                                                but he never got the nerve.
+                                            &lt;/i&gt;</span>
+                                        &lt;/span&gt;
+                                    &lt;/div&gt;
+                                &lt;/td&gt;
+                            &lt;/tr&gt;
+                        &lt;/tbody&gt;
+                    &lt;/table&gt;
+                &lt;/td&gt;
+                ...
+            &lt;/tr&gt;
+            ...
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+&lt;/div&gt;
+    ...
+    <span style="color:red">
+    &lt;div id="card_tooltip90"</span>
+         class=...
+         style="...<span style="color:red">
+                background-image:
+                    url(http://wow.zamimg.com/images/hearthstone/cards/enus/original/CS2_182.png?6485);"&gt;
+    &lt;/div&gt;</span>
+    <span style="color:red">
+    &lt;div id="card_tooltip_premium90"</span>
+         class="..."
+         style="...<span style="color:red">
+                background-image:
+                    url(http://wow.zamimg.com/images/hearthstone/cards/enus/animated/CS2_182_premium.gif?6485);"&gt;
+    &lt;/div&gt;</span>
+    ...
+&lt;/div&gt;
+...
+&lt;/html&gt;
+
+        </pre>
+        <p>从上面的代码中，我们大概可以看到普通卡牌和金色卡牌的图片展示位于id为card_tooltip90和card_tooltip_premium90里，而卡牌的属性（包括花费、攻击、生命、类型、描述）则在id为tttext90的div内。三个id都带有90这个卡牌序号，当我们遍历hearthhead的数据库时，我们自然不希望90这个数字被hardcoded在我们的筛选规则里。这里我们可以通过用正则表达式来对div的id进行筛选，或者动态修改每次筛选的id。实际上网页中还包含了仆从的召唤、攻击和死亡音效，但这三个音效的提取并不在需求范围内，有兴趣的读者可自行做出拓展进行提取。</p>
+        <p>但是很忧伤的是，我们使用requests.get方法获取出来的页面，这三个div内部都不会有我们想要的信息，也就是说这些信息是通过JS后期渲染加入的，而python自带的库由于缺少浏览器内核，无法进行渲染。</p>
+        <p>实际上，我们大可以通过安装python的第三方代码库，如PAMIE，对HTML代码进行后期渲染，但在这个案例里我们不需要。</p>
+        <p>我们注意观察网页的meta标签，在这些标签里也保留了大量的信息，包括卡牌的名称、描述以及普通卡牌图片的src，而金色卡牌图片的src可以通过修改普通卡牌图片的src获得。而这些meta标签并不是由JS渲染出来的，因此我们只需要从这里获取信息就可以了。</p>
+        <p>&#x20;</p>
+        <p>知道了上述的这些信息以后，我们便不难进行代码编写了。</p>
+    <h2 id="jump4">第二步：编写代码与运行</h2>
+    MyCrawler.py代码如下：
+    <pre class="prettyprint Lang-python">
+import requests
+from BeautifulSoup import BeautifulSoup
+import re
+import json
+
+script_file = open("dHearthHead.bat", "a")
+script_file.write("@echo off\n")
+script_file.write("mkdir HearthStone\n")
+script_file.write("cd HearthStone\n")
+script_file.write("mkdir Original\n")
+script_file.write("mkdir Premium\n")
+script_file.write("cd ..\n")
+
+for i in range(1, 2200):
+    iter = '%d' %i
+    website = requests.get("http://www.hearthhead.com/card="+iter)
+    if website.status_code == 404:
+        continue
+    soup = BeautifulSoup(website.text)
+    card_name = soup.findAll("meta", property=re.compile("title"))[0]["content"]
+    card_src = soup.findAll("meta", property=re.compile("twitter:image:src"))[0]["content"]
+    src_split = card_src.split('/')
+    card_info = src_split.pop().split('.png')
+    pre_card_src = card_info[0]+"_premium.gif"+card_info[1]
+    src_split.pop()
+    pre_card_src = '/'.join(src_split)+"/animated/"+pre_card_src
+    print iter, card_name
+    script_file.write("echo \""+iter+": "+card_name+"\"\n")
+    script_file.write("wget http:" + card_src + " -O \"HearthStone/Original/" + card_name + ".png\" -q\n")
+    script_file.write("wget http:" + pre_card_src + " -O \"HearthStone/Premium/" + card_name + ".gif\" -q\n")
+    
+script_file.write("@echo on\n")
+script_file.close()
+    </pre>
+    <p>执行该py代码后将生成一个用wget指令下载图片的批处理文件，执行该批处理文件等待下载完成即可。</p>
+    <h2 id="jump5">结语</h2>
+    <p>尽管这是一个相当简单的网络爬虫，但这样的开发可让入门者对网络爬虫有了一定的理解，了解网络爬虫大致的开发流程，方便日后的深入。</p>
+    <!-- and end here -->
+</div>
+</div>
+    
+<div id="right_wrapper" class="col-xs-4 col-md-3">
+    <ul>
+        <li><h4>跳转目录</h4></li>
+        <li><a href="#jump1">先导知识</a></li>
+        <li><a href="#jump2">需求描述</a></li>
+        <li><a href="#jump3">第一步：找准规则</a></li>
+        <li><a href="#jump4">第二步：编写代码与运行</a></li>
+        <li><a href="#jump5">结语</a></li>
+    </ul>
+</div>
+    
+    </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/mrdai.js"></script>
+    <script>prettyPrint();</script>
+</body>
+</html>
