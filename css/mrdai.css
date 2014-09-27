@@ -1,0 +1,98 @@
+html {
+    background: #252525;
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+}
+
+body {
+    border: none 0 rgb(34,34,34);
+    padding: 0;
+    margin: 0;
+    background: #252525;
+    color: rgb(34,34,34);
+}
+
+#banner_wrapper {
+    background: rgb(51,51,51);
+    color: rgb(242,242,242);
+    height: 150px;
+    padding: 0 55px;
+}
+
+#navbar {
+    margin-bottom: 0;
+}
+
+#left_wrapper {
+    padding: 20px 0;
+}
+
+#content_wrapper {
+    padding: 0;
+    height: 100%;
+}
+
+#post_list_container li {
+    padding: 20px;
+    border-bottom: dotted 1px rgb(182,182,182);
+}
+
+#post_list_conatiner li:last-child {
+    border-bottom: dotted 0px rgb(182,182,182);
+}
+
+#post_container {
+    padding: 20px;
+    font-size: 18px;
+}
+
+#right_wrapper {
+    border-left: solid 1px rgb(231,231,231);
+    background: rgb(242,242,242);
+    padding: 10px 5px;
+    height: 320px;
+}
+
+#right_wrapper ul {
+    list-style-type: none;
+    padding-right: 40px;
+}
+
+#right_wrapper li {
+    border-bottom: solid 1px rgb(224,224,224);
+    padding: 10px;
+    border-top: solid 1px rgb(255,255,255);
+}
+
+#right_wrapper a {
+    color: black;
+}
+
+#right_wrapper li:first-child {
+    border-top: solid 0 rgb(255,255,255);
+    margin-right: 0;
+}
+
+#right_wrapper li:last-child {
+    border-bottom: solid 0 rgb(255,255,255);
+}
+
+.navbar-header {
+    width: 100%
+}
+
+#post_list_container {
+    height: 200px;
+}
+
+#banner_wrapper h1 {
+    padding: 55px 0;
+    margin: 0;
+}
+
+#main_wrapper {
+    width: 80%;
+    margin: 0 auto;
+    background: rgb(248,248,248);
+}
