@@ -8,12 +8,12 @@
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/mrdai.css" rel="stylesheet">
     
-    <title>{{ page.title }}</title>
+    <title>Mr.Dai's Blog</title>
 </head>
 <body>
     <div id="main_wrapper">
     <div id="banner_wrapper">
-    <h1>{{ page.title }}</h1>
+    <h1>Mr.Dai's Blog</h1>
     </div>
     <nav id="navbar" class="navbar navbar-default" role="navigation">
     <div class="container-fluid">
@@ -49,7 +49,20 @@
     <div id="content_wrapper" class="container-fluid">
     
     <div id="left_wrapper" class="col-xs-12 col-md-8">
-    {{ content }}
+    <div id="post_list_container">
+<ul class="list-unstyled">
+    
+</ul>
+</div>
+
+<center>
+    <ul class="pagination">
+        <li><a href="#">&laquo;</a></li>
+        <li><a href="#">1</a></li>
+        <li><a href="#">&raquo;</a></li>
+    </ul>
+</center>
+
     </div>
     
     <div id="right_wrapper" class="col-xs-6 col-md-4">
