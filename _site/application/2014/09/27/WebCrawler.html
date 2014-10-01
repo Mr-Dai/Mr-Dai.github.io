@@ -15,7 +15,7 @@
 <body>
     <script>
     $(document).ready(function(){
-        prettyPrint();
+       // prettyPrint();
     });
     </script>
     <div id="main_wrapper">
@@ -88,7 +88,7 @@
     </p>
     <h2 id="jump3">第一步：找准规则</h2>
         制作网络爬虫的关键在于找准所需的信息，然后根据需求和信息找准抓取的规则。我假设你们都了解如何使用requests库和BeautifulSoup库。首先随意打开hearthhead的<a href="http://www.hearthhead.com/card=90">一个卡牌页面</a>（4费王者仆从——冰风雪人是也！）。打开开发者平台可看到网页代码如下（无关部分已被忽略）：</p>
-        <code class="prettyprint Lang-html">
+        <pre class="prettyprint Lang-html">
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
@@ -202,7 +202,7 @@
 ...
 &lt;/html&gt;
 
-        </code>
+        </pre>
         <p>从上面的代码中，我们大概可以看到普通卡牌和金色卡牌的图片展示位于id为card_tooltip90和card_tooltip_premium90里，而卡牌的属性（包括花费、攻击、生命、类型、描述）则在id为tttext90的div内。三个id都带有90这个卡牌序号，当我们遍历hearthhead的数据库时，我们自然不希望90这个数字被hardcoded在我们的筛选规则里。这里我们可以通过用正则表达式来对div的id进行筛选，或者动态修改每次筛选的id。实际上网页中还包含了仆从的召唤、攻击和死亡音效，但这三个音效的提取并不在需求范围内，有兴趣的读者可自行做出拓展进行提取。</p>
         <p>但是很忧伤的是，我们使用requests.get方法获取出来的页面，这三个div内部都不会有我们想要的信息，也就是说这些信息是通过JS后期渲染加入的，而python自带的库由于缺少浏览器内核，无法进行渲染。</p>
         <p>实际上，我们大可以通过安装python的第三方代码库，如PAMIE，对HTML代码进行后期渲染，但在这个案例里我们不需要。</p>
@@ -211,7 +211,7 @@
         <p>知道了上述的这些信息以后，我们便不难进行代码编写了。</p>
     <h2 id="jump4">第二步：编写代码与运行</h2>
     MyCrawler.py代码如下：
-    <code class="prettyprint Lang-python">
+    <pre class="prettyprint Lang-python">
 import requests
 from BeautifulSoup import BeautifulSoup
 import re
@@ -245,7 +245,7 @@ for i in range(1, 2200):
     
 script_file.write("@echo on\n")
 script_file.close()
-    </code>
+    </pre>
     <p>执行该py代码后将生成一个用wget指令下载图片的批处理文件，执行该批处理文件等待下载完成即可。</p>
     <h2 id="jump5">结语</h2>
     <p>尽管这是一个相当简单的网络爬虫，但这样的开发可让入门者对网络爬虫有了一定的理解，了解网络爬虫大致的开发流程，方便日后的深入。</p>
@@ -266,6 +266,6 @@ script_file.close()
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/mrdai.js"></script>
-    <script>prettyPrint();</script>
+    <script>//prettyPrint();</script>
 </body>
 </html>

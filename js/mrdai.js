@@ -16,11 +16,37 @@ function searchString(stringArray, reString) {
 	return null;
 }
 
-function javaStyle(codeArea) {
+
+// 代码高亮子函数拓展
+$.fn.extend({
+	javaStyle : function() {
+		if (this.length == 0)
+			return this;
+		$.each(this, function(n, value) {
+			var codeArea = $(value);
+		});
+	},
+	mlStyle : function() {
+		if (this.length == 0)
+			return this;
+		$.each(this, function(n, value) {
+			var codeArea = $(value);
+		});
+	},
+	pythonStyle : function() {
+		if (this.length == 0)
+			return this;
+		$.each(this, function(n, value) {
+			var codeArea = $(value);
+		});
+	}
+});
+
+$.fn.javaStyle = function () {
 
 }
 
-function mlStyle(codeArea) {
+$.fn.mlStyle = function () {
 
 }
 
@@ -30,9 +56,9 @@ function codeStyle() {
 	$.each(codeArea, function(n, value){
 		var lang=searchString(value.class.split(" "), "Lang-.*").split("-")[1];
 		switch (lang) {
-			case "HTML": case "XML": mlStyle(value); break;
-			case "Java": case "JavaScript": case "C": case "C++": javaStyle(value); break;
-			case "Python": pythonStyle(value); break;
+			case "HTML": case "XML": value.mlStyle(); break;
+			case "Java": case "JavaScript": case "C": case "C++": value.javaStyle(); break;
+			case "Python": value.pythonStyle(); break;
 		}
 	});
 }
