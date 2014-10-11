@@ -18,36 +18,30 @@ function searchString(stringArray, reString) {
 
 
 // 代码高亮子函数拓展
-$.fn.extend({
-	javaStyle : function() {
-		if (this.length == 0)
-			return this;
-		$.each(this, function(n, value) {
-			var codeArea = $(value);
-		});
-	},
-	mlStyle : function() {
-		if (this.length == 0)
-			return this;
-		$.each(this, function(n, value) {
-			var codeArea = $(value);
-		});
-	},
-	pythonStyle : function() {
-		if (this.length == 0)
-			return this;
-		$.each(this, function(n, value) {
-			var codeArea = $(value);
-		});
-	}
-});
 
 $.fn.javaStyle = function () {
+	if (this.length == 0)
+		return this;
+	$.each(this, function(n, value) {
+		var codeArea = $(value);
+	});
 
 }
 
 $.fn.mlStyle = function () {
+	if (this.length == 0)
+		return this;
+	$.each(this, function(n, value) {
+		var codeArea = $(value);
+	});
+}
 
+$.fn.pythonStyle = function () {
+	if (this.length == 0)
+		return this;
+	$.each(this, function(n, value) {
+		var codeArea = $(value);
+	});
 }
 
 // 代码高亮主函数
@@ -63,7 +57,27 @@ function codeStyle() {
 	});
 }
 
+// 浏览器跳转
+function browserRedirect() {  
+	var sUserAgent = navigator.userAgent.toLowerCase();  
+	var bIsIpad = sUserAgent.match(/ipad/i) == "ipad";  
+	var bIsIphoneOs = sUserAgent.match(/iphone os/i) == "iphone os";  
+	var bIsMidp = sUserAgent.match(/midp/i) == "midp";  
+	var bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4";  
+	var bIsUc = sUserAgent.match(/ucweb/i) == "ucweb";  
+	var bIsAndroid = sUserAgent.match(/android/i) == "android";  
+	var bIsCE = sUserAgent.match(/windows ce/i) == "windows ce";  
+	var bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile";  
+	if ((bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) ){  
+		window.location.href="/mobile";
+	} 
+} 
+
 $(document).ready(function(){
+	browserRedirect();
 	branchJumpBinding();
 	codeStyle();
+	$("#post_list_container ul li").last().css("border-bottom-width", "0");
+	$("html").removeClass("ui-icon-loading");
+	$(".ui-loader").remove();
 });

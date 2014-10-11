@@ -26,17 +26,22 @@ body {
 }
 
 #left_wrapper {
-    padding: 20px 0;
+    padding: 20px 0 0 0;
 }
 
 #content_wrapper {
     padding: 0;
+    background: rgb(248,248,248);
     height: 100%;
 }
 
 #post_list_container li {
     padding: 20px;
     border-bottom: dotted 1px rgb(182,182,182);
+}
+
+ul.list-unstyled {
+    margin-bottom: 0;
 }
 
 #post_list_conatiner li:last-child {
