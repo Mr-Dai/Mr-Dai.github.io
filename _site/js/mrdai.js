@@ -74,7 +74,7 @@ function browserRedirect() {
 } 
 
 $(document).ready(function(){
-	browserRedirect();
+//	browserRedirect();
 	branchJumpBinding();
 	codeStyle();
 	$("#post_list_container ul li").last().css("border-bottom-width", "0");
