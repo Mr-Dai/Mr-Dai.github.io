@@ -14,8 +14,8 @@
 </head>
 <body>
     <script>
-    $(document).ready(function(){
-       // prettyPrint();
+    $(window).load(function(){
+       prettyPrint();
     });
     </script>
     <div id="main_wrapper">
@@ -53,10 +53,13 @@
     </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
     </nav>
-    <div id="content_wrapper" class="container-fluid">
-        <div id="left_wrapper" class="col-xs-12 col-md-8">
-            <div id="post_container">
-                <h1><strong>Hello, world!</strong></h1>
+    <div id="content_wrapper" style="padding:20px; font-size:18px; line-height:40px">
+        <div id="right_wrapper" style="float:right; margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
+            <ul id="JumpList">
+                <li><h4>跳转目录</h4></li>
+            </ul>
+        </div>
+                <h1 style="margin-top:0"><strong>Hello, world!</strong></h1>
                 <h3><em>By Mr.Dai</em></h3>
                 <p style="color: gray; font-size:14px;">26 Sep 2014</p>
                 <!-- content begins here -->
@@ -64,13 +67,6 @@
 
 
                 <!-- and end here -->
-            </div>
-        </div>
-        <div id="right_wrapper" class="col-xs-6 col-md-4">
-            <ul id="JumpList">
-                <li><h4>跳转目录</h4></li>
-            </ul>
-        </div>
     </div>
     </div>
 
