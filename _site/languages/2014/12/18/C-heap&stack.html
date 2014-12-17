@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/mrdai.css" rel="stylesheet">
+    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+    
+    <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
+    <link href="/css/syntaxhighlighters/shCore.css" rel="stylesheet" type="text/css" />
+    <link href="/css/syntaxhighlighters/shThemeDefault.css" rel="stylesheet" type="text/css" />
+    
+    <title>C的内存组织方式 - Mr.Dai</title>
+</head>
+<body>
+    <div id="main_wrapper">
+    <div id="banner_wrapper">
+    <h1>Mr.Dai's Blog</h1>
+    </div>
+    <nav id="navbar" class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">首页</a>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">分类<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="/courses.html">本科学习</a></li>
+            <li><a href="/application.html">应用开发</a></li>
+            <li><a href="/algorithm.html">算法研究</a></li>
+            <li><a href="/languages.html">编程语言</a></li>
+            <li class="divider"></li>
+            <li><a href="/mobile">切换至手机版</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+    </nav>
+    <div id="content_wrapper" style="padding:20px; line-height:30px">
+        <div id="right_wrapper" style="float:right; margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
+            <ul id="JumpList">
+                <li><h4>跳转目录</h4></li>
+            </ul>
+        </div>
+                <h1 style="margin-top:0"><strong>C的内存组织方式</strong></h1>
+                <h3><em>By Mr.Dai</em></h3>
+                <p style="color: gray; font-size:14px;">18 Dec 2014</p>
+                <!-- content begins here -->
+                <script type="text/javascript" src="/js/syntaxhighlighters/shBrushCpp.js"></script>
+
+<p>原文出处：<a href="http://www.cnblogs.com/archimedes/p/rescuvie-tailrescuvie.html">codingwu 的博客</a>，转载请注明出处</p>
+<br />
+
+<p>C程序在内存中的组织方式大致如下：</p>
+<p style="padding-left: 30px;"><span style="color: #888888;"><strong>BSS段:</strong>（bss segment）通常是指用来存放程序中未初始化的全局变量的一块内存区域。BSS是英文Block Started by Symbol的简称。BSS段属于静态内存分配。</span></p>
+<p style="padding-left: 30px;"><span style="color: #888888;"><strong>数据段</strong> ：数据段（data segment）通常是指用来存放程序中已初始化的全局变量的一块内存区域。数据段属于静态内存分配。</span></p>
+<p style="padding-left: 30px;"><span style="color: #888888;"><strong>代码段：</strong> 代码段（code segment/text segment）通常是指用来存放 程序执行代码的一块内存区域。这部分区域的大小在程序运行前就已经确定，并且内存区域通常属于只读 , 某些架构也允许代码段为可写，即允许修改程序。在代码段中，也有可能包含一些只读的常数变量 ，例如字符串常量等。程序段为程序代码在内存中的映射.一个程序可以在内存中多有个副本.</span></p>
+<p style="padding-left: 30px;"><span style="color: #888888;"><strong>堆（heap）</strong> ：堆是用于存放进程运行中被动态分配的内存段，它的大小并不固定，可动态扩张或缩减。当进程调用malloc/free等函数分配内存时，新分配的内存就被动态添加到堆上（堆被扩张）/释放的内存从堆中被剔除（堆被缩减）</span></p>
+<p style="padding-left: 30px;"><span style="color: #888888;"><strong>栈(stack)</strong> ：栈又称堆栈， 存放程序的局部变量（但不包括static声明的变量， static 意味着 在数据段中存放变量）。除此以外，在函数被调用时，栈用来传递参数和返回值。由于栈的后进先出特点，所以栈特别方便用来保存/恢复调用现场。从这个意义上讲，我们可以把堆栈看成一个寄存、交换临时数据的内存区。</span></p>
+<p>堆的增长方向为从低地址到高地址向上增长，而栈的增长方向刚好相反（实际情况与CPU的体系结构有关）</p>
+<p>当C程序中调用了一个函数时，栈中会分配一块空间来保存与这个调用相关的信息，每一个调用都被当作是活跃的。栈上的那块存储空间称为活跃记录或者栈帧</p>
+<p>栈帧由5个区域组成：输入参数、返回值空间、计算表达式时用到的临时存储空间、函数调用时保存的状态信息以及输出参数，参见下图：</p>
+<p class="center"><img alt="" src="/img/heap&stack@1.jpg" width="422" height="400" /></p>
+<p>可以使用下面的程序来检验:</p>
+<pre class="brush: c; gutter: true">#include &lt;stdio.h&gt;
+int g1=0, g2=0, g3=0;
+int max(int i)
+{
+    int m1 = 0, m2, m3 = 0, *p_max;
+    static n1_max = 0, n2_max, n3_max = 0;
+    p_max = (int*)malloc(10);
+    printf(&quot;打印max程序地址\n&quot;);
+    printf(&quot;in max: 0x%08x\n\n&quot;,max);
+    printf(&quot;打印max传入参数地址\n&quot;);
+    printf(&quot;in max: 0x%08x\n\n&quot;,&amp;i);
+    printf(&quot;打印max函数中静态变量地址\n&quot;);
+    printf(&quot;0x%08x\n&quot;,&amp;n1_max); //打印各本地变量的内存地址
+    printf(&quot;0x%08x\n&quot;,&amp;n2_max);
+    printf(&quot;0x%08x\n\n&quot;,&amp;n3_max);
+    printf(&quot;打印max函数中局部变量地址\n&quot;);
+    printf(&quot;0x%08x\n&quot;,&amp;m1); //打印各本地变量的内存地址
+    printf(&quot;0x%08x\n&quot;,&amp;m2);
+    printf(&quot;0x%08x\n\n&quot;,&amp;m3);
+    printf(&quot;打印max函数中malloc分配地址\n&quot;);
+    printf(&quot;0x%08x\n\n&quot;,p_max); //打印各本地变量的内存地址
+    if(i) return 1;
+    else return 0;
+}
+int main(int argc, char **argv)
+{
+    static int s1=0, s2, s3=0;
+    int v1=0, v2, v3=0;
+    int *p;    
+    p = (int*)malloc(10);
+    printf(&quot;打印各全局变量(已初始化)的内存地址\n&quot;);
+    printf(&quot;0x%08x\n&quot;,&amp;g1); //打印各全局变量的内存地址
+    printf(&quot;0x%08x\n&quot;,&amp;g2);
+    printf(&quot;0x%08x\n\n&quot;,&amp;g3);
+    printf(&quot;======================\n&quot;);
+    printf(&quot;打印程序初始程序main地址\n&quot;);
+    printf(&quot;main: 0x%08x\n\n&quot;, main);
+    printf(&quot;打印主参地址\n&quot;);
+    printf(&quot;argv: 0x%08x\n\n&quot;,argv);
+    printf(&quot;打印各静态变量的内存地址\n&quot;);
+    printf(&quot;0x%08x\n&quot;,&amp;s1); //打印各静态变量的内存地址
+    printf(&quot;0x%08x\n&quot;,&amp;s2);
+    printf(&quot;0x%08x\n\n&quot;,&amp;s3);
+    printf(&quot;打印各局部变量的内存地址\n&quot;);
+    printf(&quot;0x%08x\n&quot;,&amp;v1); //打印各本地变量的内存地址
+    printf(&quot;0x%08x\n&quot;,&amp;v2);
+    printf(&quot;0x%08x\n\n&quot;,&amp;v3);
+    printf(&quot;打印malloc分配的堆地址\n&quot;);
+    printf(&quot;malloc: 0x%08x\n\n&quot;,p);
+    printf(&quot;======================\n&quot;);
+    max(v1);
+    printf(&quot;======================\n&quot;);
+    printf(&quot;打印子函数起始地址\n&quot;);
+    printf(&quot;max: 0x%08x\n\n&quot;,max);
+    return 0;
+}</pre>
+<p>栈是用来存储函数调用信息的绝好方案，然而栈也有一些缺点：</p>
+<p>栈维护了每个函数调用的信息直到函数返回后才释放，这需要占用相当大的空间，尤其是在程序中使用了许多的递归调用的情况下。除此之外，因为有大量的信息需要保存和恢复，因此生成和销毁活跃记录需要消耗一定的时间。我们需要考虑采用迭代的方案。幸运的是我们可以采用一种称为尾递归的特殊递归方式来避免前面提到的这些缺点。</p>
+                <!-- and end here -->
+    </div>
+    </div>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/mrdai.js"></script>
+    <script>SyntaxHighlighter.all()</script>
+</body>
+</html>

@@ -7,17 +7,15 @@
     
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/mrdai.css" rel="stylesheet">
-    <link href="/css/prettify.css" type="text/css" rel="stylesheet" />
-    <script type="text/javascript" src="/js/google-code-prettify/prettify.js"></script>
-    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></scripte>
+    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+    
+    <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
+    <link href="/css/syntaxhighlighters/shCore.css" rel="stylesheet" type="text/css" />
+    <link href="/css/syntaxhighlighters/shThemeDefault.css" rel="stylesheet" type="text/css" />
+    
     <title>各科目相关信息 - Mr.Dai</title>
 </head>
 <body>
-    <script>
-    $(window).load(function(){
-       prettyPrint();
-    });
-    </script>
     <div id="main_wrapper">
     <div id="banner_wrapper">
     <h1>Mr.Dai's Blog</h1>
@@ -37,7 +35,7 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="dropdown active">
+        <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">分类<span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li><a href="/courses.html">本科学习</a></li>
@@ -48,12 +46,11 @@
             <li><a href="/mobile">切换至手机版</a></li>
           </ul>
         </li>
-        <li><a href="/hw.html">6班作业发布</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
     </nav>
-    <div id="content_wrapper" style="padding:20px; font-size:18px; line-height:40px">
+    <div id="content_wrapper" style="padding:20px; line-height:30px">
         <div id="right_wrapper" style="float:right; margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
             <ul id="JumpList">
                 <li><h4>跳转目录</h4></li>
@@ -144,12 +141,8 @@
                 <!-- and end here -->
     </div>
     </div>
-
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/mrdai.js"></script>
-    <script>//prettyPrint();</script>
+    <script>SyntaxHighlighter.all()</script>
 </body>
 </html>

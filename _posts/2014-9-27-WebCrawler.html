@@ -5,6 +5,9 @@ author: Mr.Dai
 categories: application
 ---
 
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushXml.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushPython.js"></script>
+
     <p>
         说起网络爬虫，大部分的人印象中想到的都是些比较复杂、需要涉及人工智能的脚本。然而实际上，
     </p>
@@ -33,7 +36,7 @@ categories: application
     </p>
     <h2 id="jump3">第一步：找准规则</h2>
         制作网络爬虫的关键在于找准所需的信息，然后根据需求和信息找准抓取的规则。我假设你们都了解如何使用requests库和BeautifulSoup库。首先随意打开hearthhead的<a href="http://www.hearthhead.com/card=90">一个卡牌页面</a>（4费王者仆从——冰风雪人是也！）。打开开发者平台可看到网页代码如下（无关部分已被忽略）：</p>
-        <pre class="prettyprint Lang-html">
+        <pre class="brush: xml">
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
@@ -156,7 +159,7 @@ categories: application
         <p>知道了上述的这些信息以后，我们便不难进行代码编写了。</p>
     <h2 id="jump4">第二步：编写代码与运行</h2>
     MyCrawler.py代码如下：
-    <pre class="prettyprint Lang-python">
+    <pre class="brush: python">
 import requests
 from BeautifulSoup import BeautifulSoup
 import re

@@ -2,9 +2,15 @@
 function branchJumpBinding() {
 	var jumpDest = $("[id^='jump']");
 	var jumpList = $("#JumpList");
-	$.each(jumpDest, function(n, value) {
-		jumpList.append("<li><a href='#"+value.id+"'>"+value.innerHTML+"</a></li>");
-	});
+    // 若本页无跳转目标则隐藏跳转目录
+    // 加入#right_wrapper li的个数判断是为了防止index页的#right_wrapper被隐藏
+    if (jumpDest.size() == 0 && $("#right_wrapper li").size() == 1) {
+        $("#right_wrapper").hide();
+    } else {
+        $.each(jumpDest, function(n, value) {
+            jumpList.append("<li><a href='#"+value.id+"'>"+value.innerHTML+"</a></li>");
+        });
+    }
 }
 
 // 查找字符串数组中首个匹配正则表达式的元素

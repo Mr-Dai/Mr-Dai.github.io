@@ -7,17 +7,15 @@
     
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/mrdai.css" rel="stylesheet">
-    <link href="/css/prettify.css" type="text/css" rel="stylesheet" />
-    <script type="text/javascript" src="/js/google-code-prettify/prettify.js"></script>
-    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></scripte>
+    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+    
+    <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
+    <link href="/css/syntaxhighlighters/shCore.css" rel="stylesheet" type="text/css" />
+    <link href="/css/syntaxhighlighters/shThemeDefault.css" rel="stylesheet" type="text/css" />
+    
     <title>网络爬虫小入门 - Mr.Dai</title>
 </head>
 <body>
-    <script>
-    $(window).load(function(){
-       prettyPrint();
-    });
-    </script>
     <div id="main_wrapper">
     <div id="banner_wrapper">
     <h1>Mr.Dai's Blog</h1>
@@ -37,7 +35,7 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="dropdown active">
+        <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">分类<span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li><a href="/courses.html">本科学习</a></li>
@@ -48,12 +46,11 @@
             <li><a href="/mobile">切换至手机版</a></li>
           </ul>
         </li>
-        <li><a href="/hw.html">6班作业发布</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
     </nav>
-    <div id="content_wrapper" style="padding:20px; font-size:18px; line-height:40px">
+    <div id="content_wrapper" style="padding:20px; line-height:30px">
         <div id="right_wrapper" style="float:right; margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
             <ul id="JumpList">
                 <li><h4>跳转目录</h4></li>
@@ -63,7 +60,10 @@
                 <h3><em>By Mr.Dai</em></h3>
                 <p style="color: gray; font-size:14px;">27 Sep 2014</p>
                 <!-- content begins here -->
-                    <p>
+                <script type="text/javascript" src="/js/syntaxhighlighters/shBrushXml.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushPython.js"></script>
+
+    <p>
         说起网络爬虫，大部分的人印象中想到的都是些比较复杂、需要涉及人工智能的脚本。然而实际上，
     </p>
     <blockquote>
@@ -91,7 +91,7 @@
     </p>
     <h2 id="jump3">第一步：找准规则</h2>
         制作网络爬虫的关键在于找准所需的信息，然后根据需求和信息找准抓取的规则。我假设你们都了解如何使用requests库和BeautifulSoup库。首先随意打开hearthhead的<a href="http://www.hearthhead.com/card=90">一个卡牌页面</a>（4费王者仆从——冰风雪人是也！）。打开开发者平台可看到网页代码如下（无关部分已被忽略）：</p>
-        <pre class="prettyprint Lang-html">
+        <pre class="brush: xml">
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
@@ -214,7 +214,7 @@
         <p>知道了上述的这些信息以后，我们便不难进行代码编写了。</p>
     <h2 id="jump4">第二步：编写代码与运行</h2>
     MyCrawler.py代码如下：
-    <pre class="prettyprint Lang-python">
+    <pre class="brush: python">
 import requests
 from BeautifulSoup import BeautifulSoup
 import re
@@ -256,12 +256,8 @@ script_file.close()
                 <!-- and end here -->
     </div>
     </div>
-
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/mrdai.js"></script>
-    <script>//prettyPrint();</script>
+    <script>SyntaxHighlighter.all()</script>
 </body>
 </html>
