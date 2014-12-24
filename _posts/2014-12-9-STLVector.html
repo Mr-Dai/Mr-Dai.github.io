@@ -10,7 +10,7 @@ categories: languages
 <p><b>vector常用函数如下：</b></p>
 <br />
 
-<h2 id="jump1">构造函数</h2>
+<h2 class="jump">构造函数</h2>
 <ul>
 	<li>vector()：默认构造函数，构造一个空vector</li>
 	<li>vector(int nSize)：构造一个vector，其大小为nSize,内部的元素将调用其自身的默认构造函数进行初始化</li>
@@ -19,7 +19,7 @@ categories: languages
 	<li>vector(begin, end)：将begin与end之间包含的元素复制到新的vector中（深复制）</li>
 </ul>
 
-<h2 id="jump2">增加函数</h2>
+<h2 class="jump">增加函数</h2>
 <ul>
 	<li>void push_back(const T& x)：将元素x添加至vector的末尾</li>
 	<li>iterator insert(iterator it,const T& x)：在迭代器it指向的位置插入新元素x，原本的元素将被后移至新元素之后， 返回指向插入后新元素所在位置的迭代器。注意：<span style="color:red">在执行过后，迭代器it将无法再继续使用</span></li>
@@ -27,7 +27,7 @@ categories: languages
 	<li>iterator insert(iterator it,const_iterator first,const_iterator last)：在迭代器it指向的位置插入first与last迭代器之间的所有元素</li>
 </ul>
 
-<h2 id="jump3">删除函数</h2>
+<h2 class="jump">删除函数</h2>
 <ul>
 	<li>iterator erase(iterator it)：删除迭代器it指向的元素，后续元素前移，返回指向被删除元素下一个元素的迭代器。注意：<span style="color:red">在执行过后，迭代器it将无法再继续使用</span></li>
 	<li>iterator erase(iterator first, iterator last)：删除向量中[first, last)中的元素</li>
@@ -35,7 +35,7 @@ categories: languages
 	<li>void clear()：清空向量中所有元素</li>
 </ul>
 
-<h2 id="jump4">遍历函数</h2>
+<h2 class="jump">遍历函数</h2>
 <ul>
 	<li>reference at(int pos):返回pos位置元素的引用</li>
 	<li>reference front():返回首元素的引用</li>
@@ -46,19 +46,19 @@ categories: languages
 	<li>reverse_iterator rend():反向迭代器，指向第一个元素之前的位置</li>
 </ul>
 
-<h2 id="jump5">判断函数</h2>
+<h2 class="jump">判断函数</h2>
 <ul>
 	<li>bool empty() const:判断向量是否为空</li>
 </ul>
 
-<h2 id="jump6">大小函数</h2>
+<h2 class="jump">大小函数</h2>
 <ul>
 	<li>int size() const:返回向量中元素的个数</li>
 	<li>int capacity() const:返回当前向量张红所能容纳的最大元素值</li>
 	<li>int max_size() const:返回最大可允许的vector元素数量值</li>
 </ul>
 
-<h2 id="jump7">其他函数</h2>
+<h2 class="jump">其他函数</h2>
 <ul>
 	<li>void swap(vector&):交换两个同类型向量的数据（交换内部存储的数列指针）</li>
 	<li>void assign(int n,const T& x):设置向量中第n个元素的值为x</li>

@@ -18,7 +18,7 @@ categories: application
     <p>
         因此，简单的网络爬虫开发实际上相当容易。本文便是要为大家介绍如何开发一个简单的网络爬虫程序。
     </p>
-    <h2 id="jump1">先导知识</h2>
+    <h2 class="jump">先导知识</h2>
     <blockquote>
         <p>Web2.0</p>
         <p>Python</p>
@@ -30,11 +30,11 @@ categories: application
         <p>正则表达式</p>
         <p>Shell或Windows批处理</p>
     </blockquote>
-    <h2 id="jump2">需求描述</h2>
+    <h2 class="jump">需求描述</h2>
     <p>
         有需求才会有动力。既然是要抓取万维网信息，那自然是要抓取自己想要的信息了，而且抓取的规则不能太过复杂，于是我选择抓取<a href="http://www.hearthhead.com">hearthhead炉石传说数据库</a>里的所有炉石传说卡牌图片，用于日后炉石传说数据库软件的开发。
     </p>
-    <h2 id="jump3">第一步：找准规则</h2>
+    <h2 class="jump">第一步：找准规则</h2>
         制作网络爬虫的关键在于找准所需的信息，然后根据需求和信息找准抓取的规则。我假设你们都了解如何使用requests库和BeautifulSoup库。首先随意打开hearthhead的<a href="http://www.hearthhead.com/card=90">一个卡牌页面</a>（4费王者仆从——冰风雪人是也！）。打开开发者平台可看到网页代码如下（无关部分已被忽略）：</p>
         <pre class="brush: xml">
 &lt;!DOCTYPE html&gt;
@@ -157,7 +157,7 @@ categories: application
         <p>我们注意观察网页的meta标签，在这些标签里也保留了大量的信息，包括卡牌的名称、描述以及普通卡牌图片的src，而金色卡牌图片的src可以通过修改普通卡牌图片的src获得。而这些meta标签并不是由JS渲染出来的，因此我们只需要从这里获取信息就可以了。</p>
         <p>&#x20;</p>
         <p>知道了上述的这些信息以后，我们便不难进行代码编写了。</p>
-    <h2 id="jump4">第二步：编写代码与运行</h2>
+    <h2 class="jump">第二步：编写代码与运行</h2>
     MyCrawler.py代码如下：
     <pre class="brush: python">
 import requests
@@ -195,5 +195,5 @@ script_file.write("@echo on\n")
 script_file.close()
     </pre>
     <p>执行该py代码后将生成一个用wget指令下载图片的批处理文件，执行该批处理文件等待下载完成即可。</p>
-    <h2 id="jump5">结语</h2>
+    <h2 class="jump">结语</h2>
     <p>尽管这是一个相当简单的网络爬虫，但这样的开发可让入门者对网络爬虫有了一定的理解，了解网络爬虫大致的开发流程，方便日后的深入。</p>

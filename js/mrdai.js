@@ -1,6 +1,6 @@
 // 生成文章页的跳转列表
 function branchJumpBinding() {
-	var jumpDest = $("[id^='jump']");
+	var jumpDest = $(".jump");
 	var jumpList = $("#JumpList");
     // 若本页无跳转目标则隐藏跳转目录
     // 加入#right_wrapper li的个数判断是为了防止index页的#right_wrapper被隐藏
@@ -8,6 +8,7 @@ function branchJumpBinding() {
         $("#right_wrapper").hide();
     } else {
         $.each(jumpDest, function(n, value) {
+            value.id = "index_" + (n+1);
             jumpList.append("<li><a href='#"+value.id+"'>"+value.innerHTML+"</a></li>");
         });
     }

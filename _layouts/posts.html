@@ -56,8 +56,8 @@
                 <li><h4>跳转目录</h4></li>
             </ul>
         </div>
-                <h1 style="margin-top:0"><strong>{{ page.title }}</strong></h1>
-                <h3><em>By {{ page.author }}</em></h3>
+                <h1 style="margin-top:0; font-size: 25px;"><strong>{{ page.title }}</strong></h1>
+                <p style="color: gray; font-size: 14px">By {{ page.author }}</p>
                 <p style="color: gray; font-size:14px;">{{ page.date | date_to_string }}</p>
                 <!-- content begins here -->
                 {{ content }}

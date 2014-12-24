@@ -54,8 +54,12 @@ blockquote {
 }
 
 #post_list_container li {
-    padding: 20px;
+    padding: 10px 20px;
     border-bottom: dotted 1px rgb(182,182,182);
+}
+
+#post_list_container li h2{
+    margin-top: 0;
 }
 
 ul.list-unstyled {

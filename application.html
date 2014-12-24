@@ -6,15 +6,16 @@ title: Mr.Dai's Blog
 <div id="post_list_container">
 <ul class="list-unstyled">
     {% for post in site.categories.application %}
-    <li>
-        <h1><a style="color: black;" href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
-        <h4><strong><em>By {{ post.author }}</em></strong></h4>
-        <p style="color: rgb(170,170,170);">{{ post.date | date_to_string }}</p>
+    <li >
+        <h2><a style="color: black; font-size:20px" href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
+        <p style="font-size:15px;"><em>By {{ post.author }}</em></p>
+        <p style="color: rgb(170,170,170); font-size:15px">{{ post.date | date_to_string }}</p>
     </li>
     {% endfor %}
 </ul>
 </div>
 
+<!--
 <center>
     <ul class="pagination">
         <li><a href="#">&laquo;</a></li>
@@ -22,3 +23,4 @@ title: Mr.Dai's Blog
         <li><a href="#">&raquo;</a></li>
     </ul>
 </center>
+-->

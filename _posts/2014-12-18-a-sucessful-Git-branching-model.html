@@ -16,7 +16,7 @@ categories: application
 
 <p>It focuses around <a href="http://git-scm.com">Git</a> as the tool for the versioning of all of our source code.</p>
 
-<h2 id="jump1">Why git?</h2>
+<h2 class="jump">Why git?</h2>
 <p>For a thorough discussion on the pros and cons of Git compared to centralized source code control systems, <a href="http://whygitisbetterthanx.com/">see</a> the <a href="http://git.or.cz/gitwiki/GitSvnComparsion">web</a>. There are plenty of flame wars going on there. As a developer, I prefer Git above all other tools around today. Git really changed the way developers think of merging and branching. From the classic CVS/Subversion world I came from, merging/branching has always been considered a bit scary (“beware of merge conflicts, they bite you!”) and something you only do every once in a while.</p>
 
 <p>But with Git, these actions are extremely cheap and simple, and they are considered one of the core parts of your daily workflow, really. For example, in CVS/Subversion <a href="http://svnbook.red-bean.com">books</a>, branching and merging is first discussed in the later chapters (for advanced users), while in <a href="http://book.git-scm.com">every</a> <a href="http://pragprog.com/titles/tsgit/pragmatic-version-control-using-git">Git</a> <a href="http://github.com/progit/progit">book</a>, it’s already covered in chapter 3 (basics).</p>
@@ -25,7 +25,7 @@ categories: application
 
 <p>Enough about the tools, let’s head onto the development model. The model that I’m going to present here is essentially no more than a set of procedures that every team member has to follow in order to come to a managed software development process.</p>
 
-<h2 id="jump2">Decentralized but centralized</h2>
+<h2 class="jump">Decentralized but centralized</h2>
 <p>The repository setup that we use and that works well with this branching model, is that with a central “truth” repo. Note that this repo is only considered to be the central one (since Git is a DVCS, there is no such thing as a central repo at a technical level). We will refer to this repo as origin, since this name is familiar to all Git users.</p>
 
 <p class="center"><img alt="" src="/img/git-model@2.png" width="487"></p>
@@ -34,7 +34,7 @@ categories: application
 
 <p>Technically, this means nothing more than that Alice has defined a Git remote, named bob, pointing to Bob’s repository, and vice versa.</p>
 
-<h2 id="jump3">The main branches</h2>
+<h2 class="jump">The main branches</h2>
 <img alt="" class="right" src="/img/git-model@3.png" width="267">
 <p>At the core, the development model is greatly inspired by existing models out there. The central repo holds two main branches with an infinite lifetime:</p>
 
@@ -65,7 +65,7 @@ theoretically, we could use a Git hook script to automatically build and
 roll-out our software to our production servers everytime there was a commit on
 <code>master</code>.</p>
 
-<h2 id="jump4">Supporting branches</h2>
+<h2 class="jump">Supporting branches</h2>
 <p>Next to the main branches <code>master</code> and <code>develop</code>, our development model uses
 a variety of supporting branches to aid parallel development between team
 members, ease tracking of features, prepare for production releases and to
@@ -318,7 +318,7 @@ $ git branch -d hotfix-1.2.1
 # Deleted branch hotfix-1.2.1 (was abbe5d6).
 </pre>
 
-<h2 id="jump5">Summary</h2>
+<h2 class="jump">Summary</h2>
 <p>While there is nothing really shocking new to this branching model, the “big
 picture” figure that this post began with has turned out to be tremendously
 useful in our projects. It forms an elegant mental model that is easy to

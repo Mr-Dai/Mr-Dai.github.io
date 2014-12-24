@@ -13,7 +13,7 @@
     <link href="/css/syntaxhighlighters/shCore.css" rel="stylesheet" type="text/css" />
     <link href="/css/syntaxhighlighters/shThemeDefault.css" rel="stylesheet" type="text/css" />
     
-    <title>未来规划 - Mr.Dai</title>
+    <title>Matlab学习贴条 - Mr.Dai</title>
 </head>
 <body>
     <div id="main_wrapper">
@@ -56,31 +56,27 @@
                 <li><h4>跳转目录</h4></li>
             </ul>
         </div>
-                <h1 style="margin-top:0; font-size: 25px;"><strong>未来规划</strong></h1>
+                <h1 style="margin-top:0; font-size: 25px;"><strong>Matlab学习贴条</strong></h1>
                 <p style="color: gray; font-size: 14px">By Mr.Dai</p>
-                <p style="color: gray; font-size:14px;">28 Sep 2014</p>
+                <p style="color: gray; font-size:14px;">22 Dec 2014</p>
                 <!-- content begins here -->
-                    <h2 class="jump">网站未来规划</h2>
-    <blockquote>
-        <p>加入“日常生活”板块，写点别的休闲日志也是很不错呢~（已完成）</p>
-        <p>实现手机版博客</p>
-        <p>加入“点击图片查看大图”功能</p>
-        <p>丰富文章页面右边栏的内容</p>
-        <p>进一步使用JS和CSS完善板块，简化维护工作</p>
-        <p>使用JS自动生成文章页的跳转列表（已完成）</p>
-        <p>实现自己的代码高亮设置（网上下载的实在是太丑了！）</p>
-        <p>在文章总数达到一定程度以后，进一步细化文章分类。尝试使用TAG标记文章，而不是只用category</p>
-        <p>实现用户自由设置代码高亮风格的功能</p>
-        <footer>announced by 呆呆</footer>
-    </blockquote>
-    <blockquote>
-        <p>首页字体太大！</p>
-        <p>加入用户自定义字体大小功能！</p>
-        <footer>announced by 绰小文</footer>
-        <p>呃，好吧~</p>
-        <footer>responded by 呆呆</footer>
-    </blockquote>
+                <script type="text/javascript" src="/js/syntaxhighlighters/shBrushCpp.js"></script>
 
+<h2 class="jump">二维矩阵降维</h2>
+<p>可利用reshape函数</p>
+<pre class="brush: cpp">
+    matrix(1:3,1:3) = 1
+    matrix = reshape(matrix', 1, [])
+</pre>
+
+<h2 class="jump">二维矩阵排序</h2>
+<p>直接对二维矩阵使用sort函数只能逐行或逐列排序</p>
+<p>解决方案：先用reshape函数降维，再用sort函数排序</p>
+<pre class="brush: cpp">
+    matrix = [ 1,2,3; 4,5,6; 7,8,9 ]
+    matrix = reshape(matrix', 1, [])
+    matrix = sort(matrix)
+</pre>
                 <!-- and end here -->
     </div>
     </div>
