@@ -201,8 +201,7 @@ public void startService() {
 }
 </pre>
 <p>
-可以看到方法中启动了一个NotificationService实例。这里我并不清楚为什么要用一个新的线程来启动服务，
-在我看来这个举动是没有必要的，完全可以在主线程中启动服务。如果你对此有更好的见解，欢迎随时与我交流。
+可以看到方法中启动了一个NotificationService实例。这里建立了一个新的线程来运行服务。
 </p>
 <p>
 然后我们看到NotificationService类：
