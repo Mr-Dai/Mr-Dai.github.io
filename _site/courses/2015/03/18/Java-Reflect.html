@@ -143,7 +143,7 @@ class OfficeBetter {
     }
 }
 </pre>
-<p>这个类就可以通过编译。而且对比与原本的Office类，如果未来需要加入Outlook、PowerPoint、Visio等新功能，Office类需要修改其源代码，而OfficeBetter完全不需要修改。因此在设计上，OfficeBetter更加优越，只需要为所有的Office软件制定一个共同的标准（接口、父类）OfficeAble并在OfficeAble内声明start即可，这种设计也符合策略模式。</p>
+<p>这个类就可以通过编译。而且对比与原本的Office类，如果未来需要加入Outlook、PowerPoint、Visio等新功能，Office类需要修改其源代码，而OfficeBetter完全不需要修改。因此在设计上，OfficeBetter更加优越，只需要为所有的Office软件制定一个共同的标准（接口、父类）OfficeAble并在OfficeAble内声明start即可，这种设计也符合工厂模式。</p>
 
 <h2 class="jump">第三节：获取方法信息</h2>
 <pre class="brush: java">

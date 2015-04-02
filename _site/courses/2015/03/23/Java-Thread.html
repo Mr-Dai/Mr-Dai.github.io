@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/mrdai.css" rel="stylesheet">
+    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+    
+    <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
+    <link href="/css/syntaxhighlighters/shCore.css" rel="stylesheet" type="text/css" />
+    <link href="/css/syntaxhighlighters/shThemeDefault.css" rel="stylesheet" type="text/css" />
+    
+    <title>细说Java多线程 - Robert Peng</title>
+</head>
+<body>
+    <div id="main_wrapper">
+    <div id="banner_wrapper">
+    <h1>Mr.Dai's Blog</h1>
+    </div>
+    <nav id="navbar" class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">首页</a>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">分类<span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="/courses.html">本科学习</a></li>
+            <li><a href="/application.html">应用开发</a></li>
+            <li><a href="/algorithm.html">算法研究</a></li>
+            <li><a href="/languages.html">编程语言</a></li>
+            <li class="divider"></li>
+            <li><a href="/mobile">切换至手机版</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+    </nav>
+    <div id="content_wrapper" style="padding:20px; line-height:30px">
+        <div id="right_wrapper" style="float:right; margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
+            <ul id="JumpList">
+                <li><h4>跳转目录</h4></li>
+            </ul>
+        </div>
+                <h1 style="margin-top:0; font-size: 25px;"><strong>细说Java多线程</strong></h1>
+                <p style="color: gray; font-size: 14px">By Robert Peng</p>
+                <p style="color: gray; font-size:14px;">23 Mar 2015</p>
+                <!-- content begins here -->
+                <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+
+<p>内容出自慕课网： <a href="http://www.imooc.com/learn/312">细说多线程之Thread VS Runnable</a>，转载请注明出处</p>
+<br />
+
+<h2 class="jump">第一节：回顾线程创建的两种方式</h2>
+
+<p>第一种：继承Thread类</p>
+<pre class="brush: java">
+class MyThread extends Thread {
+    ...
+    @Override
+    public void run() {
+        ...
+    }
+}
+
+MyThread mt = new MyThread(); // 创建线程
+mt.start();                   // 启动线程
+</pre>
+<p>第二种：实现Runnable接口</p>
+<pre class="brush: java"> 
+class MyThread implements Runnable {
+    ...
+    @Override
+    public void run() {
+        ...
+    }
+}
+
+MyThread mt = new MyThread();
+Thread td = new Thread(mt);
+td.start();
+</pre>
+<p>两种方式的比较：</p>
+<ul>
+    <li>Runnable的方式可以避免Thread方式由于Java单继承特性带来的特性</li>
+    <li>Runnable的代码可以被多个线程（Thread实例）共享，适合于多个线程处理同一资源的情况</li>
+</ul>
+
+<h2 class="jump">第二节：线程的生命周期</h2>
+<p class="center"><img alt="" src="/img/java-thread@1.png"></p>
+<ul>
+    <li>创建：新建一个线程对象：如Thread thd = new Thread()</li>
+    <li>通过调用线程的start()方法，线程从创建状态进入就绪状态</li>
+    <li>就绪：此时线程只是进入了线程队列，等待获取CPU服务，具备了运行的条件，但并不一定已经开始运行了</li>
+    <li>运行：处于就绪状态的线程，一旦获取了CPU资源，便进入到运行状态，开始执行run()方法里面的逻辑</li>
+    <li>终止：线程的run()方法执行完毕，或者线程调用了stop()方法，线程便进入终止状态。</li>
+    <li>阻塞：一个正在执行的线程在某些情况下，由于某种原因而暂时让出了CPU资源，暂停了自己的执行，便进入了阻塞状态，如调用了sleep()方法。阻塞解除后，线程回到就绪状态</li>
+</ul>
+
+<h2 class="jump">第三节：守护线程</h2>
+<p>在Java中，线程有两类：</p>
+<ul>
+    <li>用户线程：运行在前台，执行具体的任务。程序的主线程、连接网络的子线程等都是用户线程</li>
+    <li>守护线程：运行在后台，为其他前台线程服务。一旦所有用户线程都结束运行，守护线程会随JVM一起结束工作</li>
+</ul>
+<p>可以通过调用Thread类的setDaemon(true)方法来设置当前的线程为守护线程。</p>
+<p>注意事项：
+<ul>
+    <li>setDaemon(true)必须在start()方法之前调用，否则会抛出IllegalThreadStateException异常</li>
+    <li>在守护线程中产生的新线程也是守护线程</li>
+    <li>不是所有的任务都可以分配给守护线程来执行，比如读写操作和计算逻辑</li>
+</ul>
+
+
+    
+
+                <!-- and end here -->
+    </div>
+    </div>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/mrdai.js"></script>
+    <script>SyntaxHighlighter.all()</script>
+</body>
+</html>
