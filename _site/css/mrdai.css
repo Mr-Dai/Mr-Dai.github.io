@@ -15,6 +15,16 @@ body {
     font-family: 'Microsoft YaHei', 宋体, 'Myriad Pro', Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+p {
+    margin-top: 30px;
+}
+
+h2, h3, h4 {
+    padding-top: 15px;
+    font-weight: bold;
+    color: rgb(32,67,92);
+}
+
 .center {
     text-align: center;
 }
@@ -114,6 +124,7 @@ ul.list-unstyled {
 
 #main_wrapper {
     width: 80%;
+    min-width: 1000px;
     margin: 0 auto;
     background: white;
 }
