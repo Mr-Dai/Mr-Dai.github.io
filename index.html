@@ -8,7 +8,7 @@ motto: Blog is how I learn.
 <ul class="list-unstyled">
     {% for post in site.posts %}
     <li>
-        <p><a style="color: rgb(50, 93, 114); font-size:30px; font-weight:300" href="{{ site.baseurl }}{{ post.url }}#disqus_thread">{{ post.title }}</a></p>
+        <p><a style="color: rgb(50, 93, 114); font-size:30px; font-weight:300" href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></p>
         <p style="font-size:15px; margin-top: 0; color: #BBB"><em>By {{ post.author }}</em>, {{ post.date | date_to_string }}</p>
     </li>
     {% endfor %}
