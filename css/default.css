@@ -1,5 +1,4 @@
 html {
-    background: #252525;
     margin: 0;
     padding: 0;
     vertical-align: baseline;
@@ -47,7 +46,10 @@ h2, h3, h4 {
 }
 
 #left_wrapper {
+	width: 70%;
+	min-width: 560px;
     padding: 20px 0 0 0;
+	border-right: solid 1px rgb(221, 221, 221)
 }
 
 #content_wrapper {
@@ -80,14 +82,20 @@ ul.list-unstyled {
 }
 
 #right_wrapper {
+	width: 30%;
+	min-width: 240px;
+	float: right;
     border-left: solid 1px rgb(231,231,231);
-    background: rgb(242,242,242);
-    padding: 10px 5px;
-    height: 100%;
+	padding-left: 0;
 }
 
 #right_wrapper ul {
+	width: 24%;
+	position: fixed;
+	top: 30%;
+	background: rgb(242,242,242);
     list-style-type: none;
+	padding: 10px 5px;
     padding-left: 20px;
     padding-right: 40px;
 }

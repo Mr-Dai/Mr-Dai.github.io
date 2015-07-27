@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/mrdai.css" rel="stylesheet">
+    <link href="/css/default.css" rel="stylesheet">
+	<link href="/css/post.css" rel="stylesheet">
     <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
     
     <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
@@ -21,16 +22,17 @@
     <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
 	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
     </div>
-    <div id="content_wrapper" style="padding:20px; line-height:30px">
-        <div id="right_wrapper" style="float:right; margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
+    <div id="content_wrapper">
+        <div id="right_wrapper" style="margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
             <ul id="JumpList">
                 <li><h4>跳转目录</h4></li>
             </ul>
         </div>
-        <p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300">Hadoop、Hive、ZooKeeper配置</p>
-		<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 02 Apr 2015</p>
-        <!-- content begins here -->
-        <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+		<div id="left_wrapper">
+			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">Hadoop、Hive、ZooKeeper配置</p>
+			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 02 Apr 2015</p>
+			<!-- content starts here -->
+			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushXml.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushSql.js"></script>
@@ -286,7 +288,25 @@ $java DataGenerator ./student.txt 10000000
 <p class="center"><img width="1200px" alt="" src="/img/hive@2.jpg"></p>
 <p class="center"><img width="1200px" alt="" src="/img/hive@3.jpg"></p>
 
-        <!-- and end here -->
+			<!-- and ends here -->
+			
+			<!-- Disqus Block starts here -->
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES * * */
+				var disqus_shortname = 'robertpsblog';
+				var disqus_identifier = 'Hadoop、Hive、ZooKeeper配置';
+    
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+			<!-- and ends here -->
+		</div>
     </div>
     </div>
     <script src="/js/bootstrap.min.js"></script>

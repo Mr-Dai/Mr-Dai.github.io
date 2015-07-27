@@ -1,0 +1,11 @@
+#left_wrapper {
+	width: 70%;
+	min-width: 500px;
+	padding-top: 0px;
+	padding-right: 20px;
+}
+
+#content_wrapper {
+	padding: 0 20px;
+	line-height: 30px;
+}

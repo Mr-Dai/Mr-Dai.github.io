@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/mrdai.css" rel="stylesheet">
+    <link href="/css/default.css" rel="stylesheet">
+	<link href="/css/post.css" rel="stylesheet">
     <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
     
     <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
@@ -21,16 +22,17 @@
     <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
 	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
     </div>
-    <div id="content_wrapper" style="padding:20px; line-height:30px">
-        <div id="right_wrapper" style="float:right; margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
+    <div id="content_wrapper">
+        <div id="right_wrapper" style="margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
             <ul id="JumpList">
                 <li><h4>跳转目录</h4></li>
             </ul>
         </div>
-        <p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300">C的内存组织方式</p>
-		<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Mr.Dai</em>, 18 Dec 2014</p>
-        <!-- content begins here -->
-        <script type="text/javascript" src="/js/syntaxhighlighters/shBrushCpp.js"></script>
+		<div id="left_wrapper">
+			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">C的内存组织方式</p>
+			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Mr.Dai</em>, 18 Dec 2014</p>
+			<!-- content starts here -->
+			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushCpp.js"></script>
 
 <p>原文出处：<a href="http://www.cnblogs.com/archimedes/p/rescuvie-tailrescuvie.html">codingwu 的博客</a>，转载请注明出处</p>
 <br />
@@ -104,7 +106,25 @@ int main(int argc, char **argv)
 }</pre>
 <p>栈是用来存储函数调用信息的绝好方案，然而栈也有一些缺点：</p>
 <p>栈维护了每个函数调用的信息直到函数返回后才释放，这需要占用相当大的空间，尤其是在程序中使用了许多的递归调用的情况下。除此之外，因为有大量的信息需要保存和恢复，因此生成和销毁活跃记录需要消耗一定的时间。我们需要考虑采用迭代的方案。幸运的是我们可以采用一种称为尾递归的特殊递归方式来避免前面提到的这些缺点。</p>
-        <!-- and end here -->
+			<!-- and ends here -->
+			
+			<!-- Disqus Block starts here -->
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES * * */
+				var disqus_shortname = 'robertpsblog';
+				var disqus_identifier = 'C的内存组织方式';
+    
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+			<!-- and ends here -->
+		</div>
     </div>
     </div>
     <script src="/js/bootstrap.min.js"></script>

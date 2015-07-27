@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/mrdai.css" rel="stylesheet">
+    <link href="/css/default.css" rel="stylesheet">
+	<link href="/css/post.css" rel="stylesheet">
     <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
     
     <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
@@ -21,16 +22,17 @@
     <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
 	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
     </div>
-    <div id="content_wrapper" style="padding:20px; line-height:30px">
-        <div id="right_wrapper" style="float:right; margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
+    <div id="content_wrapper">
+        <div id="right_wrapper" style="margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
             <ul id="JumpList">
                 <li><h4>跳转目录</h4></li>
             </ul>
         </div>
-        <p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300">算法课刷题指南</p>
-		<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Mr.Dai</em>, 17 Dec 2014</p>
-        <!-- content begins here -->
-        <h2 class="jump">第一章：算法设计基本策略</h2>
+		<div id="left_wrapper">
+			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">算法课刷题指南</p>
+			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Mr.Dai</em>, 17 Dec 2014</p>
+			<!-- content starts here -->
+			<h2 class="jump">第一章：算法设计基本策略</h2>
 <ul>
     <li><a href="http://soj.me/1020">1020</a> 大数求模</li>
     <li><a href="http://soj.me/1021">1021</a> 简单题 -> 规模原来很大 -> 难 ->数据结构: 栈</li>
@@ -116,7 +118,25 @@
     <li><a href="http://soj.sysu.edu.cn/1687">1687</a> 中等， 考虑从大到小或从小到大插入数</li>
     <li><a href="http://soj.sysu.edu.cn/1828">1828</a> 简单，排序之后DP</li>
 </ul>
-        <!-- and end here -->
+			<!-- and ends here -->
+			
+			<!-- Disqus Block starts here -->
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES * * */
+				var disqus_shortname = 'robertpsblog';
+				var disqus_identifier = '算法课刷题指南';
+    
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+			<!-- and ends here -->
+		</div>
     </div>
     </div>
     <script src="/js/bootstrap.min.js"></script>
