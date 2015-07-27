@@ -1,15 +1,15 @@
 ---
 layout: default
-title: Mr.Dai's Blog
+title: Robert P.'s Blog
+motto: Blog is how I learn.
 ---
 
 <div id="post_list_container">
 <ul class="list-unstyled">
     {% for post in site.posts %}
-    <li >
-        <h2><a style="color: black; font-size:20px" href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
-        <p style="font-size:15px;"><em>By {{ post.author }}</em></p>
-        <p style="color: rgb(170,170,170); font-size:15px">{{ post.date | date_to_string }}</p>
+    <li>
+        <p><a style="color: rgb(50, 93, 114); font-size:30px; font-weight:300" href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></p>
+        <p style="font-size:15px; margin-top: 0; color: #BBB"><em>By {{ post.author }}</em>, {{ post.date | date_to_string }}</p>
     </li>
     {% endfor %}
 </ul>

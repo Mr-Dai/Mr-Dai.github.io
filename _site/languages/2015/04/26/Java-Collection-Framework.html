@@ -18,49 +18,19 @@
 <body>
     <div id="main_wrapper">
     <div id="banner_wrapper">
-    <h1>Mr.Dai's Blog</h1>
+    <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
+	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
     </div>
-    <nav id="navbar" class="navbar navbar-default" role="navigation">
-    <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/">首页</a>
-
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">分类<span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            <li><a href="/courses.html">本科学习</a></li>
-            <li><a href="/application.html">应用开发</a></li>
-            <li><a href="/algorithm.html">算法研究</a></li>
-            <li><a href="/languages.html">编程语言</a></li>
-            <li class="divider"></li>
-            <li><a href="/mobile">切换至手机版</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
-    </nav>
     <div id="content_wrapper" style="padding:20px; line-height:30px">
         <div id="right_wrapper" style="float:right; margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
             <ul id="JumpList">
                 <li><h4>跳转目录</h4></li>
             </ul>
         </div>
-                <h1 style="margin-top:0; font-size: 25px;"><strong>Java Collections Framework源码阅读</strong></h1>
-                <p style="color: gray; font-size: 14px">By Robert Peng</p>
-                <p style="color: gray; font-size:14px;">26 Apr 2015</p>
-                <!-- content begins here -->
-                <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+        <p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300">Java Collections Framework源码阅读</p>
+		<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 26 Apr 2015</p>
+        <!-- content begins here -->
+        <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
 
 <h2 class="jump">写作背景</h2>
 
@@ -99,10 +69,10 @@
 package java.util;
 
 /**
- * A collection that contains no duplicate elements.  More formally, sets                           * 一个不包含重复元素的集合。严格来讲，set
- * contain no pair of elements e1 and e2 such that                                                  * 中不存在元素对e1 e2使得e1.equals(e2)，
- * e1.equals(e2), and at most one null element.  As implied by                                      * 且最多包含一个null元素。正如其名，Set接口
- * its name, this interface models the mathematical set abstraction.                                * 模拟的正是数学中的set抽象
+ * A collection that contains no duplicate elements.  More formally, sets       * 一个不包含重复元素的集合。严格来讲，set
+ * contain no pair of elements e1 and e2 such that                              * 中不存在元素对e1 e2使得e1.equals(e2)，
+ * e1.equals(e2), and at most one null element.  As implied by                  * 且最多包含一个null元素。正如其名，Set接口
+ * its name, this interface models the mathematical set abstraction.            * 模拟的正是数学中的set抽象
  */
 
 public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
@@ -146,50 +116,50 @@ package java.util;
 import java.io.InvalidObjectException;
 
 /**
- * This class implements the Set interface, backed by a hash table                                  * 该类利用了一个哈希表（实际上是个HashMap实例）来实现Set接口。
- * (actually a HashMap instance).  It makes no guarantees as to the                                 * 该类并不保证
- * iteration order of the set; in particular, it does not guarantee that the                        * set中元素的遍历次序；尤其是，该类不保证其遍历次序
- * order will remain constant over time.  This class permits the null                               * 不会随着时间而改变。该类允许null元素的存在。
+ * This class implements the Set interface, backed by a hash table             * 该类利用了一个哈希表（实际上是个HashMap实例）来实现Set接口。
+ * (actually a HashMap instance).  It makes no guarantees as to the            * 该类并不保证
+ * iteration order of the set; in particular, it does not guarantee that the   * set中元素的遍历次序；尤其是，该类不保证其遍历次序
+ * order will remain constant over time.  This class permits the null          * 不会随着时间而改变。该类允许null元素的存在。
  * element.
  *
- * This class offers constant time performance for the basic operations                             * 该类保证基本操作在时间上的性能基本上是不变的（o(1)），
+ * This class offers constant time performance for the basic operations        * 该类保证基本操作在时间上的性能基本上是不变的（o(1)），
  * (add, remove, contains and size),
- * assuming the hash function disperses the elements properly among the                             * 假设哈希函数可以把元素们恰当地分散在桶（buckets）里。
+ * assuming the hash function disperses the elements properly among the        * 假设哈希函数可以把元素们恰当地分散在桶（buckets）里。
  * buckets.  Iterating over this set requires time proportional to the sum of                       
- * the HashSet instance's size (the number of elements) plus the                                    * 遍历该set的所需时间大致与HashSet实例大小和其HashMap实例容量
- * "capacity" of the backing HashMap instance (the number of                                        * 的总和成正比。（o(m+n)）
- * buckets).  Thus, it's very important not to set the initial capacity too                         * 因此如果遍历性能很重要的话，请不要把初始容量设置得太高
- * high (or the load factor too low) if iteration performance is important.                         * （或把载入因子设置得太低）
+ * the HashSet instance's size (the number of elements) plus the               * 遍历该set的所需时间大致与HashSet实例大小和其HashMap实例容量
+ * "capacity" of the backing HashMap instance (the number of                   * 的总和成正比。（o(m+n)）
+ * buckets).  Thus, it's very important not to set the initial capacity too    * 因此如果遍历性能很重要的话，请不要把初始容量设置得太高
+ * high (or the load factor too low) if iteration performance is important.    * （或把载入因子设置得太低）
  *
- * Note that this implementation is not synchronized.                                               * 请注意，该实现类并不是线程同步的。
- * If multiple threads access a hash set concurrently, and at least one of                          * 如果多个线程会同时访问该哈希集合，且存在至少一个
- * the threads modifies the set, it must be synchronized externally.                                * 线程会修改它，那么在必须在外部将其声明为synchronized
- * This is typically accomplished by synchronizing on some object that                              * 通常这会通过对某个封装了该集合的包装类加同步锁来使
- * naturally encapsulates the set.                                                                  * 其线程同步
+ * Note that this implementation is not synchronized.                          * 请注意，该实现类并不是线程同步的。
+ * If multiple threads access a hash set concurrently, and at least one of     * 如果多个线程会同时访问该哈希集合，且存在至少一个
+ * the threads modifies the set, it must be synchronized externally.           * 线程会修改它，那么在必须在外部将其声明为synchronized
+ * This is typically accomplished by synchronizing on some object that         * 通常这会通过对某个封装了该集合的包装类加同步锁来使
+ * naturally encapsulates the set.                                             * 其线程同步
  *
- * If no such object exists, the set should be "wrapped" using the                                  * 如果并不存在这样的一个包装类，集合应用Collections.synchronizedSet方法
- * {@link Collections#synchronizedSet Collections.synchronizedSet}                                  * 进行封装。
- * method.  This is best done at creation time, to prevent accidental                               * 该操作最好进行在实例创建时，以免意外地对集合产生了未同步的访问。
+ * If no such object exists, the set should be "wrapped" using the             * 如果并不存在这样的一个包装类，集合应用Collections.synchronizedSet方法
+ * {@link Collections#synchronizedSet Collections.synchronizedSet}             * 进行封装。
+ * method.  This is best done at creation time, to prevent accidental          * 该操作最好进行在实例创建时，以免意外地对集合产生了未同步的访问。
  * unsynchronized access to the set:
  *   Set s = Collections.synchronizedSet(new HashSet(...));
  *
- * The iterators returned by this class's iterator method are                                       * 由该类的iterator方法返回的迭代器是快速失败（fail-fast）的：
- * fail-fast: if the set is modified at any time after the iterator is                              * 如果在迭代器创建后，集合通过除迭代器自己的remove方法以外的途径
- * created, in any way except through the iterator's own remove                                     * 发生了修改，
- * method, the Iterator throws a {@link ConcurrentModificationException}.                           * Iterator便会抛出一个ConcurrentModificationException。
- * Thus, in the face of concurrent modification, the iterator fails quickly                         * 因此在发生并发修改时，迭代器会快速且优雅地失败掉，而不是
- * and cleanly, rather than risking arbitrary, non-deterministic behavior at                        * 冒险在未来继续进行不确定的行为。
+ * The iterators returned by this class's iterator method are                  * 由该类的iterator方法返回的迭代器是快速失败（fail-fast）的：
+ * fail-fast: if the set is modified at any time after the iterator is         * 如果在迭代器创建后，集合通过除迭代器自己的remove方法以外的途径
+ * created, in any way except through the iterator's own remove                * 发生了修改，
+ * method, the Iterator throws a {@link ConcurrentModificationException}.      * Iterator便会抛出一个ConcurrentModificationException。
+ * Thus, in the face of concurrent modification, the iterator fails quickly    * 因此在发生并发修改时，迭代器会快速且优雅地失败掉，而不是
+ * and cleanly, rather than risking arbitrary, non-deterministic behavior at   * 冒险在未来继续进行不确定的行为。
  * an undetermined time in the future.
  *
- * Note that the fail-fast behavior of an iterator cannot be guaranteed                             * 注意，迭代器的快速失败特性并非是完全保证的，
- * as it is, generally speaking, impossible to make any hard guarantees in the                      * 或者说，并不保证到未同步的并发修改出现时，
- * presence of unsynchronized concurrent modification.  Fail-fast iterators                         * 迭代器真的会快速失败。迭代器抛出ConcurrentModificationException
- * throw ConcurrentModificationException on a best-effort basis.                                    * 本身只是尽力而为（best-effort）的。
- * Therefore, it would be wrong to write a program that depended on this                            * 因此，请不要基于该exception的正确性来编写代码（因为它并不保证自己的正确性），
- * exception for its correctness: the fail-fast behavior of iterators                               * 迭代器的快速失败特性仅应用来检查bug。
+ * Note that the fail-fast behavior of an iterator cannot be guaranteed        * 注意，迭代器的快速失败特性并非是完全保证的，
+ * as it is, generally speaking, impossible to make any hard guarantees in the * 或者说，并不保证到未同步的并发修改出现时，
+ * presence of unsynchronized concurrent modification.  Fail-fast iterators    * 迭代器真的会快速失败。迭代器抛出ConcurrentModificationException
+ * throw ConcurrentModificationException on a best-effort basis.               * 本身只是尽力而为（best-effort）的。
+ * Therefore, it would be wrong to write a program that depended on this       * 因此，请不要基于该exception的正确性来编写代码（因为它并不保证自己的正确性），
+ * exception for its correctness: the fail-fast behavior of iterators          * 迭代器的快速失败特性仅应用来检查bug。
  * should be used only to detect bugs.
  *
- * This class is a member of the                                                                    * 该类为Java Collections Framework成员之一。
+ * This class is a member of the                                               * 该类为Java Collections Framework成员之一。
  * Java Collections Framework.
  */
 
@@ -378,26 +348,26 @@ public class HashSet&lt;E&gt;
 package java.util;
 
 /**
- * A NavigableSet implementation based on a TreeMap.                                                * 基于TreeMap的NavigableSet实现类
- * The elements are ordered using their Comparable natural                                          * 元素是基于其Comparable顺序有序的，
- * ordering, or by a Comparator provided at set creation                                            * 也可基于在集合创建时所使用的Comparator，
- * time, depending on which constructor is used.                                                    * 取决于你使用的构造函数。
+ * A NavigableSet implementation based on a TreeMap.                        * 基于TreeMap的NavigableSet实现类
+ * The elements are ordered using their Comparable natural                  * 元素是基于其Comparable顺序有序的，
+ * ordering, or by a Comparator provided at set creation                    * 也可基于在集合创建时所使用的Comparator，
+ * time, depending on which constructor is used.                            * 取决于你使用的构造函数。
  *
- * This implementation provides guaranteed log(n) time cost for the basic                           * 该实现保证集合基本操作add、remove和contains的
- * operations (add, remove and contains).                                                           * 时间复杂度为o(log(n))
+ * This implementation provides guaranteed log(n) time cost for the basic   * 该实现保证集合基本操作add、remove和contains的
+ * operations (add, remove and contains).                                   * 时间复杂度为o(log(n))
  *
- * Note that the ordering maintained by a set (whether or not an explicit                           * 注意，集合所维护的元素次序（无论是否由一个comparator显式提供）
- * comparator is provided) must be consistent with equals if it is to                               * 都应该像是实现了Set接口那样正确地返回与equals相同的结果。
+ * Note that the ordering maintained by a set (whether or not an explicit   * 注意，集合所维护的元素次序（无论是否由一个comparator显式提供）
+ * comparator is provided) must be consistent with equals if it is to       * 都应该像是实现了Set接口那样正确地返回与equals相同的结果。
  * correctly implement the Set interface. 
- * This is so because the Set interface is defined in                                               * 这么做是因为Set接口是基于equals方法定义的，
- * terms of the equals operation, but a TreeSet instance                                            * 而TreeSet实例通过其compareTo或compare方法来进行元素间的比较，
+ * This is so because the Set interface is defined in                       * 这么做是因为Set接口是基于equals方法定义的，
+ * terms of the equals operation, but a TreeSet instance                    * 而TreeSet实例通过其compareTo或compare方法来进行元素间的比较，
  * performs all element comparisons using its compareTo (or
- * compare) method, so two elements that are deemed equal by this method                            * 所以TreeSet中两个元素相等的定义应同集合元素相等的定义保持一致。
- * are, from the standpoint of the set, equal.  The behavior of a set                               * 即使TreeSet的元素次序与equals函数不吻合，它的行为
- * is well-defined even if its ordering is inconsistent with equals; it                             * 依然是明确定义的，只是它违反了Set接口的约束。
+ * compare) method, so two elements that are deemed equal by this method    * 所以TreeSet中两个元素相等的定义应同集合元素相等的定义保持一致。
+ * are, from the standpoint of the set, equal.  The behavior of a set       * 即使TreeSet的元素次序与equals函数不吻合，它的行为
+ * is well-defined even if its ordering is inconsistent with equals; it     * 依然是明确定义的，只是它违反了Set接口的约束。
  * just fails to obey the general contract of the Set interface.
  *
- * This class is a member of the                                                                    * TreeSet是Java Collections Framework的成员之一。
+ * This class is a member of the                                            * TreeSet是Java Collections Framework的成员之一。
  * Java Collections Framework.
  */
 
@@ -618,8 +588,8 @@ public boolean add(E e) {
 }
 </pre>
 <p>从上述代码可以看出，RegularEnumSet维护一个长度为64的位向量，每一位的0或1代表着对应位置的enum常量（其ordinal值由其声明为enum类型时在声明语句中的序号所决定，由0开始数起）是否已加入到EnumSet中。由此，EnumSet对枚举类判重总共只需要8个字节，而基于int的HashSet只要放入两个以上的枚举类就超过了这个大小了，更不用提HashSet的插入效率肯定远远比不上EnumSet的位运算。</p>
-<p>因此，EnumSet和EnumMap本身的算法并不特别，它们只是为了为特别的set和map提供更为高效的实现。</p>
-                <!-- and end here -->
+<p>因此，EnumSet和EnumMap本身的算法并不特别，它们提供为key为枚举类型的map或内容为枚举类型的set提供高效的实现，当应用场景吻合时应尽量使用EnumMap和EnumSet。</p>
+        <!-- and end here -->
     </div>
     </div>
     <script src="/js/bootstrap.min.js"></script>

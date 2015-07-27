@@ -18,49 +18,19 @@
 <body>
     <div id="main_wrapper">
     <div id="banner_wrapper">
-    <h1>Mr.Dai's Blog</h1>
+    <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
+	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
     </div>
-    <nav id="navbar" class="navbar navbar-default" role="navigation">
-    <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/">首页</a>
-
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">分类<span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            <li><a href="/courses.html">本科学习</a></li>
-            <li><a href="/application.html">应用开发</a></li>
-            <li><a href="/algorithm.html">算法研究</a></li>
-            <li><a href="/languages.html">编程语言</a></li>
-            <li class="divider"></li>
-            <li><a href="/mobile">切换至手机版</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
-    </nav>
     <div id="content_wrapper" style="padding:20px; line-height:30px">
         <div id="right_wrapper" style="float:right; margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
             <ul id="JumpList">
                 <li><h4>跳转目录</h4></li>
             </ul>
         </div>
-                <h1 style="margin-top:0; font-size: 25px;"><strong>递归与尾递归</strong></h1>
-                <p style="color: gray; font-size: 14px">By Mr.Dai</p>
-                <p style="color: gray; font-size:14px;">18 Dec 2014</p>
-                <!-- content begins here -->
-                <script type="text/javascript" src="/js/syntaxhighlighters/shBrushCpp.js"></script>
+        <p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300">递归与尾递归</p>
+		<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Mr.Dai</em>, 18 Dec 2014</p>
+        <!-- content begins here -->
+        <script type="text/javascript" src="/js/syntaxhighlighters/shBrushCpp.js"></script>
 
 <p>原文出处：<a href="http://www.cnblogs.com/archimedes/p/rescuvie-tailrescuvie.html">codingwu 的博客</a>，转载请注明出处</p>
 <br />
@@ -120,7 +90,7 @@
 <p>示例中的函数是尾递归的，因为对facttail的单次递归调用是函数返回前最后执行的一条语句。在facttail中碰巧最后一条语句也是对facttail的调用，但这并不是必需的。换句话说，在递归调用之后还可以有其他的语句执行，只是它们只能在递归调用没有执行时才可以执行。</p>
 <p>尾递归是极其重要的，不用尾递归，函数的堆栈耗用难以估量，需要保存很多中间函数的堆栈。比如f(n, sum) = f(n-1) + value(n) + sum; 会保存n个函数调用堆栈，而使用尾递归f(n, sum) = f(n-1, sum+value(n)); 这样则只保留后一个函数堆栈即可，之前的可优化删去。</p>
 <p>也许在C语言中有很多的特例，但编程语言不只有C语言，在函数式语言Erlang中（亦是栈语言），如果想要保持语言的高并发特性，就必须用尾递归来替代传统的递归。</p>
-                <!-- and end here -->
+        <!-- and end here -->
     </div>
     </div>
     <script src="/js/bootstrap.min.js"></script>
