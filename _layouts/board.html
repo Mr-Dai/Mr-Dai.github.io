@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/default.css" rel="stylesheet">
-    <title>Robert P.'s Blog</title>
+	<link href="/css/board.css" rel="stylesheet">
+    <title>{{ page.title }}</title>
 </head>
 <body onload="prettyPrint()">
     <script src="/js/jquery-2.1.1.min.js"></script>
@@ -21,38 +22,10 @@
     <div id="content_wrapper" class="container-fluid">
     
     <div id="left_wrapper">
-    <div id="post_list_container">
-<ul class="list-unstyled">
-    
-    <li >
-        <h2><a style="color: black; font-size:20px" href="/algorithm/2014/12/17/algorithm-problems.html">算法课刷题指南</a></h2>
-        <p style="font-size:15px;"><em>By Mr.Dai</em></p>
-        <p style="color: rgb(170,170,170); font-size:15px">17 Dec 2014</p>
-    </li>
-    
-</ul>
-</div>
-
-<!--
-<center>
-    <ul class="pagination">
-        <li><a href="#">&laquo;</a></li>
-        <li><a href="#">1</a></li>
-        <li><a href="#">&raquo;</a></li>
-    </ul>
-</center>
--->
-
+    {{ content }}
     </div>
     
-    <div id="right_wrapper">
-        <ul>
-            <li><h3>其他目录</h3></li>
-            <li><a href="/board.html">学习贴条</a></li>
-            <li><a href="/log.html">改动日志</a></li>
-            <!-- <li><a href="/aboutme.html">关于我</a></li> -->
-        </ul>
-    </div>
+    <div id="right_wrapper"></div>
     
     </div>
     </div>

@@ -53,10 +53,10 @@ h2, h3, h4 {
 }
 
 #content_wrapper {
+	height: auto;
     padding: 0;
     background: none;
     font-size: 15px;
-    height: 100%;
 }
 
 blockquote {
@@ -130,6 +130,8 @@ ul.list-unstyled {
 }
 
 #main_wrapper {
+	min-height: 100%;
+	height: auto;
     width: 80%;
     min-width: 1000px;
     margin: 0 auto;
