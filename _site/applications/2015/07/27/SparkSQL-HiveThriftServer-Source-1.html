@@ -1,10 +1,40 @@
----
-layout: posts
-title: SparkSQL Hive ThriftServer 源码解析（一）：Intro
-author: Robert Peng
-categories: applications
----
-<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/default.css" rel="stylesheet">
+	<link href="/css/post.css" rel="stylesheet">
+    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+    
+    <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
+    <link href="/css/syntaxhighlighters/shCore.css" rel="stylesheet" type="text/css" />
+    <link href="/css/syntaxhighlighters/shThemeDefault.css" rel="stylesheet" type="text/css" />
+	
+	<link rel="shortcut icon" href="/img/favicon.ico" >
+    
+    <title>SparkSQL Hive ThriftServer 源码解析（一）：Intro - Robert Peng</title>
+</head>
+<body>
+    <div id="main_wrapper">
+    <div id="banner_wrapper">
+    <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
+	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
+    </div>
+    <div id="content_wrapper">
+        <div id="right_wrapper" style="margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
+            <ul id="JumpList">
+                <li><h4>跳转目录</h4></li>
+            </ul>
+        </div>
+		<div id="left_wrapper">
+			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">SparkSQL Hive ThriftServer 源码解析（一）：Intro</p>
+			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 27 Jul 2015</p>
+			<!-- content starts here -->
+			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
 
@@ -20,7 +50,7 @@ categories: applications
 	我开的一个坑：我会慢慢地更新这篇文章，不断地修正我对SparkSQL本身的理解。同时也希望读者不要过于相信我的一家之言，因为我很有可能是错的。
 	如果您在某些问题上有比我更好的见解，随时欢迎您用电子邮件与我联系进行深入交流。
 </p>
-<p>本文中所出现的源代码皆为写作时最新的Spark 1.4.1中的源代码</p>
+<p>本文中所出现的源代码皆为写作时最新的Spark 1.4.1中的源代码。</p>
 
 <h2 class="jump">SparkSQL模块综述</h2>
 <p>
@@ -99,7 +129,7 @@ Spark SQL is broken up into four subprojects:
 	首先，我们从ThriftServer的启动入口开始。在Spark的sbin文件夹下有一个名为<code>start-thriftserver.sh</code>的脚本文件，
 	通过执行该脚本便可启动Thrift Server。我们不妨先看看它的内容：
 </p>
-<pre class="brush: bash">
+<pre class="brush: bash" id="start-thriftserver">
 # Usage打印以及注释等无关语句已被删去
 
 CLASS="org.apache.spark.sql.hive.thriftserver.HiveThriftServer2"
@@ -112,7 +142,7 @@ exec "$FWDIR"/sbin/spark-daemon.sh submit $CLASS 1 "$@"
 <p>
 	入口确定，于是我们去找HiveThriftServer2的main函数吧！
 </p>
-<pre class="brush: scala">
+<pre class="brush: scala" id="HiveThriftServer2#main">
 /**
  * The main entry point for the Spark SQL port of HiveServer2.  Starts up a `SparkSQLContext` and a
  * `HiveThriftServer2` thrift server.
@@ -172,7 +202,7 @@ object HiveThriftServer2 extends Logging {
 <p>
 	可见，main函数创建了一个HiveThriftServer2实例，传入HiveContext与HiveConf实例对其进行初始化并启动。于是我们来看看HiveThriftServer2：
 </p>
-<pre class="brush: scala">
+<pre class="brush: scala" id="HiveThriftServer2">
 /**
  * 继承自Apache Hive的HiveServer2。
  * 注意HiveServer2里，cliService和thriftCLIService为private，
@@ -214,7 +244,7 @@ private[hive] class HiveThriftServer2(hiveContext: HiveContext)
 <p>
 	我们可以拿上述代码对比一下HiveServer2原本的代码：
 </p>
-<pre class="brush: java">
+<pre class="brush: java" id="HiveServer2">
 public class HiveServer2 extends CompositeService {
   private static final Log LOG = LogFactory.getLog(HiveServer2.class);
 
@@ -257,7 +287,7 @@ public class HiveServer2 extends CompositeService {
 	HiveThriftServer2除了继承自HiveServer2，还混入了ReflectedCompositeService特质，
 	而HiveServer2继承自CompositeService特质。我们可以看一下ReflectedCompositeService特质：
 </p>
-<pre class="brush: scala">
+<pre class="brush: scala" id="ReflectedCompositeService">
 /** Reflected，反射 */
 private[thriftserver] trait ReflectedCompositeService {
   this: AbstractService =>
@@ -280,7 +310,58 @@ private[thriftserver] trait ReflectedCompositeService {
   }
 }
 </pre>
-<p>所以<code>HiveThriftServer2</code>中的<code>initCompositeService(hiveConf)</code>和<code>HiveServer2</code>中的<code>super.init(hiveConf)</code>是等价的。</p>
+<p>可以对比一下CompositleService的源代码</p>
+<pre class="brush: java">
+public class CompositeService extends AbstractService {
+
+  // ...
+
+  private final List&lt;Service> serviceList = new ArrayList&lt;Service>();
+
+  // ...
+
+  protected synchronized void addService(Service service) {
+    serviceList.add(service);
+  }
+
+  protected synchronized boolean removeService(Service service) {
+    return serviceList.remove(service);
+  }
+
+  @Override
+  public synchronized void init(HiveConf hiveConf) {
+    for (Service service : serviceList) {
+      service.init(hiveConf);
+    }
+    super.init(hiveConf);
+  }
+
+  @Override
+  public synchronized void start() {
+    int i = 0;
+    try {
+      for (int n = serviceList.size(); i &lt; n; i++) {
+        Service service = serviceList.get(i);
+        service.start();
+      }
+      super.start();
+    } catch (Throwable e) {
+      LOG.error("Error starting services " + getName(), e);
+      stop(i);
+      throw new ServiceException("Failed to Start " + getName(), e);
+    }
+
+  }
+
+  // ...
+}
+</pre>
+<p>
+	可以看到，CompositeService维护着一个由Service组成的ArrayList（Composite意为“复合的”、“混合的”），
+	调用CompositeService的<code>addService</code>和<code>removeService</code>可以向其中添加和删除Service，
+	而调用<code>init</code>和<code>start</code>则可以分别调用其中所有Service的init和start方法。
+	稍微对比ReflectedCompositeService的代码和CompositeService的代码即可得出结论，
+	<code>HiveThriftServer2</code>中的<code>initCompositeService(hiveConf)</code>和<code>HiveServer2</code>中的<code>super.init(hiveConf)</code>是等价的。</p>
 <p>
 	ReflectedCompositeService是一处。细心的读者还会注意到在<code>HiveThriftServer2</code>中还出现了<code>setSuperField</code>方法。
 	<code>setSuperField</code>方法是来自于<code>org.apache.spark.sql.hive.thriftserver.RefectionUtils</code>的静态方法。该工具类包含的所有
@@ -314,3 +395,31 @@ private[thriftserver] trait ReflectedCompositeService {
 	里面，而是在充当Servlet角色的执行模块<code>SparkSQLCLIService</code>内。
 </p>
 <p>在接下来的文章中，我将分两个方向，分别讲解这两个模块的工作原理。敬请期待。</p>
+<p style="height: 20px"></p>
+<a href="/applications/2015/07/30/SparkSQL-HiveThriftServer-Source-2.html">SparkSQL Hive ThriftServer 源码解析（二）：SparkSQLCLIService</a>
+			<!-- and ends here -->
+			<div class="blank" style="height: 80px"></div>
+			<!-- Disqus Block starts here -->
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES * * */
+				var disqus_shortname = 'robertpsblog';
+				var disqus_identifier = 'SparkSQL Hive ThriftServer 源码解析（一）：Intro';
+    
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+			<!-- and ends here -->
+		</div>
+    </div>
+    </div>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/mrdai.js"></script>
+    <script>SyntaxHighlighter.all()</script>
+</body>
+</html>
