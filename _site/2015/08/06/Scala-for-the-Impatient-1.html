@@ -368,7 +368,7 @@ represented by an object in the underlying runtime system.
 	通过简单的搜索，不难发现<a href="http://stackoverflow.com/questions/12289973/trying-to-understand-final-abstract-class-int-private-extends-anyval-in-scala">这篇</a>
 	stackoverflow上的问题。其中提到，像<code>Int</code>这样的类原本只是一些<code>stub</code>，它们在<a href="https://github.com/scala/scala/commit/4253124eecba6bed38f1dc961c5c4ee39a29f730">这次commit</a>中被加入到Scala的源代码中，那时它们还只是<code>final</code>的，
 	它的<code>+</code>方法等都有实现，尽管都是会打印一个错误信息，意味着实际上这些方法永远不会被真正调用。
-	在后来的<a href="">这次commit</a>中，为了减小Scala库的体积，它们被改写为了现在的样子，并被标记为了<code>abstract</code>，方法的实现也全部都被删去。
+	在后来的<a href="https://github.com/scala/scala/commit/241c7606d0bf5f3209b9d549fb751dbbc5b8e514#diff-46159a28e7cc8c3f41e5e289bcd10dff">这次commit</a>中，为了减小Scala库的体积，它们被改写为了现在的样子，并被标记为了<code>abstract</code>，方法的实现也全部都被删去。
 </p>
 <p>我们可以来测试一下：</p>
 <pre class="brush: scala">
