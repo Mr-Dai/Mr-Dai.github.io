@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/default.css" rel="stylesheet">
+	<link href="/css/post.css" rel="stylesheet">
+    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+    
+    <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
+    <link href="/css/syntaxhighlighters/shCore.css" rel="stylesheet" type="text/css" />
+    <link href="/css/syntaxhighlighters/shThemeDefault.css" rel="stylesheet" type="text/css" />
+	
+	<link rel="shortcut icon" href="/img/favicon.ico" >
+    
+    <title>快学Scala：Intro与第1章 - Robert Peng</title>
+</head>
+<body>
+    <div id="main_wrapper">
+    <div id="banner_wrapper">
+    <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
+	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
+    </div>
+    <div id="content_wrapper">
+        <div id="right_wrapper" style="margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
+            <ul id="JumpList">
+                <li><h4>跳转目录</h4></li>
+            </ul>
+        </div>
+		<div id="left_wrapper">
+			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">快学Scala：Intro与第1章</p>
+			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 06 Aug 2015</p>
+			<!-- content starts here -->
+			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
+
+<h2 class="jump">前言</h2>
+<p>
+	Scala是一门十分复杂的语言。
+</p>
+<p>
+	我在大学时学习Spark编程的时候便对Scala有所耳闻，但当时仅仅是认为Scala只是一门可以用于Spark编程的语言，
+	Spark和Hadoop一样以Java作为开发语言，因此使用Java开发Spark程序更为正统。尽管后来为了使用函数式编程减轻开发压力而选择了Python
+	进行后续开发，但我始终没有机会去接触Scala，因此也一直认为Scala是一门和Java差不多的语言。
+</p>
+<p>
+	我的第一份实习工作便要求我去阅读Spark的源代码。直到这时我才意识到，Spark的主要开发语言其实是Scala，其中只有很少一部分是由Java
+	编写而成。当我依然抱着“Scala和Java差不多”的奇怪印象尝试在没学习过Scala的情况下阅读Spark的源代码的时候，问题就来了：
+	我几乎一句都看不懂。也是直到这时，我才清醒地认识到，虽然同样会被编译为字节码运行在JVM之上，但Scala和Java天差地别。
+</p>
+<p>
+	在这种情况下，快速学习Scala基本语法已经刻不容缓了。在简单地查询过市面上比较推崇的Scala入门书以后，我选择了这一本：《快学Scala》
+	（《Scala for the Impatient》，说实话中文名有点low），我认为这一本书的书名很符合我当时的情况，于是果断地就在亚马逊上下单了。
+	这本书是我目前为止看过的唯一一本Scala书籍，因此我不能告诉你相比于其他Scala入门书它的表现如何。但我可以告诉你的是，这本书达到了它自己的目的，
+	它帮助我在三天之内快速地学习了Scala的基本语法，在这之后我便可以轻松地阅读Spark源代码并用Scala为Spark开发插件了。因此我认为，
+	这本书确实达到了其“快”的目的。
+</p>
+<p>
+	我并不认为三天时间让我快速地扫过这本书就能让我成为Scala大师，这也是为何我想要写这个系列博文。我的这个系列博文将在《快学Scala》
+	的内容之上加入更为深层次的解析。我更推荐各位读者能够像我一样在看过一遍《快学Scala》以后再通过阅读我的博文来二刷。
+	这本书在<a href="http://t.cn/RLTcB7Y">中国亚马逊</a>上价格公道，配送速度也极高，笔者当时上午下单，下午就到了我的手中。
+	我会尽可能地照顾那些确确实实是没有读过此书的读者，但有些内容也很有可能会超出已学范围，因此我也确确实实推荐大家能够先读过书一遍后再来看我的博文。
+</p>
+<p>
+	说了这么久，好像也还没说到Scala到底怎么复杂。
+</p>
+<p>
+	这么说吧，其实比起Java，我觉得Scala更像是在Python的基础上加了个Haskell。Scala编译后其实也是Java字节码，很大程度上也是由于此，
+	Scala首先是面向对象的。但相比于Java的面向对象，Scala要自由许多。比如Java不允许一个类继承多个类，但Scala允许。也正因如此，
+	当然还有其他的一些Scala特性，Scala的面向对象要复杂许多。除此之外，Scala也是面向函数的。函数式编程的定义我就不说了，
+	我实在没那水平，怕概括有误误导了大家，但我认为正如Java是面向对象的规范那样，Haskell是面向函数的规范。Haskell语言无法定义变量，
+	即使是生成一个列表也要用函数来生成。也就是说一切都是函数。当然了，Scala不可能真的像Haskell那样，因为那样的话就没法面向对象了。
+	所以真要二选一的话，Scala其实还是面向对象的，但其面向对象并没有Java那么严格，同时还加入了大量函数式编程的元素。
+</p>
+<p>综上所述，Scala的面向对象比起Java要复杂，同时还加入了函数式编程，因此其复杂程度是Java的好几倍，表达能力自然也是Java的好几倍，可读性也比Java差得多。</p>
+<p>
+	正如我前文所述，我的这篇系列博文是以《快学Scala》的内容为基础的，但这并不代表我会把这本书的内容一字不差地抄上来。
+	我只会尽可能地引用书中的重点以及代码示例，同时加入自己的一些理解和说明。除此之外，我也希望读者们能够深刻意识到，Scala代码最终会被编译成Java字节码，
+	因此Scala源代码和Java源代码之间是存在对应关系的。我会在博文中加入大量的由Scala编译出来的字节码反编译而成的Java代码，因为我认为，
+	深刻理解Scala语言特性的实现原理更有利于Java程序员学习Scala。也正由于此，在学习的过程中我将会不断地引导大家去学习Scala的底层实现，
+	因此这个系列的难度恐怕要比《快学Scala》本身要高得多。因此，再说一遍，我衷心推荐你们在学习过这本书一遍以后再继续往下看。
+</p>
+<p>
+	文中所有的源代码均使用命令行反编译工具<a href="http://varaneckas.com/jad/">Jad</a> v1.5.8e反编译而成，文中的反编译代码将不再给出其版权信息。
+	为了提高可读性，我会对反编译的代码进行一定的格式排版，但不会修改其中的变量或者参数的命名。
+</p>
+
+<h1>第一章：基础</h1>
+<h2 class="jump">1.1 Scala解释器</h2>
+<p>
+	该节大致介绍了Scala解释器（Interpreter）的使用方法。注意，此处的所谓“解释器”并不是指Scala像Python一样是一种解释性语言。必须明确的是，
+	Scala并不是一门脚本语言，这一点上有别于Python。Scala和Java一样，是一门编译性语言，使用类似于<code>javac</code>的<code>scalac</code>指令
+	将<code>.scala</code>文件编译为<code>.class</code>字节码文件后才可使用类似于<code>java</code>的<code>scala</code>指令运行。
+</p>
+<p>
+	此处所指的解释器，实际上是指Scala Shell。使用过Bash或者Python的读者应该对Shell这种东西不会陌生。
+	Scala也提供了一个类似于Shell的交互式命令行工具，用户通过在安装了Scala的计算机上直接输入<code>scala</code>指令便可打开该工具。
+	Scala程序员们更倾向于将其称为<code>REPL</code>，即<code>Read-Eval-Print Loop</code>。尽管这个命令行工具的行为和功能和Python的Shell
+	极为相似，但在此我还是要郑重地提醒各位，谨记：Scala不是Python或Bash那样的脚本语言，它和Java一样需要完整编译。拥有一个Shell并不代表着
+	Scala就是脚本语言，毕竟即将到来的Java1.9也将加入一个JShell。
+</p>
+
+<h2 class="jump">1.2 声明值和变量</h2>
+<p>
+	声明一个变量，对于Java程序员来说简直就是家常便饭了。我们会这样写：
+</p>
+<pre class="brush: java">
+int i = 0;
+</pre>
+<p>
+	很多人可能不是很理解值和变量的区别。值即value，它是不能变的，而变量是variable，即它是可变的。
+	我们可以把Java中普通的变量理解为这里所指的“变量”，而把Java中的final变量或把C++中的const变量这类不可变变量理解为这里所指的“值”。
+</p>
+<p>
+	在Scala中，声明值和变量的方式比较不同。
+</p>
+<pre class="brush: scala">
+var a = 0   // 声明了一个变量，var即variable的缩写
+val b = 0   // 声明了一个值，val即value的缩写
+</pre>
+<p>
+	除了声明的方式，上述代码还出现了另外两处Scala与Java不同的地方：
+</p>
+<p>
+	1、Scala的语句不需要在末尾加上分号。当然你也可以加分号，但那是不必要的，
+	虽然加上了并不会影响编译器的工作。当且仅当你想要在一行代码里写好几条语句的时候，你才必须要用分号分隔这些语句。比如你可以这样写：
+</p>
+<p><code>var a = 0; val b = 0</code></p> 
+<p>
+	2、声明变量时并不需要明确给出变量的类型，Scala的编译器会尝试去推断变量的类型，当然你也可以显式地给出变量的类型，
+	那并没有什么影响。比如上述代码你还可以写成：
+</p>
+<p><code>var a: Int = 0; val b: Int = 0</code></p>
+<p>
+	不过，如果Scala的编译器觉得自己无法推断出某个变量的类型时，
+	它便会毫不留情地丢给你一个编译错误，因此把握好在什么样的情况下Scala编译器可以推断出某个变量的类型也比较重要。
+</p>
+<p>
+	正如前文所述，值是不能被改变的，它的唯一一次赋值机会便是其初始化，其他时候的赋值都是不被允许的。比如在运行过上述代码以后再运行<code>b = 1</code>
+	就会触发一个错误，提示你正在尝试为一个<code>val</code>重复赋值，而这样的操作是不被允许的。
+</p>
+<p>那么问题来了。<code>var</code>就不说了，<code>val</code>的话，是不是就是Java的<code>final</code>变量呢？</p>
+<p>我们编写如下Scala代码：</p>
+<pre class="brush: scala">
+class ValAndVar {
+	val _val = "val"
+	var _var = "var"
+}
+</pre>
+<p>使用<code>scalac</code>编译上述代码后再使用Jad反编译<code>.class</code>文件，所得结果为：</p>
+<pre class="brush: java">
+public class ValAndVar {
+
+    private final String _val = "val";
+    private String _var;
+
+    public String _val() {
+        return _val;
+    }
+
+    public String _var() {
+        return _var;
+    }
+
+    public void _var_$eq(String x$1) {
+        _var = x$1;
+    }
+
+    public ValAndVar() {
+        _var = "var";
+    }
+}
+</pre>
+<p>
+	虽然函数名和参数名有些诡异，但其实我们可以看到Scala编译器为<code>var</code>变量生成了getter和setter，
+	而<code>val</code>变量只声明了getter，同时果然被声明为了final变量，在其初始化时便被赋值，而<code>var</code>
+	变量的赋值操作被放到了类的构造函数中。
+</p>
+<p>
+	上述的两段Scala代码都有一个共同点：在声明<code>var</code>变量时为其赋了初值。当然了，在声明时我们都为<code>val</code>赋了初值，
+	但那没什么好说的，毕竟那是唯一一次为<code>val</code>变量赋值的机会。不过问题在于，我们可以在声明的时候不赋初值吗？我们可以打开Scala REPL，
+	进行尝试。
+</p>
+<p>我们输入<code>var i</code>，按下回车：</p>
+<p class="center"><img alt="" src="/img/scala@1.png"></p>
+<p>嗯？Scala REPL似乎认为我们还没输入完整语句。那我们输入<code>var i;</code>，用一个分号告诉REPL我们输完了：</p>
+<p class="center"><img alt="" src="/img/scala@2.png"></p>
+<p>
+	哈哈，崩了。Scala要求我们必须要在变量声明的时候加个等号。可是我们就是不想赋值，怎么办呢？通过一个给它赋一个缺省值<code>_</code>即可达到其目的。
+	我们输入<code>var i: String = _</code>：
+</p>
+<p class="center"><img alt="" src="/img/scala@3.jpg"></p>
+<p>嗯，没错，String类对象的缺省值确实是<code>null</code>。咦？我为什么突然加入了显式的类型说明？可以不加吗？那好，我们输入<code>var i = _</code>：
+<p class="center"><img alt="" src="/img/scala@4.jpg"></p>
+<p>
+	嘿嘿，又崩了。虽然错误提示看起来有点奇怪，但其实究其根本，是因为只是赋一个缺省值，Scala编译器推断不出你想把<code>i</code>变量声明为什么类型，
+	也无法推断出应该给它赋一个什么缺省值，毕竟在Java里，primitive类型变量和对象变量的缺省值是不一样的嘛，所以才会提示"unbound placeholder parameter"。
+</p>
+<p>同样的语句我们在<code>val</code>变量上再试一次:</p>
+<p class="center"><img alt="" src="/img/scala@5.png"></p>
+<p>运行<code>val i;</code>和<code>var i;</code>给出的提示完全相同。<code>val i = _</code>和<code>var i = _</code>的表现也相同。</p>
+<p>
+	值得注意的是，<code>val i: String = _</code>
+	给出了和<code>val i = _</code>相同的错误提示，不过这不太可能是因为编译器无法推断<code>String</code>的缺省值。注意到，错误提示将<code>_</code>描述为"placeholder"，即占位符，
+	也就是说<code>_</code>并不直接等同于缺省值，只是在<code>var i: String = _</code>这种特定的情况下会被理解为“赋缺省值”。在Scala中，占位符<code>_</code>确实不止“赋缺省值”一种用法，
+	在以后的学习中你就会接触到它的其他用法。语句<code>val i: String = _</code>给出这样的提示，
+	更有可能意味着在这种情况下占位符<code>_</code>不会被解释为“赋缺省值”动作，因此编译器无法理解这条语句的意图，发生了编译错误。实际上这么操作也是合情合理的，
+	因为Java解释器同样禁止在声明final变量时不为其赋值，即像<code>final int i;</code>这样的语句在Java里同样会触发编译错误。
+</p>
+<p>
+	我们通过输入<code>val i = null</code>或者<code>val i: String = null</code>为其显式地赋上空值即可成功运行。
+</p>
+<p>
+	注意当我们输入<code>val i = null</code>时，Scala将变量<code>i</code>理解为了<code>Null</code>类型。这个是Scala特有的类型，通过输入<code>classOf[Null]</code>（相当于Java中的<code>Null.class</code>）
+	即可看到该类的全名为<code>scala.runtime.Null$</code>。
+</p>
+<p>
+	值得注意的是，当我们输入<code>val i: String</code>的时候，提示是"only classes can have declared but undefined members"。那好,我们就弄个class把它们包起来。
+	我们直接改写之前那个类：
+</p>
+<pre class="brush: scala">
+class ValAndVar {
+	val _val: String
+	var _var: String
+}
+</pre>
+<p>这里我们不为变量赋任何值，即使是缺省值也不赋。不过这里我们必须显式的表明两个变量的类型，因为从Java类的角度来讲，如果不确定变量的类型是没法在类中声明的。于是我们尝试编译该类：</p>
+<p class="center"><img alt="" src="/img/scala@6.png"></p>
+<p>编译器提示该类必须为<code>abstract</code>的，因为我们没有实现<code>_val</code>和<code>_var</code>。可以理解，那我们改写一下：</p>
+<pre class="brush: scala">
+abstract class ValAndVar {
+	val _val: String
+	var _var: String
+}
+</pre>
+<p>该类是可以编译成功的。我们来看看它反编译的结果：</p>
+<pre class="brush: java">
+public abstract class ValAndVar {
+    public abstract String _val();
+
+    public abstract String _var();
+
+    public abstract void _var_$eq(String s);
+
+    public ValAndVar() {}
+}
+</pre>
+<p>
+	很有意思，这次Scala不再声明变量，而是以abstract函数的形式声明了<code>var</code>的getter和setter以及<code>val</code>的getter，
+	可见变量的声明和初始化将交给子类，同时子类也会实现这三个abstract函数。这样做的话，在定义子类的时候，编译器可以通过同样的逻辑
+	将变量转换为getter和setter而无需使用另一种逻辑，减小了编译器的复杂程度；如果用户没有在子类中实现同名同类型的变量，未实现abstract函数
+	的Java编译器也可以确保这样的代码无法通过编译。不过以上只是我的猜想，暂时还没有任何证据证明Scala的编译器是基于Java编译器开发的。
+</p>
+
+<h2 class="jump">1.3 常用类型</h2>
+<p>
+	在Java中，基本（primitive）类型基本上都是一些数值类型，应该是直接对应着C/C++中的基本类型。为了保证严格的面向对象特性，
+	Java为每个基本类型都创建了包装类。但包装类的使用比起基本类型来说太过麻烦，而且提供的功能甚至比原本的基本类型还要少得多。
+	直到1.5版本，Java才引入了包装类的自动装箱和自动拆箱，起码在功能使用上，基本类型和包装类的使用极其接近了，但实际上还是存在问题的。
+	比如声明一个<code>ArrayList&lt;int&gt;</code>依然是不行的，你仍然需要将其写为<code>ArrayList&lt;Integer&gt;</code>。而且自动装拆箱
+	其实也会造成性能问题，因为包装类们始终不支持如"+-*/"等运算符操作，当你用三个Double类来执行一个<code>a = b + c</code>操作时，
+	这里包含了两次自动拆箱和一次自动装箱。
+</p>
+<p>
+	所以，Scala设计者们当然认为，这简直是bullshit。于是Scala完全抛弃了基本类型。Scala包含的7种基本数据类型分别为：<code>Byte</code>、<code>Char</code>、<code>Short</code>、
+	<code>Int</code>（注意不是Integer）、<code>Long</code>、<code>Float</code>和<code>Double</code>。在名称上，它们与Java原本的基本类型保持一致
+	（显然是在嘲讽Java非要把<code>int</code>的包装类叫做<code>Integer</code>），同时提供了大量的功能函数。
+</p>
+<p>
+	不过我认为，功能函数什么的没什么好说的，有兴趣的话大家可以直接查阅官方的<a href="http://www.scala-lang.org/api/current/">ScalaDoc</a>。重点在于，
+	这些数据类型是支持运算符操作的。对于Scala中的<code>Double</code>，<code>a = b + c</code>这样的操作是没有问题的。更多相关内容将在1.4节中进行详述。
+</p>
+<p>
+	除去这些数据类型，在Java中我们最常用的类，恐怕是<code>String</code>。在Scala中所使用的<code>String</code>其实正是Java的String：在REPL中输入指令
+	<code>classOf[String].getName</code>也会得到结果<code>java.lang.String</code>。所不同的在于，Scala提供了一个<code>StringOps</code>类，为Java原本的
+	<code>String</code>类提供了更多的操作，比如：
+</p>
+<pre class="brush: scala">
+"Hello".intersect("World")  // 将输出"lo"
+</pre>
+<p>
+	<code>StringOps</code>提供的其他接口大家可以直接查阅<a href="http://www.scala-lang.org/api/current/#scala.collection.immutable.StringOps">ScalaDoc</a>，
+	这里不再详述。我们更应该关注这是怎么实现的。我们反编译上述代码，得到结果如下：
+</p>
+<pre class="brush: java">
+(new StringOps(Predef$.MODULE$.augmentString("Hello"))).intersect(Predef$.MODULE$.wrapString("World"));
+</pre>
+<p>
+	可见，Scala直接将上述代码中的两个<code>String</code>对象进行了类似于装箱的操作。因此可以推断，
+	直接使用<code>StringOps</code>提供的函数虽然可以让代码变得更简洁，但同样会带来性能的损失。而字符串操作的性能问题在处理日志输出时将显得尤为重要，
+	因此使用时要慎重。（点击<a href="https://github.com/scala/scala/blob/2.11.x/src/library/scala/Predef.scala">这里</a>可以查看<code>Predef</code>的源代码，
+	可以证明上述代码中出现的<code>augmentString</code>和<code>wrapString</code>方法确实使用了<code>new</code>关键字进行装箱）。
+</p>
+<p>
+	类似于<code>StringOps</code>，Scala还提供了<code>RichInt</code>、<code>RichDouble</code>等工具类，
+	为<code>Int</code>、<code>Double</code>等基本数据类型提供了一些便捷操作。我们以<code>Int</code>和<code>RichInt</code>为例：
+</p>
+<pre class="brush: scala">
+class RichInt {
+	val range = 1 to 10
+}
+</pre>
+<p>其中<code>to</code>方法是<code>RichInt</code>的方法。反编译的结果如下：</p>
+<pre class="brush: java">
+import scala.Predef$;
+import scala.collection.immutable.Range;
+import scala.runtime.RichInt$;
+
+public class RichInt {
+
+    private final scala.collection.immutable.Range.Inclusive range;
+
+    public scala.collection.immutable.Range.Inclusive range() {
+        return range;
+    }
+
+    public RichInt() {
+        range = RichInt$.MODULE$.to$extension0(Predef$.MODULE$.intWrapper(1), 10);
+    }
+}
+</pre>
+<p>
+	在这里，作为方法调用者的<code>1</code>确实被装箱了。
+	不过，<code>range</code>变量的类型有点神奇，而且初始化时调用的函数并不是<code>to</code>，而是<code>RichInt$.MODULE$.to$extension0</code>。
+	有关<code>Range</code>类型的更多内容将在第13章详述。
+</p>
+
+<h2 class="jump">1.4 算术和操作符重载</h2>
+<p>
+	正如上文所述，在Scala中，对于<code>Int</code>、<code>Double</code>这样的数据类型来说，<code>a = b + c</code>这样的操作是可以的。
+	书中给出的解释是，这里的<code>+</code>运算符也是一个函数，<code>b + c</code>实际上相当于<code>b.+(c)</code>的另一种写法。
+	在Scala中像这个样子的中缀写法可以用任意的只包含一个参数的函数。即使是Java原本的方法比如<code>string.append("abc")</code>也可以在Scala中写成
+	<code>string append "abc"</code>。使用哪种写法完全取决于你的个人意愿，两种写法在Scala中都是可以正常编译的。
+</p>
+<p>
+	要注意的是，尽管Scala为数据类型提供了大量的操作符方法，但在Scala中，<code>++</code>和<code>--</code>操作符被抛弃了，你只能使用
+	<code>a += 1</code>或者<code>a -= 1</code>这样的语句来代替。书中给出的解释是，Scala设计者们认为不值得为少按一个键额外增加一种特例。
+</p>
+<p>
+	学到这里，读者们可能会觉得，Scala中的<code>Int</code>、<code>Double</code>等虽然提供了很多很神奇的方法和便捷操作，但它们的角色和
+	Java中的包装类是一样的，甚至会觉得这些数据类型其实就是Scala的包装类，而这些运算符都是这个包装类的方法。
+	但从Scala的实际原理上来讲，这样想是完全错误的。请读者们谨记：这些数据类型不是包装类，它们远比Java中的包装类要复杂。
+</p>
+<p>
+	我们以<code>Int</code>为例。点击<a href="https://github.com/scala/scala/blob/2.11.x/src/library/scala/Int.scala">这里</a>可以查看<code>Int</code>的源代码。
+	且先不急着去看它的方法（因为其实没什么好看的），我们看看<code>Int</code>这个类声明时所使用的修饰符。你看到了什么？（事实上在ScalaDoc里也能看到<code>Int</code>的修饰符）
+</p>
+<p><code>final abstract</code></p>
+<p>
+	有没有觉得你的世界被颠覆了？那这个时候你首先想到的第一个问题应该就是：我们创建的那些<code>Int</code>到底是什么东西？是<code>Int</code>的某个子类？但是<code>Int</code>是<code>final</code>的啊！
+	（注：在Java中，被标注为<code>final</code>的类无法被继承，而<code>final abstract</code>这样的组合是不被允许的）这里首先要声明的是，Scala里的<code>final</code>关键字和<code>abstract</code>关键字和Java里的是一样的。
+	这个问题我们先放一放。我们先把目光转移到<code>Int</code>声明时的ScalaDoc注释上：
+</p>
+<pre>
+`Int`, a 32-bit signed integer (equivalent to Java's `int` primitive type) is a
+subtype of [[scala.AnyVal]]. Instances of `Int` are not
+represented by an object in the underlying runtime system.
+</pre>
+<p>Instances of `Int` are not represented by an object in the underlying runtime system.</p>
+<p>这句话好像很有意思啊。再回到刚刚那个问题上：我们创建的那些<code>Int</code>到底是什么？要解决这样的问题其实也很容易。我们打开ScalaREPL，输入如下指令：</p>
+<p class="center"><img alt="" src="/img/scala@7.png"></p>
+<p>这是个<code>int</code>？这怎么是个<code>int</code>？其实回到刚刚那段注释的第一句话：equivalent to Java's `int` primitive type. 好像确实是这个样子呢，但为什么会这样？</p>
+<p>
+	通过简单的搜索，不难发现<a href="http://stackoverflow.com/questions/12289973/trying-to-understand-final-abstract-class-int-private-extends-anyval-in-scala">这篇</a>
+	stackoverflow上的问题。其中提到，像<code>Int</code>这样的类原本只是一些<code>stub</code>，它们在<a href="https://github.com/scala/scala/commit/4253124eecba6bed38f1dc961c5c4ee39a29f730">这次commit</a>中被加入到Scala的源代码中，那时它们还只是<code>final</code>的，
+	它的<code>+</code>方法等都有实现，尽管都是会打印一个错误信息，意味着实际上这些方法永远不会被真正调用。
+	在后来的<a href="">这次commit</a>中，为了减小Scala库的体积，它们被改写为了现在的样子，并被标记为了<code>abstract</code>，方法的实现也全部都被删去。
+</p>
+<p>我们可以来测试一下：</p>
+<pre class="brush: scala">
+object Int {
+	def main(args: Array[String]) {
+	
+		val a: Int = 10
+		val b: Int = 20
+		val c = a + b
+		val d = a == b
+		val e = a to b
+	
+	}
+}
+</pre>
+<p>可以看到，<code>a</code>和<code>b</code>都被显式声明为了<code>Int</code>反编译后，其中的<code>main</code>函数变为：</p>
+<pre class="brush: java">
+public void main(String args[]) {
+    int a = 10;
+    int b = 20;
+    int c = a + b;
+    boolean d = a == b;
+    scala.collection.immutable.Range.Inclusive e = RichInt$.MODULE$.to$extension0(Predef$.MODULE$.intWrapper(a), b);
+}
+</pre>
+<p>
+	我想这样一来其实就可以说明，<code>Int</code>等数据类型不是Java基本类型的包装类，它们就代表着那些基本类型，
+	在Scala编译器编译的过程中就会变为<code>int</code>等基本类型。<code>Int</code>这些类的实例是不会存在于JVM中的，
+	因此它们可以是<code>abstract</code>的。而在编译之前，<code>Int</code>这样的类却又确实存在，它们确实存在于Scala库中，
+	尽管它们并未实现任何逻辑。不过我想，既然它们被称为<code>stub</code>，那么我想它们的存在恐怕和编译器编译的步骤有关。
+	猜想是它们需要用于在编译器进行类型链接或者类型检查的时候作为一个桩而存在，而担当这样的角色并不需要它们实现任何逻辑，因为编译器不会运行代码。
+	将其替换为对应的基本类型，也就是所谓的“编译器代码优化”，恐怕被放在了这些操作之后。当然了，这只是我个人的猜想，并不是一定正确的。你们只需要记住，它们不是包装类，
+	它们就代表了JVM中的基本类型就够了。
+</p>
+
+<h2 class="jump">1.5 调用函数和方法</h2>
+<p>
+	书中提到，我们可以通过引入语句<code>import scala.math._</code>，引入一些数学函数，引入后我们即可通过如<code>pow(2, 4)</code>、<code>sqrt(2)</code>
+	等形式直接使用这些函数，而不需要从每个类里调用它的静态方法。在这里，你就看到了占位符<code>_</code>的另一种用法。
+</p>
+<p>
+	这个功能的表现和Java中的静态引入十分相似，在Java中我们也可以通过<code>import static java.lang.Math.*;</code>达到相同的效果。
+	Scala中的<code>import scala.math._</code>是否又是类似的原理呢？
+</p>
+<pre class="brush: scala">
+import scala.math._
+
+object Math {
+	def main(args: Array[String]) {
+		val a = sqrt(2)
+		val b = pow(2, 4)
+		val c = min(3, Pi)
+	}
+}
+</pre>
+<p>反编译的结果是：</p>
+<pre class="brush: java">
+import scala.math.package$;
+
+public void main(String args[]) {
+    double a = package$.MODULE$.sqrt(2D);
+    double b = package$.MODULE$.pow(2D, 4D);
+    double c = package$.MODULE$.min(3D, 3.1415926535897931D);
+}
+</pre>
+<p>
+	这里我们看到，实际上这些函数是调用了<code>scala.math.package$.MODULE$</code>类的静态函数。关于<code>package$</code>的内容将会在第7.5节中详述，
+	想提前学习的读者可以在<a href="https://github.com/scala/scala/blob/2.11.x/src/library/scala/math/package.scala">这里</a>看到<code>scala.math.package</code>的源代码。
+	关于<code>MODULE$</code>以及单例对象和伴生对象的内容将在第六章中详述。
+</p>
+<p>
+	除此之外，书中还提到，Scala允许在调用无参数方法的时候不使用圆括号，也就是说<code>a.toString()</code>和<code>a.toString</code>有相同的效果。
+	但考虑到可读性的问题，更好的写法应该是在方法不会改变当前对象的情况下才忽略圆括号，如果方法会改变当前对象的话就写上圆括号。
+</p>
+
+<h2 class="jump">1.6 apply方法</h2>
+<p>
+	书中提到，Scala允许用户把对象当做方法来调用，比如<code>"Hello"(4)</code>则会取出字符<code>o</code>。其背后的原理实际上是调用了该对象的<code>apply</code>方法。
+</p>
+<pre class="brush: scala">
+val c = "Hello"(4)
+</pre>
+<p>反编译的结果为：</p>
+<pre class="brush: java">
+char c = StringOps$.MODULE$.apply$extension(Predef$.MODULE$.augmentString("Hello"), 4);
+</pre>
+<p>虽然和书上所讲的<code>"Hello".apply(4)</code>有点出入，但核心上还是一致的：上述代码确实调用了<code>apply</code>方法。</p>
+
+<h2 class="jump">章末结语</h2>
+<p>恭喜恭喜，你已经完成了本书第一章的学习，一共359页的书你已经完成了11页了~恭喜恭喜。</p>
+<p>本章主要介绍了Scala REPL的用法以及Scala的7种基本数据类型，算是入门篇的一部分吧。确实Scala是一门十分复杂的语言，希望大家能再接再厉，坚持往下学习啦。</p>
+
+			<!-- and ends here -->
+			<div class="blank" style="height: 80px"></div>
+			<!-- Disqus Block starts here -->
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES * * */
+				var disqus_shortname = 'robertpsblog';
+				var disqus_identifier = '快学Scala：Intro与第1章';
+    
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+			<!-- and ends here -->
+		</div>
+    </div>
+    </div>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/mrdai.js"></script>
+    <script>SyntaxHighlighter.all()</script>
+</body>
+</html>
