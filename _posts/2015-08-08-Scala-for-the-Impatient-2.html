@@ -1,0 +1,562 @@
+---
+layout: posts
+title: 快学Scala：第2章（上）
+author: Robert Peng
+---
+
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushCpp.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
+
+<h2 class="jump">前情提要</h2>
+<p>
+	在<a href="/2015/08/06/Scala-for-the-Impatient-1.html">上一篇文章</a>，我们学习了Scala的基本使用，包括Scala提供的REPL的使用方式、Scala的<code>var</code>变量和<code>val</code>变量、
+	Scala的七种数据类型以及Scala类的<code>apply</code>方法。
+</p>
+<p>
+	接下来我们将进入《快学Scala》第二章的上半部分，学习Scala的控制结构。
+</p>
+
+<h1>第二章：控制结构和函数</h1>
+<h2 class="jump">2.1 条件表达式</h2>
+
+<p>
+	首先，我们需要明确“表达式”与“语句”的区别。总体而言，表达式（expression）和语句（statement）都可以让计算机执行我们为其指定的操作，
+	但这两种代码的区别在于，表达式是有返回值的，而语句没有返回值，只执行动作。
+</p>
+<p>
+	此节的标题为“条件表达式”，无疑指的就是<code>if</code>和<code>else</code>关键字了。可标题说的是条件“表达式”，而不是我们常说的条件“语句”。
+	因此这里实际上就牵出了Scala的又一个特性：Scala的<code>if</code>表达式是有返回值的。
+</p>
+<p>我们来看下面一段Java代码：</p>
+<pre class="brush: java">
+int i;
+if ( something ) {
+	i = 0;
+} else {
+	i = 1;
+}
+</pre>
+<p>
+	这是一种很常见的场景：我们有些时候需要根据程序状态的不同为一个变量赋不同的值。在Java中你需要像上述代码那样去操作，因为在Java中，
+	<code>if</code>语句没有返回值。在Scala中，由于<code>if</code>表达式有返回值，情况就截然不同了：
+</p>
+<pre class="brush: scala">
+val i = if ( something ) {
+	0
+} else {
+	1
+}
+</pre>
+<p>
+	上述代码比较简单，图省事的话也可以在一行之内写完：<code>val i = if (something) 0 else 1</code>。这种写法其实更容易让大家联想到Java中的<code>?:</code>表达式：
+	<code>int i = something ? 0 : 1;</code>。是的，如果处理逻辑比较简单的话，上述Scala语句当然和<code>?:</code>表达式没什么不同。但当处理逻辑比较复杂的时候，Scala
+	<code>if</code>表达式的优势就开始凸显出来了：
+</p>
+<pre class="brush: scala">
+val i = if ( something ) {
+	
+	// 做点奇奇怪怪的操作
+	// ...
+	// 继续做更多奇奇怪怪的操作
+	// ...
+	
+	// 做了好几十行的奇怪操作以后
+	// ...
+	
+	0
+	
+} else {
+
+	// 做点不那么奇怪的操作
+	// ...
+	// 继续做更多不那么奇怪的操作
+	// ...
+	
+	// 做了几行不那么奇怪的操作以后
+	// ...
+
+	1
+	
+}
+</pre>
+<p>
+	像这个样子较为复杂的逻辑，恐怕你就不会选择使用<code>?:</code>表达式，而是倾向于更为传统的<code>if</code>和<code>else</code>了。在Scala中，你仍然可以使用<code>?:</code>
+	表达式来表达简单的逻辑。同时，在Scala中编写Java风格的<code>if</code><code>else</code>语句依然是没有问题的，关键还是在于你如何选择。
+</p>
+<p>
+	那么，这种有返回值的<code>if</code>表达式是怎么做到的呢？
+</p>
+<p>我们先看一个比较简单的<code>if else</code>语句：</p>
+<pre class="brush: scala">
+class IfSimple {
+	val a = 0
+	val i = if (a == 0) 0 else 1
+}
+</pre>
+<p>它的反编译结果是：</p>
+<pre class="brush: java">
+public class IfSimple {
+
+    private final int a = 0;
+    private final int i = a() != 0 ? 1 : 0;
+
+    public int a() {
+        return a;
+    }
+
+    public int i() {
+        return i;
+    }
+
+    public IfSimple() {}
+}
+</pre>
+<p>好像并没有什么特别的，Scala果然是把这样的语句变成了Java中的<code>?:</code>表达式。那么，如果是复杂一点的表达式呢？考虑这样的Scala代码：</p>
+<pre class="brush: scala">
+class IfComplicated {
+
+	var a = 0
+	val b = "Hello World"
+	
+	val c = if (b.hashCode &lt;= 100000) {
+		a += 1
+		a += 2
+		a += 3
+		a += 4
+		a += 5
+		
+		a
+	} else {
+		a += 6
+		a += 7
+		a += 8
+		
+		b.hashCode
+	}
+
+}
+</pre>
+<p>它的反编译结果是：</p>
+<pre class="brush: java">
+public class IfComplicated {
+
+    public int a() {
+        return a;
+    }
+
+    public void a_$eq(int x$1) {
+        a = x$1;
+    }
+
+    public String b() {
+        return b;
+    }
+
+    public int c() {
+        return c;
+    }
+
+    public IfComplicated() {
+        a = 0;
+        b = "Hello World";
+        this;
+        if(b().hashCode() > 0x186a0) goto _L2; else goto _L1
+_L1:
+        a_$eq(a() + 1);
+        a_$eq(a() + 2);
+        a_$eq(a() + 3);
+        a_$eq(a() + 4);
+        a_$eq(a() + 5);
+        a();
+          goto _L3
+_L2:
+        a_$eq(a() + 6);
+        a_$eq(a() + 7);
+        a_$eq(a() + 8);
+        b().hashCode();
+_L3:
+        c;
+    }
+
+    private int a;
+    private final String b;
+    private final int c;
+}
+</pre>
+<p>
+	首先，可以看出来，不知道为什么Scala的编译器很喜欢对我们写的布尔表达式进行取反。不过最突出的一点还是在于，Scala编译器在这里使用了<code>goto</code>关键字。
+	而实际上呢，Java里尽管有<code>goto</code>关键字，但实际上该关键字在Java中没有任何作用，而上述代码之所以会出现<code>goto</code>关键字，
+	其实是因为Jad无法把上述代码的字节码完整反编译，因此有些语句看起来不太make sense。不过从上述代码，其实不难猜出其字节码在<code>_L1</code>和<code>_L2</code>
+	的结尾分别把结果放入了同一个寄存器，再进入到<code>_L3</code>从寄存器中把值放入到变量<code>c</code>。
+</p>
+<p>
+	知道这一点意义不是很大，这种编程模式在汇编代码中是很常见的，但原生的Java代码肯定是无法做到这种功能的。
+	这起码可以证明，Scala代码和Java代码之间并不存在一个完整的映射，Scala的编译器不会简单到先把Scala代码变成Java代码再用Java编译器来编译。
+	同时还说明，Scala编译器会根据<code>if else</code>所包含的语句不同将其编译成截然不同的字节码，这说明Scala编译器在编译优化上做过不少的功夫，
+	恐怕在其它Scala高级功能上会出现更多的特殊优化。我相信，<code>if else</code>语句在其他情况下很有可能还会编译出其他的表达方式，不过这个就留给你们自己去发现啦~
+</p>
+<p>
+	考虑<code>else</code>部分不存在的情况：<code>if (x > 0) 1</code>，那么当<code>x &lt;= 0</code>的时候，这个<code>if</code>表达式就没有返回值了。
+	但实际上，它仍然有返回值，它返回的是一个<code>Unit</code>对象，在Scala代码中写作<code>()</code>，即上述表达式相当于<code>if (x > 0) 1 else ()</code>
+	的缩写。你可以把<code>()</code>占位符（或者说<code>Unit</code>对象）当做是“无有用值”（no useful value）。在这一点上，<code>Unit</code>和Java中的<code>void</code>
+	关键字就存在差异了，因为后者就意味着没有值，而前者意味着“没有有用值”，也就是说有可能有个“无用值”。
+</p>
+<p>
+	我们先不着急着冲过去看<code>Unit</code>类的源代码。我们先看看这样的<code>if</code>语句是否真的会有这样的表现：
+</p>
+<pre class="brush: scala">
+class NoElse {
+	val x = -1
+	val a = if (x > 0) 1
+}
+</pre>
+<p>
+	反编译结果为：
+</p>
+<pre class="brush: java">
+import scala.runtime.BoxedUnit;
+import scala.runtime.BoxesRunTime;
+
+public class NoElse {
+
+    private final int x = -1;
+    private final Object a;
+
+    public int x() {
+        return x;
+    }
+
+    public Object a() {
+        return a;
+    }
+
+    public NoElse() {
+        a = x() &lt;= 0 ? ((Object) (BoxedUnit.UNIT)) : ((Object) (BoxesRunTime.boxToInteger(1)));
+    }
+}
+</pre>
+<p>
+	这里可以看到，<code>val a</code>被声明为了<code>final Object</code>，声明时并未赋上初值，其初始化被延后到了类的构造函数中。在构造函数里，<code>a</code>
+	根据<code>x</code>的大小被赋上<code>Unit</code>或者<code>java.lang.Integer</code>。
+</p>
+<p>
+	好像和我们象的不太一样，但其实也是情理之中。毕竟<code>Unit</code>类和<code>java.lang.Integer</code>类最近的公有父类很有可能就已经是<code>java.lang.Object</code>了。
+</p>
+<p>然后我们看看<code>Unit</code>类的源代码吧：</p>
+<pre class="brush: scala">
+package scala
+
+
+/** `Unit` is a subtype of [[scala.AnyVal]]. There is only one value of type
+ *  `Unit`, `()`, and it is not represented by any object in the underlying
+ *  runtime system. A method with return type `Unit` is analogous to a Java
+ *  method which is declared `void`.
+ */
+final abstract class Unit private extends AnyVal {
+  override def getClass(): Class[Unit] = null
+}
+
+object Unit extends AnyValCompanion {
+
+  /** Transform a value type into a boxed reference type.
+   *
+   *  @param  x   the Unit to be boxed
+   *  @return     a scala.runtime.BoxedUnit offering `x` as its underlying value.
+   */
+  def box(x: Unit): scala.runtime.BoxedUnit = scala.runtime.BoxedUnit.UNIT
+
+  /** Transform a boxed type into a value type.  Note that this
+   *  method is not typesafe: it accepts any Object, but will throw
+   *  an exception if the argument is not a scala.runtime.BoxedUnit.
+   *
+   *  @param  x   the scala.runtime.BoxedUnit to be unboxed.
+   *  @throws     ClassCastException  if the argument is not a scala.runtime.BoxedUnit
+   *  @return     the Unit value ()
+   */
+  def unbox(x: java.lang.Object): Unit = ()
+
+  /** The String representation of the scala.Unit companion object. */
+  override def toString = "object scala.Unit"
+}
+</pre>
+<p>
+	可以看到<code>Unit</code>类和它的兄弟姐妹们一样，也被声明为了<code>final abstract</code>，可见它也是作为一个桩存在的。当Scala函数的返回值被指定为<code>Unit</code>时，
+	实际效果就等同于将其声明为<code>void</code>。而在其他地方，恐怕<code>Unit</code>这个字眼都不太会直接出现在你的Scala代码当中。这一点上和<code>Int</code>等确实很像：
+	你只能通过写一个常量或占位符（<code>10</code>、<code>()</code>）来产生一个它们的实例，尝试通过<code>new</code>关键字来创建它们的实例只会导致编译错误。
+</p>
+
+<h2 class="jump">2.2 语句终止</h2>
+<p>
+	正如我在上一篇文章中讲的那样，Scala的语句不需要在末尾处加上分号<code>;</code>。尽管加上并不会导致编译错误，但确实是不必要的。只在你想要在一行内写多条语句的时候，
+	你才必须使用分号来分隔这些语句。
+</p>
+<p>
+	Scala的编译器会根据上下文来判断某行的行末是否是语句的末尾，也就是说我们不需要像Bash脚本那样在行末加上<code>\</code>或者什么别的东西来告诉编译器这条语句还没结束。
+	这一点上Scala编译器的表现和Java编译器表现很像，为了使用这种功能你需要让语句在行末出现一些让这一行看起来不像是一条完整语句的符号，比如<code>+</code>、<code>{</code>等。
+	也就是说，如果你的代码写得实在太像是一条完整语句（尽管确实不是），也是有可能被Scala编译器当成一条完整语句来编译，然后丢给你一个编译错误的。不过在这一点上，你只要保持Java
+	的编程习惯，一般都不会发生这种错误。
+</p>
+
+<h2 class="jump">2.3 块表达式和赋值</h2>
+<p>
+	与Java或C++类似，在Scala中你也可以用<code>{ }</code>块包围一系列的表达式，并在该代码块的最后用一条表达式来指明这个代码块的返回值。实际上这样的功能我们在<code>if else</code>
+	的时候就有用到，只是不那么明显。这次我们可以用得更直接一点：
+</p>
+<pre class="brush: scala">
+import math._
+
+class MixString {
+	var x = ""
+	var y = ""
+	var distance: Double = ""
+	
+	def mix(x0: Int, y0: Int) {
+		distance = {
+			val dx = x - x0
+			val dy = y - y0
+			sqrt(dx * dx + dy * dy)
+		}
+	}
+}
+</pre>
+<p>可以看到，当调用<code>compute</code>方法时，就会计算两点间的距离并放入到<code>distance</code>变量中。我们可以看看它反编译的结果：</p>
+<pre class="brush: java">
+import scala.math.package$;
+
+public class Distance {
+
+    private int x;
+    private int y;
+    private double distance;
+
+    public Distance() {
+        x = 0;
+        y = 0;
+        distance = 0.0D;
+    }
+
+    public int x() { return x; }
+    public void x_$eq(int x$1) { x = x$1; }
+	public int y() { return y; }
+	public void y_$eq(int x$1) { y = x$1; }
+	public double distance() { return distance; }
+    public void distance_$eq(double x$1) { distance = x$1; }
+
+    public void compute(int x0, int y0) {
+        int dx;
+        int dy;
+        distance_$eq(package$.MODULE$.sqrt((dx = x() - x0) * dx + (dy = y() - y0) * dy));
+    }
+}
+</pre>
+<p>
+	可以看到，上述反编译代码利用了Java赋值语句的返回值，巧妙地把一系列的语句糅合在了一条语句中。不过这个糅合的过程存在很明显的编译优化的痕迹，
+	有可能不一样的表达式得出的反编译结果也会有所不同。
+</p>
+<p>
+	值得注意的是，与Java不同，在Scala中赋值语句的返回值并不是等式右边的结果，而是一个<code>Unit</code>对象。如果不了解这一点的话，
+	有可能会导致你将块表达式最后一句写成<code>distance = sqrt(dx * dx + dy * dy)</code>的形式，这样的话最终<code>distance</code>的值将会变成一个<code>Unit</code>。
+	像<code>x = y = 1</code>这样串联起来的赋值语句自然也是行不通的，最终只会导致<code>x</code>的值为<code>Unit</code>。
+</p>
+
+<h2 class="jump">2.4 输入和输出</h2>
+
+<p>
+	计算机程序的文本输出分为标准文本输出与错误信息输出，这个大家自然是耳熟能详了。在大多数情况下，我们往往更倾向于使用标准文本输出来打印信息。
+	在大多数编程语言中，这是很轻松的一件事情：在Python中，你用<code>print</code>输出；在Bash和PHP中，你用<code>echo</code>来输出；即使是如C般底层的语言，
+	你也会觉得<code>printf</code>函数十分亲切。但在Java中，标准文本输出却显得比较麻烦：<code>System.out.println</code>，这可比其他语言的输出函数长了不是一点半点。
+	当然，对像我这样的十足的Java卫道士而言，综合考虑Java的<code>System.err</code>以及其它<code>OutputStream</code>以后，这样设计恰恰体现了Java规范的面向对象特性，
+	但在进行敏捷开发的时候，不得不承认老是输入<code>System.out.println</code>确实是一件很麻烦的事情。
+</p>
+<p>
+	在Scala中，你不再需要这样做了。Scala提供了两个简便的函数：<code>println</code>和<code>print</code>。它们的功能和使用方法与Java中的<code>System.out.println</code>
+	以及<code>System.out.print</code>完全一致。同时，Scala还提供了一个类似于C风格的<code>printf</code>函数方便你格式化输出字符串。那么，这三个函数是不是就是Java的
+	<code>System.out.println</code>、<code>System.out.print</code>和<code>System.out.printf</code>呢？事实胜于雄辩：
+</p>
+<pre class="brush: scala">
+class Output {
+	println("Hello world")
+	print("Hello Scala\n")
+	printf("%s %s\n", "Goodbye", "System.out")
+}
+</pre>
+<p>反编译结果为：</p>
+<pre class="brush: java">
+import scala.Predef$;
+
+public class Output {
+
+    public Output() {
+        Predef$.MODULE$.println("Hello world");
+        Predef$.MODULE$.print("Hello Scala\n");
+        Predef$.MODULE$.printf("%s %s\n", Predef$.MODULE$.genericWrapArray(((Object) (new Object[] {
+            "Goodbye", "System.out"
+        }))));
+    }
+}
+</pre>
+<p>
+	我想这也不算什么新闻了，毕竟之前学到的几个函数，虽然功能和使用上也和Java的函数保持一致，但反编译的结果依然不是Java原本的函数。
+	在<a href="https://github.com/scala/scala/blob/2.11.x/src/library/scala/Predef.scala">这里</a>可以查看<code>Predef</code>的源代码，
+	我们将在以后再对其进行详细讲解。
+</p>
+
+<p>讲完输出，是时候讲讲输入了。在复杂的C和C++中，我们都有<code>scanf</code>和<code>cin</code>，那么在Java中，我们有什么？</p>
+<pre class="brush: java">
+Scanner stdin = new Scanner(new BufferedInputStream(System.in));
+String line = stdin.nextLine();
+</pre>
+<p>我们甚至不能在一条语句内完成。当你需要同时读入要几个变量的时候，用Java操作起来就更是痛苦。那么这一点在Scala里有所改善吗？我只能说，改善了一点点。</p>
+<p>
+	在Scala中，我们可以使用<code>readLine</code>、<code>readInt</code>等方法从控制台读取用户输入，使用方法和功能与Java Scanner的方法十分相似。这些函数甚至还可以接受一个字符串参数，
+	作为提示用户输入的提示语句，有没有很人性化？嘿嘿，我只能说，和<code>scanf</code>还是差太远了点。
+</p>
+
+<h2 class="jump">2.5 循环</h2>
+<p>在其他的编程语言中，学习完类似<code>if</code>和<code>switch</code>这样的控制结构以后，接下来就该学习循环结构了。</p>
+<p>
+	在Scala中，你仍然可以使用<code>while</code>关键字，其功能与Java中的完全一致。但这并不是重点。Scala的<code>for</code>
+	关键字仍然用于循环结构，但其不再提供在Java中的那种C/C++风格的<code>for</code>循环功能了，改而仅用于提供foreach的功能：
+</p>
+<pre class="brush: scala">
+for (i &lt;- 1 to n)
+	r = r * i
+</pre>
+<p>
+	这种<code>for (i &lt;- 表达式)</code>的结构实际上和Java中的<code>for( i : set )</code>结构在功能上是一致的。我们知道，
+	在Java中使用如此结构需要被遍历集合实现了<code>Iterable</code>接口。而在Scala中，使用这样的功能则需要被遍历的集合继承自
+	<code>Traversable</code>特质（关于特质我们将在以后再详细讲解，在这里你可以把<code>Traversable</code>特质当做是一个Java接口）。
+	我们可以通过反编译，来观察这种功能的实际实现原理。上述代码反编译的结果为：
+</p>
+<pre class="brush: java">
+RichInt$.MODULE$.to$extension0(Predef$.MODULE$.intWrapper(1), n())
+	.foreach$mVc$sp(new Serializable() {
+	
+        public static final long serialVersionUID = 0L;
+        private final ForEach $outer;
+		
+		public final void apply(int i) {
+            apply$mcVI$sp(i);
+        }
+
+        public void apply$mcVI$sp(int i) {
+            $outer.r_$eq($outer.r() * i);
+        }
+
+        public final volatile Object apply(Object v1) {
+            apply(BoxesRunTime.unboxToInt(v1));
+            return BoxedUnit.UNIT;
+        }
+
+        public {
+            if(ForEach.this == null) {
+                throw null;
+            } else {
+                this.$outer = ForEach.this;
+                super();
+                return;
+            }
+        }
+    }
+</pre>
+<p>
+	我们可以看到，这里Scala调用了<code>Range</code>类的<code>foreach</code>方法，并传入了一个继承自<code>Serializable</code>的匿名内部类。
+	关于<code>foreach</code>方法，实际上它声明于<code>scala.collection.TraversableLike</code>特质，而<code>Range</code>类是该特质的子类之一。
+	这个地方传入一个匿名内部类的做法可能让Java程序员比较迷茫，但这个内部类的<code>apply</code>方法我们以前却是见过的。
+	通过浏览<code>TraversableLike</code>的<a href="https://github.com/scala/scala/blob/2.11.x/src/library/scala/collection/TraversableLike.scala">源代码</a>你就能了解到，
+	这个地方传入的是一个Scala的函数闭包。关于函数闭包我们将在以后进行详细讲述，这里你可以把它理解为类似于Java的<code>lambda</code>关键字声明的匿名函数，
+	通过将用户声明的函数逻辑放入到内部类的<code>apply</code>方法中，再通过在运行时调用其<code>apply</code>方法来实现匿名函数的功能。
+</p>
+<p>
+	除了我们刚才提到过的<code>for (i &lt;- 1 to 10)</code>这种调用方法外，你还可以使用<code>for (i &lt;- 1 until 10)</code>。<code>until</code>
+	和<code>to</code>的功能实际上是类似的，但<code>until</code>生成的集合不包含上界。
+</p>
+<p>
+	在Scala中，我们不需要像其他语言那样频繁地使用循环。在第12章你就会看到，Scala提供的集合类提供了对集合所有元素应用某个指定函数的接口。
+</p>
+
+<h2 class="jump">2.6 高级for循环和for推导式</h2>
+<p>
+	上一节提到，在Scala中，<code>for</code>关键字用于提供类似于Java中的foreach的循环控制结构，但实际上，它能做到的要比Java的foreach更多。
+	比如对于一些多重循环，我们可以这样写：
+</p>
+<pre class="brush: scala">
+for (i &lt;- 1 to 3; j &lt;- 1 to 3)
+	print ((10 * i + j) + " ")
+// 输出 11 12 13 21 22 23 31 32 33
+</pre>
+<p>我们甚至可以根据外循环的值来改变内循环的范围：</p>
+<pre class="brush: scala">
+for (i &lt; 1 to 3; from = 4 - i; j &lt;- from to 3)
+	print ((10 * i + j) + " ")
+// 输出 13 22 23 31 32 33
+</pre>
+<p>不仅如此，我们还可以为循环动作执行与否通过<code>if</code>关键字添加一个条件判断，这样的条件判断被称为for循环的守卫（guard）：</p>
+<pre class="brush: scala">
+for (i &lt;- 1 to 3; j &lt; 1 to 3 if i != j)
+	print ((10 * i + j) + " ")
+// 输出 12 13 21 23 31 32
+</pre>
+<p>
+	那么，这样的功能是怎么实现的呢？我们大概可以猜到，既然<code>to</code>方法产生的是一个可遍历的集合，那么<code>if</code>
+	守卫应该相当于在使用了类似于<code>filter</code>之类的方法以后再使用它的<code>foreach</code>方法吧。那么是否真的如此呢？
+</p>
+<pre class="brush: scala">
+for (i &lt;- 1 to 3; from = 4 - i; j &lt;- from to 3 if i != j)
+	print ((10 * i + j) + " ")
+</pre>
+<p>
+	实际上，上述代码的反编译结果极为复杂，其中出现了4个匿名内部类，每个匿名内部类都是类似于之前出现的那种<code>new Serializable</code>，
+	也就是Scala的匿名函数。为什么是4个呢？<code>i</code>、<code>from</code>、<code>j</code>、<code>if</code>，正好4个。这里我把这些<code>Serializable</code>
+	重新翻译为Scala匿名函数，那么上述代码就会变成大概下面这个样子：
+</p>
+<pre class="brush: scala">
+(1 to 3).map(i => {
+	var from = 4 - i
+	(i, from)
+}).foreach({
+	var i = _._1
+	var from = _._2
+	(from to 3).withFilter(j => j != i).foreach(j => {
+		print ((10 * i + j) + " ")
+	})
+})
+</pre>
+<p>
+	也许在某些小细节上有些出入，但总体而言是一致的。在第一次<code>map</code>时，匿名函数返回的是由<code>i</code>和<code>from</code>组成的元组，
+	然后再对这个元组集合调用<code>foreach</code>，进入第一级循环。在第一级循环内，可能是出于避免变量名重复的考虑，Scala编译器保留了用户设定的变量名。
+	在使用<code>from to 3</code>构建出第二级循环的遍历体以后，果然使用了<code>withFilter</code>方法去除不符合条件的元素。然后才调用了<code>foreache</code>
+	方法，进入第二级循环。
+</p>
+<p>
+	多少有点“万变不离其宗”的味道：如此高级的<code>for</code>表达式，最终其实现原理也只是在重复使用最简单的<code>for (i &lt;- 1 to 3)</code>。
+	不过在此，我要郑重的提醒大家：如果你的程序对性能十分敏感，请不要使用Scala For表达式的if守卫，它的性能极差。
+	改而使用while循环或简单的for循环并在循环体内部使用if语句，能在性能上提供至少一倍的性能提升。
+</p>
+<p>
+	除了做到简单的循环控制，<code>for</code>语句结合<code>yield</code>关键字可以直接生成一个集合。这种功能对于Python程序员来说应该十分熟悉了：
+</p>
+<pre class="brush: scala">
+for (c &lt;- "Hello"; i &lt;- 0 to 1) yield (c + i).toChar
+// 将生成 "HIeflmlmop"
+for (i &lt;- 0 to 1; c &lt;- "Hello") yield (c + i).toChar
+// 将生成 Vector('H', 'e', 'l', 'l', 'o', 'I', 'f', 'm', 'm', 'p')
+</pre>
+<p>这样的循环被称为for推导式（for comprehension），其生成的集合与<code>for</code>语句内的第一个生成器是类型兼容的。</p>
+
+<h2 class="jump">结语</h2>
+<p>
+	第二章上半部分到这里就结束了，一共359页的书你已经进行到了第20页了。在这篇文章里，我们详细讲解了Scala控制结构的底层实现原理，
+	其中包括了Scala的<code>if</code>语句以及<code>for</code>语句。尽管我们花费了大量的篇幅去讲解Scala一些很简单很常用的功能，
+	但我认为对于高级程序员而言，对自己书写的每一条语句知根知底更有利于在不同的情境下写出最优的代码。不管怎么说，能坚持读完这篇文章，
+	相信你也已经受益匪浅了。恭喜你！
+</p>
+<p>
+	在最后，我还是要唠叨一句：与其他高级语言一样，Scala在享有超强的表达能力的同时，它不仅会有比起Java长得多的编译时间，
+	而且它的性能也会和你的写法息息相关。
+	在文章中我已经说过了，但我还是要再说一次：Scala<code>for</code>表达式的if守卫很慢，如果你的程序对性能十分敏感，
+	请不要使用Scala的这项功能。至于Scala在这一方面到底有多慢，我会在近期出一篇Scala基准测试的测试报告，
+	欢迎各位持续关注我的博客。
+</p>
