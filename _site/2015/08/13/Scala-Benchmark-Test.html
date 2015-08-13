@@ -1,10 +1,40 @@
----
-layout: posts
-title: Scala性能基准测试
-author: Robert Peng
----
-
-<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/default.css" rel="stylesheet">
+	<link href="/css/post.css" rel="stylesheet">
+    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+    
+    <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
+    <link href="/css/syntaxhighlighters/shCore.css" rel="stylesheet" type="text/css" />
+    <link href="/css/syntaxhighlighters/shThemeDefault.css" rel="stylesheet" type="text/css" />
+	
+	<link rel="shortcut icon" href="/img/favicon.ico" >
+    
+    <title>Scala性能基准测试 - Robert Peng</title>
+</head>
+<body>
+    <div id="main_wrapper">
+    <div id="banner_wrapper">
+    <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
+	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
+    </div>
+    <div id="content_wrapper">
+        <div id="right_wrapper" style="margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
+            <ul id="JumpList">
+                <li><h4>跳转目录</h4></li>
+            </ul>
+        </div>
+		<div id="left_wrapper">
+			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">Scala性能基准测试</p>
+			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 13 Aug 2015</p>
+			<!-- content starts here -->
+			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushCpp.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
@@ -256,11 +286,11 @@ object ScalaFor {
 	实质上来讲Scala的while和Java的本来就是同一个东西。那么这次出现的性能的差异，
 	恐怕意味着在Scala中计算<code>i % 2 == 0</code>要比Java慢一点点。
 </p>
-<br />
-<br />
+<hr />
 <p>在这次测试中，我们用大到没朋友的数据集分别测试了Scala和Java中for和while循环的性能并对它们进行了对比，最终得出结论：</p>
 <ul>
 	<li>Scala for语句的if守卫性能十分糟糕，在同样的数据集上，其耗时比起逻辑相同的在循环体内使用if语句的Scala for循环多了两倍以上。</li>
+	<li>Scala和Java一样，while都要比for稍快。</li>
 	<li>Scala的while与Java的while表现出了完全一致的性能，证明了它们原理上完全相同的本质。</li>
 	<li>Scala for语句的性能表现略优于Java的for语句，但这种情况似乎仅存在于超大的数据集上。</li>
 	<li>Scala带条件的while比Java的稍慢，也许意味着Scala计算<code>i % 2 == 0</code>需要更多的时间。</li>
@@ -271,5 +301,259 @@ object ScalaFor {
 	测试结果请酌情参考。
 </p>
 
+<h2 class="jump">1.2 多次遍历小集合</h2>
+<p>
+	在上一次测试案例中，我们测试了两种语言在遍历单个超大集合时的性能表现，得出了许多十分有用的结论。
+	但由于测试时使用的集合实在是过大，我们在真实的编程环境中不可能使用这样的集合，因此上一次测试的实际参考意义比较小。
+</p>
+<p>
+	这次，我们转而去遍历更小的集合。我们使用大小分别为从1~10的集合，每次测试我们都对其遍历100,000,000次以放大数据，
+	同时保持测试环境不变。那么我们先来看看Java测试的代码：
+</p>
+<pre class="brush: java">
+package benchmark.loop;
+
+/**
+ * Java Benchmark Testing on loop. Only used to give a baseline of JVM loop performance
+ *
+ * @author Robert Peng  13/08/2015
+ */
+public class JavaFor {
+
+    private static long startMili;
+    private static long endMili;
+    private static long dummy;
+    private static int[] sizeCandidates = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+    public static void main(String[] args) {
+        // Test on performance of Java `for` loop...
+        for (int size : sizeCandidates) {
+            dummy = 0;
+            startMili = System.currentTimeMillis();
+            for (int i = 1; i &lt;= 100000000; i++)
+                for (int j = 0; j &lt; size; j++)
+                    dummy += j;
+            endMili = System.currentTimeMillis();
+            echo("Java `for` loop of size " + size + " finished in " + (endMili - startMili) + " ms");
+        }
+
+        // Test on performance of Java `while` loop...
+        for (int size : sizeCandidates) {
+            dummy = 0;
+            startMili = System.currentTimeMillis();
+            int i = 1;
+            while (i &lt;= 100000000) {
+                int j = 0;
+                while (j &lt; size) {
+                    dummy += j;
+                    j++;
+                }
+                i++;
+            }
+            endMili = System.currentTimeMillis();
+            echo("Java `while` loop of size " + size + " finished in " + (endMili - startMili) + " ms");
+        }
+
+        // Test on performance of Java `for` loop with guard...
+        for (int size : sizeCandidates) {
+            dummy = 0;
+            startMili = System.currentTimeMillis();
+            for (int i = 1; i &lt;= 100000000; i++)
+                for (int j = 0; j &lt; size; j++)
+                    if (j % 2 != 0)
+                        dummy += j;
+            endMili = System.currentTimeMillis();
+            echo("Java `for` loop with guard of size " + size + " finished in " + (endMili - startMili) + " ms");
+        }
+
+        // Test on performance of Java `while` loop with guard...
+        for (int size : sizeCandidates) {
+            dummy = 0;
+            startMili = System.currentTimeMillis();
+            int i = 1;
+            while (i &lt;= 100000000) {
+                int j = 0;
+                while (j &lt; size) {
+                    if (j % 2 != 0)
+                        dummy += j;
+                    j++;
+                }
+                i++;
+            }
+            endMili = System.currentTimeMillis();
+            echo("Java `while` loop with guard of size " + size + " finished in " + (endMili - startMili) + " ms");
+        }
+    }
+
+    private static void echo(String s) {
+        System.out.println(s);
+    }
+}
+</pre>
+<p>那么Java的表现如何呢？结果如下：</p>
+<p class="center"><img style="width: 100%" alt="" src="/img/ScalaBenchmark@7.jpg"></p>
+<p>
+	除了普通的for循环不知道出于什么原因在集合大小为<code>6</code>时耗时突然减少然后在大小为<code>7</code>时回到轨道，
+	但我们可以看到for循环和while循环的性能表现十分接近。而且我们可以看到，在单次遍历大集合时，while循环较之for循环会有一个较为明显的性能提高，
+	而在多次遍历小集合时，for循环反而以细微差距超越了while循环，这确实是有点耐人寻味，但总得来说这个差距可以小到忽略不计。
+</p>
+<p>
+	除了这些，我们可以看到带<code>if</code>的循环这次消耗的时间就比不带<code>if</code>的循环要多了。这是可以理解的，
+	因为在上一次测试中执行的运算是<code>dummy += i % 2</code>，这次是<code>dummy += j</code>，少了一个取余的过程，
+	用于计算的时间变少，那么用于条件判断的性能损失就体现出来了。
+</p>
+<p>好了，Java大概就是这些。那么我们接下来看看Scala吧。首先先看Scala的代码：</p>
+<pre class="brush: scala">
+package benchmark.loop
+
+/**
+ * Scala Benchmark Testing on `for` loop, comparing to Java-like loop implemented by `while`
+ *
+ * @author Robert Peng  11/08/2015
+ */
+object ScalaFor {
+
+    var startMili: Long = _
+    var endMili: Long = _
+
+    var dummy: Long = _
+
+    def echo(s: String) = Console println s
+
+    def main(args: Array[String]): Unit = {
+        val sizeCandidates = Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+
+        // Test on performance of Scala `for` loop...
+        for (size &lt;- sizeCandidates) {
+            dummy = 0
+            startMili = System.currentTimeMillis
+            for (i &lt;- 1 to 100000000;
+                 j &lt;- 1 to size)
+                dummy += j
+            endMili = System.currentTimeMillis
+            echo("Scala `for` loop of size " + size + " finished in " + (endMili - startMili) + " ms")
+        }
+
+        // Test on performance of Java-like Scala `while` loop...
+        for (size &lt;- sizeCandidates) {
+            dummy = 0
+            startMili = System.currentTimeMillis
+            var i = 0
+            while (i &lt; 100000000) {
+                var j = 0
+                while (j &lt; size) {
+                    dummy += j
+                    j += 1
+                }
+                i += 1
+            }
+            endMili = System.currentTimeMillis
+            echo("Java-like Scala `while` loop of size " + size + " finished in " + (endMili - startMili) + " ms")
+        }
+
+        // Test on performance of Scala `for` loop with guard...
+        for (size &lt;- sizeCandidates) {
+            dummy = 0
+            startMili = System.currentTimeMillis
+            for (i &lt;- 1 to 100000000;
+                 j &lt;- 1 to size
+                 if j % 2 != 0)
+                dummy += j
+            endMili = System.currentTimeMillis
+            echo("Scala `for` loop with guard of size " + size + " finished in " + (endMili - startMili) + " ms")
+        }
+
+        // Test on performance of Scala `for` loop with if...
+        for (size &lt;- sizeCandidates) {
+            dummy = 0
+            startMili = System.currentTimeMillis
+            for (i &lt;- 1 to 100000000;
+                 j &lt;- 1 to size)
+                if (j % 2 != 0)
+                    dummy += j
+            endMili = System.currentTimeMillis
+            echo("Scala `for` loop with guard of size " + size + " finished in " + (endMili - startMili) + " ms")
+        }
+
+        // Test on performance of Java-like Scala `while` loop with `if`...
+        for (size &lt;- sizeCandidates) {
+            dummy = 0
+            startMili = System.currentTimeMillis
+            var i = 0
+            while (i &lt; 100000000) {
+                var j = 0
+                while (j &lt; size) {
+                    if (j % 2 != 0)
+                        dummy += j
+                    j += 1
+                }
+                i += 1
+            }
+            endMili = System.currentTimeMillis
+            echo("Java-like Scala `while` loop with guard of size " + size + " finished in " + (endMili - startMili) + " ms")
+        }
+    }
+}
+</pre>
+<p>测试结果如下：</p>
+<p class="center"><img style="width: 100%" alt="" src="/img/ScalaBenchmark@8.jpg"></p>
+<p>
+	可以看到，使用守卫的for循环耗时依旧是居高不下。这个故事告诉我们，还是不要用守卫比较好。除此之外的数据分布，
+	其实也可以大致推断出来一些了。Scala for循环相比于Scala while循环依然是慢一点点，但也仅仅是一点点。
+	考虑到在Scala中写while循环比写for循环要麻烦得多，如此小的性能损失是完全可以接受的。
+	同样<code>if</code>语句对循环性能的影响与Java保持一致。
+</p>
+<p>
+	那么接下来就到了两种语言的性能对比时间了。在上一次测试中我们其实就已经得出了Scala while循环与Java while循环完全一致的结论，
+	而同样带有<code>if</code>的两种循环在不同的语言中都有着完全相同的性能表现。唯一值得关注的，是简单for循环在两种语言中的表现。
+	在上一次测试中，我们看到Scala的for循环在超大数据集上性能表现要比Java稍好，但从曲线斜率上看，这种优势很有可能仅存在于这种超大数据集的情况下。
+	那么事实又是如何呢？两种语言在小数据集上的简单for循环表现如下：
+</p>
+<p class="center"><img style="width: 100%" alt="" src="/img/ScalaBenchmark@9.jpg"></p>
+<p>
+	虽然这种测试方式确实会导致得出的结果曲线不如上一次测试那么平滑，但我倒是没意料到会如此此起彼伏。
+	这样的数据实际上没有办法说明在小数据集的情况下两种语言的For循环性能到底谁好谁差，我觉得我能从这张图给出的最好的结论，
+	就是两种语言的for循环在小数据集下有着基本相同的性能。
+</p>
+<hr />
+<p>这一次，我们在小数据集下测试两种语言的循环的性能表现。对比于前一次大数据集的测试，我们可以得出如下结论：</p>
+<ul>
+	<li>Java的for循环与Scala的for循环在小数据集下并没有明显的性能差异。</li>
+	<li>Scala的for守卫依然要比带if的普通for循环要慢得多。</li>
+	<li>不同种类的循环的数据分布呈现出了与大数据集时相似的模式。</li>
+</ul>
+<p>
+	这里，为了客观，我还是要提醒一下大家。虽然这两次测试我用到了“大数据集”和“小数据集”这两个词语，但这不代表我在测试两种语言的集合的性能。
+	这两项测试只是单纯的在测试Scala和Java的while和for语句本身的性能，暂时还不涉及到两种语言的容器。同时，以上数据都只是我个人测试得出的数据，
+	在不同的机器上或者使用不同的版本，两种语言可能都有着不同的版本。本文旨在抛砖引玉，如果各位读者想要得出更为准确的数据，还是希望各位能够在真实的环境下自行测试。
+</p>
+
 <h2 class="jump">下集预告</h2>
-<p>下一次我将测试两种语言在遍历大量小集合时的性能表现，毋庸置疑这样的测试对于实际的编程环境具有更大的参考意义。敬请期待。</p>
+<p>for语句与while语句的性能测试到此告一段落，但语言的运用远不止于如此。下一次，我将开始测试两种语言的动态容器的性能，敬请期待！</p>
+
+			<!-- and ends here -->
+			<div class="blank" style="height: 80px"></div>
+			<!-- Disqus Block starts here -->
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES * * */
+				var disqus_shortname = 'robertpsblog';
+				var disqus_identifier = 'Scala性能基准测试';
+    
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+			<!-- and ends here -->
+		</div>
+    </div>
+    </div>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/mrdai.js"></script>
+    <script>SyntaxHighlighter.all()</script>
+</body>
+</html>
