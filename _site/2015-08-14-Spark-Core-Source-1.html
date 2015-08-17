@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="baidu-site-verification" content="daFR1yHCCy" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/default.css" rel="stylesheet">
+	<link rel="shortcut icon" href="/img/favicon.ico" >
+    <title>Robert P.'s Blog</title>
+</head>
+<body onload="prettyPrint()">
+    <script src="/js/jquery-2.1.1.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/mrdai.js"></script>
+    <script src="/js/google-code-prettify/prettify.js" type="text/javascript"></script>
+    <div id="main_wrapper">
+    <div id="banner_wrapper">
+    <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
+	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
+    </div>
+    <div id="content_wrapper" class="container-fluid">
+    
+    <div id="left_wrapper">
+    <script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
+
+<h2 class="jump">前言</h2>
+<p>
+	我的<a href="/2015/07/27/SparkSQL-HiveThriftServer-Source-1.html">上一个系列</a>的Spark源码解析已经完结了一段时间了。
+	当时我出于实习工作的需要阅读了SparkSQL HiveThriftServer以及Spark Scala Interpreter的源代码，并顺势写下了那个系列的源码解析文章。
+	但读Spark源代码怎么能只读那些外围插件的源代码呢？于是我又开一个新坑了。
+</p>
+<p>
+	要理解Spark的中心思想，首先当然得从Spark Core开始。Spark Core中包含了所有Spark的核心类的定义，其中就有我们用得最多的<code>SparkContext</code>和
+	<code>RDD</code>。在开始阅读本文之前，我希望各位可以先完整阅读<a href="/file/RDDs.pdf">这篇</a>论文以及<a href="/file/Spark.pdf">这篇</a>论文。这两篇论文的撰写者相同，均属UC Berkeley大学，
+	虽然我不确定他们是不是，但我想他们应该就是Spark的创始人了。前一篇论文在第二节详细介绍了RDD的概念，并在第五节详细介绍了Spark的一些实现原理。
+	后一篇论文在内容上并不如前一篇论文充分，而且有大量的重复内容，但其中也包含了一些新内容，值得大家学习一下。
+	源代码中会出现很多奇怪的名词，恐怕你必须通过完整阅读这两篇论文才能够理解。我不会在文中重复解释这些术语的确切意思，
+	因此我希望你能静下心来读完这两篇论文再继续往下看。我相信这样的阅读是完全值得的。
+</p>
+<p>
+	首先这个系列的出发点其实就有两个，一个是<code>SparkContext</code>，另一个就是<code>RDD</code>。我有思考过哪个更好，最终我选择了<code>RDD</code>，
+	因为它的实现更简单，与Spark其他类的依赖也少得多。在我们完整阅读了<code>RDD</code>的源代码后，想必阅读<code>SparkContext</code>的源代码也会变得轻松很多。
+	但这并不代表在这篇文章中不会出现<code>SparkContext</code>的代码。这篇文章将涵盖与<code>RDD</code>功能实现有关的代码，至于这些代码来自于哪个类并不重要。
+</p>
+<p>
+	那我们开始吧。
+</p>
+<hr />
+<h2 class="jump">RDD</h2>
+<p>在开始跳进去看RDD的方法之前，我们应该先了解一下RDD的一些基本信息。</p>
+<p>首先，我们先来看看RDD的构造方法：</p>
+<pre class="brush: scala">
+abstract class RDD[T: ClassTag](
+    @transient private var _sc: SparkContext,
+    @transient private var deps: Seq[Dependency[_]]
+  ) extends Serializable with Logging {
+
+  if (classOf[RDD[_]].isAssignableFrom(elementClassTag.runtimeClass)) {
+    // This is a warning instead of an exception in order to avoid breaking user programs that
+    // might have defined nested RDDs without running jobs with them.
+    logWarning("Spark does not support nested RDDs (see SPARK-5063)")
+  }
+  
+  /** Construct an RDD with just a one-to-one dependency on one parent */
+  def this(@transient oneParent: RDD[_]) =
+    this(oneParent.context , List(new OneToOneDependency(oneParent)))
+}
+</pre>
+<p>
+	这里我们看到，<code>RDD</code>在创建时便会放入一个<code>SparkContext</code>和它的<code>Dependency</code>们。
+	关于<code>Dependency</code>类，在上面的论文中有介绍，它包含了当前<code>RDD</code>的父<code>RDD</code>的引用，
+	以及足够从父<code>RDD</code>恢复丢失的partition的信息。
+</p>
+<p>接下来我们看看<code>RDD</code>需要子类实现的虚函数：</p>
+<pre class="brush: scala">
+/**
+ * :: DeveloperApi ::
+ * Implemented by subclasses to compute a given partition.
+ */
+@DeveloperApi
+def compute(split: Partition, context: TaskContext): Iterator[T]
+
+/**
+ * Implemented by subclasses to return the set of partitions in this RDD. This method will only
+ * be called once, so it is safe to implement a time-consuming computation in it.
+ */
+protected def getPartitions: Array[Partition]
+
+/**
+ * Implemented by subclasses to return how this RDD depends on parent RDDs. This method will only
+ * be called once, so it is safe to implement a time-consuming computation in it.
+ */
+protected def getDependencies: Seq[Dependency[_]] = deps
+
+/**
+ * Optionally overridden by subclasses to specify placement preferences.
+ */
+protected def getPreferredLocations(split: Partition): Seq[String] = Nil
+
+/** Optionally overridden by subclasses to specify how they are partitioned. */
+@transient val partitioner: Option[Partitioner] = None
+</pre>
+<p>
+	这些函数基本都是用于执行Spark计算的方法，也包括了论文中提到的三大RDD接口中的两个，
+	即<code>getPartitions</code>以及<code>getPreferredLocations</code>。其中有两个函数是子类必须实现的，即
+	<code>compute</code>和<code>getPartitions</code>。我们记住它们的功能定义，以免它们在子类中再次出现时一时想不起来它们的功能。
+</p>
+<p>
+	继续往下，我们看到除了包含<code>SparkContext</code>变量和<code>Dependency</code>们，一个RDD还包含了自己的<code>id</code>
+	以及<code>name</code>：
+</p>
+<pre class="brush: scala">
+/** The SparkContext that created this RDD. */
+def sparkContext: SparkContext = sc
+
+/** A unique ID for this RDD (within its SparkContext). */
+val id: Int = sc.newRddId()
+
+/** A friendly name for this RDD */
+@transient var name: String = null
+
+/** Assign a name to this RDD */
+def setName(_name: String): this.type = {
+  name = _name
+  this
+}
+</pre>
+<p>再继续往下，便是RDD的公用API了。</p>
+<hr />
+<h2 class="jump">RDD Action</h2>
+<p>
+	RDD提供了大量的API供我们使用。通过浏览RDD的<a href="http://spark.apache.org/docs/latest/api/scala/index.html#org.apache.spark.rdd.RDD">ScalaDoc</a>，不难发现RDD拥有数十种<code>public</code>的接口，
+	更不要提那些我们即将面对的非<code>public</code>的接口了。因此直接跳进<code>RDD.scala</code>从上往下阅读源代码是不科学的。
+	这里我使用另外一种阅读方式。
+</p>
+<p>
+	正如Spark的论文中所描述的，RDD的API并不是每一个都会启动Spark的计算。被称之为<code>Transformation</code>的操作可以用一个RDD产生另一个RDD，
+	但这样的操作实际上是lazy的：它们并不会被立即计算，而是当你真正触发了计算动作的时候，所有你提交过的Transformation们会在经过Spark优化以后再顺序执行。
+	那么怎么样的操作会触发Spark的计算呢？
+</p>
+<p class="center"><img style="width: 100%" alt="" src="/img/SparkCore@1.jpg"></p>
+<p>
+	这些被称之为<code>Action</code>的RDD操作便会触发Spark的计算动作。根据上图，Action包括<code>count</code>、<code>collect</code>、<code>reduce</code>、
+	<code>lookup</code>和<code>save</code>（已被更名为<code>saveAsTextFile</code>和<code>saveAsObjectFile</code>）。不难发现，除了<code>save</code>，
+	其他四个操作都是将结果直接获取到driver程序中的操作，由这些操作来启动Spark的计算也是十分合理的。
+</p>
+<p>
+	那么我们不妨先来看一下这几个函数的源代码：
+</p>
+<pre class="brush: scala" id="rdd-actions">
+
+// RDD.scala
+
+/**
+ * Return the number of elements in the RDD.
+ */
+def count(): Long = sc.runJob(this, Utils.getIteratorSize _).sum
+
+/**
+ * Reduces the elements of this RDD using the specified commutative and
+ * associative binary operator.
+ */
+def reduce(f: (T, T) => T): T = withScope {
+  // Clean一下用户传入的closure，以准备将其序列化
+  val cleanF = sc.clean(f)
+  // 应用在每个partition上的reduce函数。相当于Hadoop MR中的combine
+  val reducePartition: Iterator[T] => Option[T] = iter => {
+    if (iter.hasNext) {
+      Some(iter.reduceLeft(cleanF))
+    } else {
+      None
+    }
+  }
+  
+  var jobResult: Option[T] = None
+  // 合并每个partition的reduce结果
+  val mergeResult = (index: Int, taskResult: Option[T]) => {
+    if (taskResult.isDefined) {
+      jobResult = jobResult match {
+        case Some(value) => Some(f(value, taskResult.get))
+        case None => taskResult
+      }
+    }
+  }
+  // 启动Spark Job
+  sc.runJob(this, reducePartition, mergeResult)
+  // Get the final result out of our Option, or throw an exception if the RDD was empty
+  jobResult.getOrElse(throw new UnsupportedOperationException("empty collection"))
+}
+
+// PairRDDFunctions.scala
+
+/**
+ * Return the list of values in the RDD for key `key`. This operation is done efficiently if the
+ * RDD has a known partitioner by only searching the partition that the key maps to.
+ */
+def lookup(key: K): Seq[V] = self.withScope {
+  self.partitioner match {
+    case Some(p) =>
+      val index = p.getPartition(key)
+      val process = (it: Iterator[(K, V)]) => {
+        val buf = new ArrayBuffer[V]
+        for (pair &lt;- it if pair._1 == key) {
+          buf += pair._2
+        }
+        buf
+      } : Seq[V]
+      val res = self.context.runJob(self, process, Array(index), false)
+      res(0)
+    case None =>
+      self.filter(_._1 == key).map(_._2).collect()
+  }
+}  
+</pre>
+
+<p>
+	其中<code>reduce</code>函数比较不好懂，我特意加上了一些中文注释。上述四个函数都有一个特点：它们都直接或间接地调用了<code>sparkContext.runJob</code>方法来获取结果。
+	可见这个方法便是启动Spark计算任务的入口。我们记下这个入口，留到研读<code>SparkContext</code>源代码的时候再进行解析。
+</p>
+<hr />
+<h2 class="jump">RDD Transformations</h2>
+<p>
+	讲完了Action，自然就轮到了Transformation了。可是有那~么多的Transformation啊。我们一个一个来吧。
+</p>
+<h3>map</h3>
+<p>我们先从用得最多的开始。我们直接看源码：</p>
+<pre class="brush: scala">
+/**
+ * Return a new RDD by applying a function to all elements of this RDD.
+ */
+def map[U: ClassTag](f: T => U): RDD[U] = withScope {
+  val cleanF = sc.clean(f)
+  new MapPartitionsRDD[U, T](this, (context, pid, iter) => iter.map(cleanF))
+}
+</pre>
+<p>
+	和论文中说的一样，<code>map</code>函数会利用当前RDD以及用户传入的匿名函数构建出一个<code>MapPartitionsRDD</code>。
+	毋庸置疑这个东西肯定是继承自<code>RDD</code>类的。我们可以看看它的源代码：
+</p>
+<pre class="brush: scala">
+private[spark] class MapPartitionsRDD[U: ClassTag, T: ClassTag](
+    prev: RDD[T],
+    f: (TaskContext, Int, Iterator[T]) => Iterator[U],  // (TaskContext, partition index, iterator)
+    preservesPartitioning: Boolean = false)
+  extends RDD[U](prev) {
+
+  override val partitioner = if (preservesPartitioning) firstParent[T].partitioner else None
+
+  override def getPartitions: Array[Partition] = firstParent[T].partitions
+
+  override def compute(split: Partition, context: TaskContext): Iterator[U] =
+    f(context, split.index, firstParent[T].iterator(split, context))
+}
+</pre>
+<p>
+	可以看到，<code>MapPartitionsRDD</code>实现了<code>getPartitions</code>和<code>compute</code>方法。
+</p>
+<p>
+	<code>getPartitions</code>方法直接返回了它的<code>firstParent</code>的partition。实际上<code>MapPartitionsRDD</code>也只会有一个parent，
+	也就是构造函数传入的<code>prev</code>。
+</p>
+<p>
+	<code>compute</code>方法在这里直接应用了构造参数传入的方法<code>f</code>。我们看回<code>RDD#map</code>，
+	传入的方法是<code>(context, pid, iter) => iter.map(cleanF)</code>。结合到<code>MapPartitionsRDD</code>的源代码里就不难看出其实现原理了。
+	这里我们最好记住匿名函数的<code>context</code>是<code>TaskContext</code>、<code>pid</code>是<code>Partition</code>的id、
+	<code>iter</code>即该<code>Partition</code>的<code>iterator</code>。记住这些以免后面再次出现的时候一时晕菜。
+</p>
+<p>
+	注意到，<code>MapPartitionsRDD</code>还重载了<code>partitioner</code>变量，
+	其值取决于构造函数传入的<code>preservesPartitioning</code>参数，该参数默认为<code>false</code>。
+	在<code>RDD#map</code>方法里并未对该参数赋值。
+</p>
+<h3>withScope</h3>
+<p>
+	我们回到刚才的<code>RDD#map</code>方法，注意到它还调用了一个函数，就是<code>withScope</code>。
+	这个函数出现的次数相当多，你在很多RDD API里都能发现它。我们来看看它的源代码：
+</p>
+<pre class="brush: scala">
+
+// RDD.scala
+
+/**
+ * Execute a block of code in a scope such that all new RDDs created in this body will
+ * be part of the same scope. For more detail, see &#123;&#123;org.apache.spark.rdd.RDDOperationScope&#125;&#125;.
+ *
+ * Note: Return statements are NOT allowed in the given body.
+ */
+private[spark] def withScope[U](body: => U): U = RDDOperationScope.withScope[U](sc)(body)
+
+
+
+// RDDOperationScope.scala
+
+/**
+ * A general, named code block representing an operation that instantiates RDDs.
+ *
+ * All RDDs instantiated in the corresponding code block will store a pointer to this object.
+ * Examples include, but will not be limited to, existing RDD operations, such as textFile,
+ * reduceByKey, and treeAggregate.
+ *
+ * An operation scope may be nested in other scopes. For instance, a SQL query may enclose
+ * scopes associated with the public RDD APIs it uses under the hood.
+ *
+ * There is no particular relationship between an operation scope and a stage or a job.
+ * A scope may live inside one stage (e.g. map) or span across multiple jobs (e.g. take).
+ */
+@JsonInclude(Include.NON_NULL)
+@JsonPropertyOrder(Array("id", "name", "parent"))
+private[spark] class RDDOperationScope(
+    val name: String,
+    val parent: Option[RDDOperationScope] = None,
+    val id: String = RDDOperationScope.nextScopeId().toString) {
+
+  def toJson: String = {
+    RDDOperationScope.jsonMapper.writeValueAsString(this)
+  }
+
+  /**
+   * Return a list of scopes that this scope is a part of, including this scope itself.
+   * The result is ordered from the outermost scope (eldest ancestor) to this scope.
+   */
+  @JsonIgnore
+  def getAllScopes: Seq[RDDOperationScope] = {
+    parent.map(_.getAllScopes).getOrElse(Seq.empty) ++ Seq(this)
+  }
+
+  override def equals(other: Any): Boolean = {
+    other match {
+      case s: RDDOperationScope =>
+        id == s.id && name == s.name && parent == s.parent
+      case _ => false
+    }
+  }
+
+  override def toString: String = toJson
+}
+
+/**
+ * A collection of utility methods to construct a hierarchical representation of RDD scopes.
+ * An RDD scope tracks the series of operations that created a given RDD.
+ */
+private[spark] object RDDOperationScope extends Logging {
+  private val jsonMapper = new ObjectMapper().registerModule(DefaultScalaModule)
+  private val scopeCounter = new AtomicInteger(0)
+
+  def fromJson(s: String): RDDOperationScope = {
+    jsonMapper.readValue(s, classOf[RDDOperationScope])
+  }
+
+  /** Return a globally unique operation scope ID. */
+  def nextScopeId(): Int = scopeCounter.getAndIncrement
+
+  /**
+   * Execute the given body such that all RDDs created in this body will have the same scope.
+   * The name of the scope will be the first method name in the stack trace that is not the
+   * same as this method's.
+   *
+   * Note: Return statements are NOT allowed in body.
+   */
+  private[spark] def withScope[T](
+      sc: SparkContext,
+      allowNesting: Boolean = false)(body: => T): T = {
+    val ourMethodName = "withScope"
+    val callerMethodName = Thread.currentThread.getStackTrace()
+      .dropWhile(_.getMethodName != ourMethodName)	// 去掉了withScope之后的所有函数调用
+      .find(_.getMethodName != ourMethodName)	// 找到调用withScope的函数，如RDD#withScope
+      .map(_.getMethodName)
+      .getOrElse {
+        // Log a warning just in case, but this should almost certainly never happen
+        logWarning("No valid method name for this RDD operation scope!")
+        "N/A"
+      }
+    withScope[T](sc, callerMethodName, allowNesting, ignoreParent = false)(body)
+  }
+
+  /**
+   * Execute the given body such that all RDDs created in this body will have the same scope.
+   *
+   * If nesting is allowed, any subsequent calls to this method in the given body will instantiate
+   * child scopes that are nested within our scope. Otherwise, these calls will take no effect.
+   *
+   * Additionally, the caller of this method may optionally ignore the configurations and scopes
+   * set by the higher level caller. In this case, this method will ignore the parent caller's
+   * intention to disallow nesting, and the new scope instantiated will not have a parent. This
+   * is useful for scoping physical operations in Spark SQL, for instance.
+   *
+   * Note: Return statements are NOT allowed in body.
+   */
+  private[spark] def withScope[T](
+      sc: SparkContext,
+      name: String,
+      allowNesting: Boolean,
+      ignoreParent: Boolean)(body: => T): T = {
+    // Save the old scope to restore it later
+    val scopeKey = SparkContext.RDD_SCOPE_KEY
+    val noOverrideKey = SparkContext.RDD_SCOPE_NO_OVERRIDE_KEY
+    val oldScopeJson = sc.getLocalProperty(scopeKey)
+    val oldScope = Option(oldScopeJson).map(RDDOperationScope.fromJson)
+    val oldNoOverride = sc.getLocalProperty(noOverrideKey)
+    try {
+      if (ignoreParent) {
+        // Ignore all parent settings and scopes and start afresh with our own root scope
+        sc.setLocalProperty(scopeKey, new RDDOperationScope(name).toJson)
+      } else if (sc.getLocalProperty(noOverrideKey) == null) {
+        // Otherwise, set the scope only if the higher level caller allows us to do so
+        sc.setLocalProperty(scopeKey, new RDDOperationScope(name, oldScope).toJson)
+      }
+      // Optionally disallow the child body to override our scope
+      if (!allowNesting) {
+        sc.setLocalProperty(noOverrideKey, "true")
+      }
+      body
+    } finally {
+      // Remember to restore any state that was modified before exiting
+      sc.setLocalProperty(scopeKey, oldScopeJson)
+      sc.setLocalProperty(noOverrideKey, oldNoOverride)
+    }
+  }
+}
+</pre>
+
+
+    </div>
+    
+    <div id="right_wrapper">
+        <ul>
+            <li><h3>其他目录</h3></li>
+            <li><a href="/board.html">学习贴条</a></li>
+            <li><a href="/log.html">改动日志</a></li>
+            <!-- <li><a href="/aboutme.html">关于我</a></li> -->
+        </ul>
+    </div>
+    
+    </div>
+    </div>
+</body>
+</html>

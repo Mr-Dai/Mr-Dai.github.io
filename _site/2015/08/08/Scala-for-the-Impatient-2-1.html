@@ -496,8 +496,11 @@ RichInt$.MODULE$.to$extension0(Predef$.MODULE$.intWrapper(1), n())
 	关于<code>foreach</code>方法，实际上它声明于<code>scala.collection.TraversableLike</code>特质，而<code>Range</code>类是该特质的子类之一。
 	这个地方传入一个匿名内部类的做法可能让Java程序员比较迷茫，但这个内部类的<code>apply</code>方法我们以前却是见过的。
 	通过浏览<code>TraversableLike</code>的<a href="https://github.com/scala/scala/blob/2.11.x/src/library/scala/collection/TraversableLike.scala">源代码</a>你就能了解到，
-	这个地方传入的是一个Scala的函数闭包。关于函数闭包我们将在以后进行详细讲述，这里你可以把它理解为类似于Java的<code>lambda</code>关键字声明的匿名函数，
+	这个地方传入的是一个Scala的函数闭包（closure）。关于函数闭包我们将在以后进行详细讲述，实际上它就相当于Java的<code>lambda</code>关键字声明的匿名函数，
 	通过将用户声明的函数逻辑放入到内部类的<code>apply</code>方法中，再通过在运行时调用其<code>apply</code>方法来实现匿名函数的功能。
+</p>
+<p>
+	因此，实际上<code>for (p &lt;- points) {body}</code>这样的语法结构是由Scala提供的语法糖（syntactic sugar），其实际功能与<code>points.foreach(p => {body})</code>完全一致。
 </p>
 <p>
 	除了我们刚才提到过的<code>for (i &lt;- 1 to 10)</code>这种调用方法外，你还可以使用<code>for (i &lt;- 1 until 10)</code>。<code>until</code>
@@ -575,6 +578,22 @@ for (i &lt;- 0 to 1; c &lt;- "Hello") yield (c + i).toChar
 // 将生成 Vector('H', 'e', 'l', 'l', 'o', 'I', 'f', 'm', 'm', 'p')
 </pre>
 <p>这样的循环被称为for推导式（for comprehension），其生成的集合与<code>for</code>语句内的第一个生成器是类型兼容的。</p>
+<p>
+	之前我们了解到，在Scala中<code>for</code>关键字实现的功能本质上只是一个语法糖，真正实现这种功能的是<code>scala.collection.TraversableLike</code>的<code>foreach</code>方法。
+	通过反编译并将<code>Serializable</code>对象重新翻译为Scala匿名函数，上述代码就会成为这个样子：
+</p>
+<pre class="brush: scala">
+"Hello".foreach( c => {
+	(0 to 1).map( i => { c + i } )
+})
+
+(0 to 1).foreach( i => {
+	"Hello".map( c => { c + i } )
+})
+</pre>
+<p>
+	这样其实就能理解，为什么推导式生成的集合会与第一个生成器类型兼容了。
+</p>
 
 <h2 class="jump">结语</h2>
 <p>
