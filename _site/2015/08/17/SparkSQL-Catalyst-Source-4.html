@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/default.css" rel="stylesheet">
+	<link href="/css/post.css" rel="stylesheet">
+    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+    
+    <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
+    <link href="/css/syntaxhighlighters/shCore.css" rel="stylesheet" type="text/css" />
+    <link href="/css/syntaxhighlighters/shThemeDefault.css" rel="stylesheet" type="text/css" />
+	
+	<link rel="shortcut icon" href="/img/favicon.ico" >
+    
+    <title>Spark Catalyst 源码解析：Analyzer与Optimizer - Robert Peng</title>
+</head>
+<body>
+    <div id="main_wrapper">
+    <div id="banner_wrapper">
+    <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
+	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
+    </div>
+    <div id="content_wrapper">
+        <div id="right_wrapper" style="margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
+            <ul id="JumpList">
+                <li><h4>跳转目录</h4></li>
+            </ul>
+        </div>
+		<div id="left_wrapper">
+			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">Spark Catalyst 源码解析：Analyzer与Optimizer</p>
+			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 17 Aug 2015</p>
+			<!-- content starts here -->
+			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
+
+<h2 class="jump">前情提要</h2>
+<p>
+	在<a href="/2015/08/17/SparkSQL-Catalyst-Source-3.html">上一篇文章</a>中，
+	我们详细了解了SparkSQL中特殊的TreeNode们以及核心类LogicalPlan，完整理解了整个执行计划树的组成。
+</p>
+<p>
+	在这篇文章中，我将开始讲解Unresolved Logical Plan如何通过Analyzer转变为Analyzed Logical Plan，
+	再通过Optimizer转变为Optimized Logical Plan。
+</p>
+<p class="center"><img style="max-width: 100%" alt="" src="/img/Spark-Catalyst@9.jpg"></p>
+<h2 class="jump">Analyzer</h2>
+<p>我们先来看看<code>SQLContext</code>为我们默认设置的analyzer吧：</p>
+<pre class="brush: scala">
+@transient
+protected[sql] lazy val analyzer: Analyzer =
+  new Analyzer(catalog, functionRegistry, conf) {
+    override val extendedResolutionRules =
+      ExtractPythonUdfs ::
+      sources.PreInsertCastAndRename ::
+      Nil
+
+    override val extendedCheckRules = Seq(
+      sources.PreWriteCheck(catalog)
+    )
+  }
+</pre>
+<p>可以看到，<code>SQLContext</code>通过匿名内部类的方式创建了一个<code>Analyzer</code>的子类实例。那我们就去看看<code>Analyzer</code>吧：</p>
+<pre class="brush: scala">
+/**
+ * Provides a logical query plan analyzer, which translates [[UnresolvedAttribute]]s and
+ * [[UnresolvedRelation]]s into fully typed objects using information in a schema [[Catalog]] and
+ * a [[FunctionRegistry]].
+ */
+class Analyzer(
+    catalog: Catalog,
+    registry: FunctionRegistry,
+    conf: CatalystConf,
+    maxIterations: Int = 100)
+  extends RuleExecutor[LogicalPlan] with HiveTypeCoercion with CheckAnalysis {
+
+  // ...
+
+  val fixedPoint = FixedPoint(maxIterations)
+
+  /**
+   * Override to provide additional rules for the "Resolution" batch.
+   */
+  val extendedResolutionRules: Seq[Rule[LogicalPlan]] = Nil
+
+  lazy val batches: Seq[Batch] = Seq(
+    Batch("Substitution", fixedPoint,
+      CTESubstitution ::
+      WindowsSubstitution ::
+      Nil : _*),
+    Batch("Resolution", fixedPoint,
+      ResolveRelations ::
+      ResolveReferences ::
+      ResolveGroupingAnalytics ::
+      ResolveSortReferences ::
+      ResolveGenerate ::
+      ResolveFunctions ::
+      ExtractWindowExpressions ::
+      GlobalAggregates ::
+      UnresolvedHavingClauseAttributes ::
+      TrimGroupingAliases ::
+      typeCoercionRules ++
+      extendedResolutionRules : _*)
+  )
+
+  object CTESubstitution extends Rule[LogicalPlan] {
+	// ...
+  }
+
+  object WindowsSubstitution extends Rule[LogicalPlan] {
+    // ...
+  }
+
+  object TrimGroupingAliases extends Rule[LogicalPlan] {
+    // ...
+  }
+
+  object ResolveGroupingAnalytics extends Rule[LogicalPlan] {
+    // ...
+  }
+
+  object ResolveRelations extends Rule[LogicalPlan] {
+    // ...
+  }
+
+  object ResolveReferences extends Rule[LogicalPlan] {
+    // ...
+  }
+
+  object ResolveSortReferences extends Rule[LogicalPlan] {
+    // ...
+  }
+
+  object ResolveFunctions extends Rule[LogicalPlan] {
+    // ...
+  }
+
+  object GlobalAggregates extends Rule[LogicalPlan] {
+    // ...
+  }
+
+  object UnresolvedHavingClauseAttributes extends Rule[LogicalPlan] {
+    // ...
+  }
+
+  object ResolveGenerate extends Rule[LogicalPlan] {
+	// ...
+  }
+
+  object ExtractWindowExpressions extends Rule[LogicalPlan] {
+    // ...
+  }
+}
+
+object EliminateSubQueries extends Rule[LogicalPlan] {
+  // ...
+}
+</pre>
+<p>
+	关于上述这个类，我们可以把目光放在如下几个点。首先<code>batches</code>变量内包含了两个<code>Batch</code>实例，分别被命名为了"Substitution"和"Resolvation"。
+	创建<code>Batch</code>实例的时候传入了大量的<code>Rule</code>子类，而<code>Analyzer</code>本身继承自<code>RuleExecutor</code>。
+</p>
+<h2 class="jump">RuleExecutor</h2>
+<p>那么我们不妨先来看一下<code>RuleExecutor</code>：</p>
+<pre class="brush: scala">
+abstract class RuleExecutor[TreeType &lt;: TreeNode[_]] extends Logging {
+
+  // 执行策略，定义了maxIterations。
+  // 我们知道Optimize的过程需要不断地重复迭代，Analyze的过程也一样。
+  // 由此可见Analyze迭代停止的条件有两个：
+  // 1. 达到Strategy指定的最大迭代数，或
+  // 2. 达到fixed point（不动点，在数学中即指满足f(x) = x的x）
+  abstract class Strategy { def maxIterations: Int }
+
+  case object Once extends Strategy { val maxIterations = 1 }
+  
+  case class FixedPoint(maxIterations: Int) extends Strategy
+
+  // 之前的Batch类出现在了这里
+  protected case class Batch(name: String, strategy: Strategy, rules: Rule[TreeType]*)
+
+  // 由子类定义的需要执行的Rule们
+  protected val batches: Seq[Batch]
+
+  // 在传入的plan上迭代地执行由子类定义的batch
+  def execute(plan: TreeType): TreeType = {
+    var curPlan = plan
+
+    batches.foreach { batch =>
+      val batchStartPlan = curPlan
+      var iteration = 1
+      var lastPlan = curPlan
+      var continue = true
+
+      // Run until fix point (or the max number of iterations as specified in the strategy.
+      while (continue) {
+	    // 对curPlan顺序执行一次当前batch的所有rule
+        curPlan = batch.rules.foldLeft(curPlan) {
+          case (plan, rule) =>
+            val result = rule(plan)
+            if (!result.fastEquals(plan)) {
+              logTrace(
+                s"""
+                  |=== Applying Rule ${rule.ruleName} ===
+                  |${sideBySide(plan.treeString, result.treeString).mkString("\n")}
+                """.stripMargin)
+            }
+
+            result
+        }
+        iteration += 1
+		
+		// 根据最大迭代数或是否达到不动点来确定是否要继续迭代
+        if (iteration > batch.strategy.maxIterations) {
+          // Only log if this is a rule that is supposed to run more than once.
+          if (iteration != 2) {
+            logInfo(s"Max iterations (${iteration - 1}) reached for batch ${batch.name}")
+          }
+          continue = false
+        }
+        if (curPlan.fastEquals(lastPlan)) {
+          logTrace(
+            s"Fixed point reached for batch ${batch.name} after ${iteration - 1} iterations.")
+          continue = false
+        }
+        lastPlan = curPlan
+		
+		// 进入下一轮迭代
+      }
+
+      if (!batchStartPlan.fastEquals(curPlan)) {
+        logDebug(
+          s"""
+          |=== Result of Batch ${batch.name} ===
+          |${sideBySide(plan.treeString, curPlan.treeString).mkString("\n")}
+        """.stripMargin)
+      } else {
+        logTrace(s"Batch ${batch.name} has no effect.")
+      }
+	  
+	  // 进入下一个batch
+    }
+
+    curPlan
+  }
+}
+</pre>
+<p>
+	所以，<code>RuleExecutor</code>这个类的主要功能，在于<code>execute</code>函数可对传入的plan迭代地执行子类指定的rule，
+	不同组的rule通过分配在不同的batch中以及放置的位置来区分执行的先后次序。
+</p>
+<p>我们再看回<code>Analyzer</code>：</p>
+<pre class="brush: scala">
+// SQLContext.scala
+protected[sql] lazy val analyzer: Analyzer =
+  new Analyzer(catalog, functionRegistry, conf) {
+    override val extendedResolutionRules =
+      ExtractPythonUdfs ::
+      sources.PreInsertCastAndRename ::
+      Nil
+
+    override val extendedCheckRules = Seq(
+      sources.PreWriteCheck(catalog)
+    )
+  }
+
+// Analyzer.scala
+  
+// SQLContext在创建时放入了Analysis过程需要的Catalog和FunctionRegistry
+class Analyzer(
+    catalog: Catalog,
+    registry: FunctionRegistry,
+    conf: CatalystConf,
+    maxIterations: Int = 100)  // 最大迭代数取默认值100
+  extends RuleExecutor[LogicalPlan] with HiveTypeCoercion with CheckAnalysis {
+
+  def resolver: Resolver = {
+    if (conf.caseSensitiveAnalysis) {
+      caseSensitiveResolution
+    } else {
+      caseInsensitiveResolution
+    }
+  }
+
+  // 生成strategy
+  val fixedPoint = FixedPoint(maxIterations)
+
+  // 在SQLContext的匿名内部类中被重载，额外放入了两个rule
+  val extendedResolutionRules: Seq[Rule[LogicalPlan]] = Nil
+
+  // 需要执行的rule们，同时在第二个batch中放入了在SQLContext的匿名内部类中指定的两个rule
+  lazy val batches: Seq[Batch] = Seq(
+    Batch("Substitution", fixedPoint,
+      CTESubstitution ::
+      WindowsSubstitution ::
+      Nil : _*),
+    Batch("Resolution", fixedPoint,
+      ResolveRelations ::
+      ResolveReferences ::
+      ResolveGroupingAnalytics ::
+      ResolveSortReferences ::
+      ResolveGenerate ::
+      ResolveFunctions ::
+      ExtractWindowExpressions ::
+      GlobalAggregates ::
+      UnresolvedHavingClauseAttributes ::
+      TrimGroupingAliases ::
+      typeCoercionRules ++
+      extendedResolutionRules : _*)
+  )
+  
+  // ...
+}
+</pre>
+<p>接下来，我们继续往下挖掘，看一下<code>Rule</code>类：</p>
+<pre class="brush: scala">
+abstract class Rule[TreeType &lt;: TreeNode[_]] extends Logging {
+
+  // Rule的名字。默认为类的类名
+  val ruleName: String = {
+    val className = getClass.getName
+    if (className endsWith "$") className.dropRight(1) else className
+  }
+
+  // 子类通过重载Rule的apply函数来实现其逻辑
+  def apply(plan: TreeType): TreeType
+}
+</pre>
+<p>
+	本文就不对每个<code>Rule</code>子类都进行讲解了，各位可以自行观看。你们只要知道真正起作用的是它的<code>apply</code>函数，
+	我想看起来应该也是很轻松的事。
+</p>
+<h2 class="jump">Optimizer</h2>
+<p class="center"><img style="max-width: 100%" alt="" src="/img/Spark-Catalyst@10.jpg"></p>
+<p>
+	实际上，在学习过<code>Analyzer</code>的执行机制以后，<code>Optimizer</code>就是水到渠成了。
+	因为<code>Optimizer</code>同样继承了<code>RuleExecutor</code>：
+</p>
+<pre class="brush: scala">
+// SQLContext.scala
+protected[sql] lazy val optimizer: Optimizer = DefaultOptimizer
+
+// Optimizer.scala
+abstract class Optimizer extends RuleExecutor[LogicalPlan]
+
+object DefaultOptimizer extends Optimizer {
+  val batches =
+    // SubQueries are only needed for analysis and can be removed before execution.
+    Batch("Remove SubQueries", FixedPoint(100),
+      EliminateSubQueries) ::
+    Batch("Operator Reordering", FixedPoint(100),
+      UnionPushdown,
+      CombineFilters,
+      PushPredicateThroughProject,
+      PushPredicateThroughJoin,
+      PushPredicateThroughGenerate,
+      ColumnPruning,
+      ProjectCollapsing,
+      CombineLimits) ::
+    Batch("ConstantFolding", FixedPoint(100),
+      NullPropagation,
+      OptimizeIn,
+      ConstantFolding,
+      LikeSimplification,
+      BooleanSimplification,
+      SimplifyFilters,
+      SimplifyCasts,
+      SimplifyCaseConversionExpressions) ::
+    Batch("Decimal Optimizations", FixedPoint(100),
+      DecimalAggregates) ::
+    Batch("LocalRelation", FixedPoint(100),
+      ConvertToLocalRelation) :: Nil
+}
+</pre>
+<p>完全同理，相比之下<code>Optimizor</code>的执行器更加简单。</p>
+
+<h2 class="jump">总结</h2>
+<p>
+	在本文中，我们学习了<code>Analyzer</code>和<code>Optimizer</code>的执行方式，了解到它们都利用了<code>RuleExecutor</code>，
+	区别仅在于在重载的过程中设定了不同的<code>Rule</code>。可以说是用同样的逻辑完成了两件事。
+</p>
+<p>
+	在本文中我并未详细介绍<code>Rule</code>实现类，并不是因为它们不重要。实际上它们才是Analysis和Optimization过程的主角。在了解到
+	<code>Rule</code>子类的执行入口是<code>apply</code>函数后，相信各位在阅读<code>Rule</code>实现类的过程中应该不会遇到太大的问题。
+</p>
+<p>下一次，我们将继续大步向前，开始探究SparkSQL如何根据Optimized Logical Plan生成Physical Plan。敬请期待。</p>
+			<!-- and ends here -->
+			<div class="blank" style="height: 80px"></div>
+			<!-- Disqus Block starts here -->
+			<div id="disqus_thread"></div>
+			<script type="text/javascript">
+				/* * * CONFIGURATION VARIABLES * * */
+				var disqus_shortname = 'robertpsblog';
+				var disqus_identifier = 'Spark Catalyst 源码解析：Analyzer与Optimizer';
+    
+				/* * * DON'T EDIT BELOW THIS LINE * * */
+				(function() {
+					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+				})();
+			</script>
+			<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+			<!-- and ends here -->
+		</div>
+    </div>
+    </div>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/mrdai.js"></script>
+    <script>SyntaxHighlighter.all()</script>
+</body>
+</html>
