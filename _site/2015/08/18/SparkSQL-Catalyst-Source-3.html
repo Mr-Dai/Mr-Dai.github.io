@@ -32,7 +32,7 @@
         </div>
 		<div id="left_wrapper">
 			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">Spark Catalyst 源码解析：LogicalPlan</p>
-			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 17 Aug 2015</p>
+			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 18 Aug 2015</p>
 			<!-- content starts here -->
 			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
@@ -209,7 +209,7 @@ trait UnaryNode[BaseType &lt;: TreeNode[BaseType]] {
 abstract class QueryPlan[PlanType &lt;: TreeNode[PlanType]] extends TreeNode[PlanType] {
   self: PlanType with Product =>
   
-  // 返回出现在该查询计划操作符中的所有表达式（Expression）
+  // 返回该查询计划包含的所有表达式（Expression）
   def expressions: Seq[Expression] = {
     productIterator.flatMap {
       case e: Expression => e :: Nil

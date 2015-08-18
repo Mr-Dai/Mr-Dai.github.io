@@ -1,0 +1,364 @@
+---
+layout: posts
+title: Spark Catalyst 源码解析：Planner
+author: Robert Peng
+---
+
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
+
+<h2 class="jump">前情提要</h2>
+<p>
+	在<a href="/2015/08/18/SparkSQL-Catalyst-Source-4.html">上一篇文章</a>中，
+	我们详细了解了SparkSQL如何利用Analyzer和Optimizer，一步一步将Unresolved Logical Plan变为Analyzed Logical Plan
+	再变为Optimized Logical Plan。到了这一步，Logical Plan的生命历程就走到了终点。
+</p>
+<p>
+	在这篇文章中，我将开始讲解SparkSQL如何通过Planner将Optimized Logical Plan变为Physical Plan。
+</p>
+<p class="center"><img style="max-width: 100%" alt="" src="/img/Spark-Catalyst@11.jpg"></p>
+<h2 class="jump">SparkPlanner</h2>
+<p>
+	到了这一步，我们就不能期待Planner和Optimizer他们一样继承自<code>RuleExecutor</code>了。
+	为了了解这个过程的入口，我们先回到之前提到过的<code>SQLContext#QueryExecution</code>：
+</p>
+<pre class="brush: scala">
+lazy val optimizedPlan: LogicalPlan = optimizer.execute(withCachedData)
+
+// 生成PhysicalPlan
+// Optimized Logical Plan -> Physical Plan
+lazy val sparkPlan: SparkPlan = {
+  SparkPlan.currentContext.set(self)
+  planner.plan(optimizedPlan).next()
+}
+</pre>
+<p>总结下来就是这样的一个流程：</p>
+<p><code>optimizedPlan -> planner.plan -> sparkPlan</code></p>
+<p>由此一来，我们首先锁定了入口方法<code>planner.plan</code>：
+<pre class="brush: scala">
+// SQLContext.scala
+
+protected[sql] val planner = new SparkPlanner
+
+protected[sql] class SparkPlanner extends SparkStrategies {
+  // 从外部的SQLContext实例中导入相关设定参数
+  val sparkContext: SparkContext = self.sparkContext
+  val sqlContext: SQLContext = self
+  def codegenEnabled: Boolean = self.conf.codegenEnabled
+  def unsafeEnabled: Boolean = self.conf.unsafeEnabled
+  def numPartitions: Int = self.conf.numShufflePartitions
+
+  def strategies: Seq[Strategy] =
+    experimental.extraStrategies ++ (
+    DataSourceStrategy ::
+    DDLStrategy ::
+    TakeOrdered ::
+    HashAggregation ::
+    LeftSemiJoin ::
+    HashJoin ::
+    InMemoryScans ::
+    ParquetOperations ::
+    BasicOperators ::
+    CartesianProduct ::
+    BroadcastNestedLoopJoin :: Nil)
+
+  // ...
+} 
+</pre>
+<p>
+	我们这次看到了一个<code>strategies</code>变量，其形式与之前在<code>Analyzer</code>和<code>Optimizer</code>里看到的<code>batches</code>变量十分相似。
+	除此之外，我们并未看到<code>SparkPlanner</code>实现<code>plan</code>方法。这并不奇怪，毕竟<code>Analyzer</code>和<code>Optimizer</code>也没有实现<code>execute</code>方法。
+	那我们先去看看<code>SparkPlanner</code>的父类<code>SparkStrategies</code>：
+</p>
+<p class="center"><img style="max-width: 100%" alt="" src="/img/Spark-Catalyst@12.jpg"></p>
+<pre class="brush: scala">
+private[sql] abstract class SparkStrategies extends QueryPlanner[SparkPlan] {
+  self: SQLContext#SparkPlanner =>
+
+  object LeftSemiJoin extends Strategy with PredicateHelper {
+    // ...
+  }
+  
+  object HashJoin extends Strategy with PredicateHelper {
+	// ...
+  }
+
+  object HashAggregation extends Strategy {
+    // ...
+  }
+
+  object BroadcastNestedLoopJoin extends Strategy {
+    // ...
+  }
+
+  object CartesianProduct extends Strategy {
+    // ...
+  }
+
+  protected lazy val singleRowRdd =
+    sparkContext.parallelize(Seq(new GenericRow(Array[Any]()): Row), 1)
+
+  object TakeOrdered extends Strategy {
+    // ...
+  }
+
+  object ParquetOperations extends Strategy {
+    // ...
+  }
+
+  object InMemoryScans extends Strategy {
+    // ...
+  }
+
+  object BasicOperators extends Strategy {
+    // ...
+  }
+
+  object DDLStrategy extends Strategy {
+    // ...
+  }
+}
+</pre>
+<p>
+	似乎<code>SparkStrategies</code>并未定义任何函数，倒是定义了大量的<code>Strategy</code>子类，这些子类都被应用在了<code>SQLContext#SparkPlanner</code>中。
+	那么看来，这个类确实是名符其实的<code>SparkStrategies</code>。我们继续去看它的父类吧！
+</p>
+<p class="center"><img style="max-width: 100%" alt="" src="/img/Spark-Catalyst@13.jpg"></p>
+
+<pre class="brush: scala">
+// 可以看到Strategy与之前的Rule很类似，差别只在与apply函数返回的是Seq[PhysicalPlan]
+abstract class GenericStrategy[PhysicalPlan &lt;: TreeNode[PhysicalPlan]] extends Logging {
+  def apply(plan: LogicalPlan): Seq[PhysicalPlan]
+}
+
+// 相对的，QueryPlanner也和RuleExecutor十分相似
+abstract class QueryPlanner[PhysicalPlan &lt;: TreeNode[PhysicalPlan]] {
+  /** A list of execution strategies that can be used by the planner */
+  def strategies: Seq[GenericStrategy[PhysicalPlan]]
+
+  // 返回一个占位符。该占位符将由QueryPlanner使用其它可用的Strategy替换掉
+  protected def planLater(plan: LogicalPlan) = this.plan(plan).next()
+
+  def plan(plan: LogicalPlan): Iterator[PhysicalPlan] = {
+    // Lazy地在LogicalPlan上apply所有Strategy
+    val iter = strategies.view.flatMap(_(plan)).toIterator
+    assert(iter.hasNext, s"No plan for $plan")
+    iter
+  }
+}
+</pre>
+<p class="center"><img style="max-width: 100%" alt="" src="/img/Spark-Catalyst@14.jpg"></p>
+<p>
+	从执行引擎这边能看到的似乎就只有这些了，我们甚至无法知道模板参数<code>PhysicalPlan</code>具体会是什么类型。
+	通过查看之前出现过的<code>Strategy</code>类型，会在<code>sql</code>的包对象中发现这样一句：
+</p>
+<pre class="brush: scala">
+@DeveloperApi
+type Strategy = org.apache.spark.sql.catalyst.planning.GenericStrategy[SparkPlan]
+</pre>
+<p>至此我们就了解到，PhysicalPlan树结点的类型为<code>SparkPlan</code>。于是我们查看它的源代码：</p>
+<pre class="brush: scala">
+object SparkPlan {
+  protected[sql] val currentContext = new ThreadLocal[SQLContext]()
+}
+
+// 与LogicalPlan相同，继承自QueryPlan
+abstract class SparkPlan extends QueryPlan[SparkPlan] with Logging with Serializable {
+  self: Product =>
+
+  @transient
+  protected[spark] final val sqlContext = SparkPlan.currentContext.get()
+  protected def sparkContext = sqlContext.sparkContext
+
+  // sqlContext will be null when we are being deserialized on the slaves.  In this instance
+  // the value of codegenEnabled will be set by the desserializer after the constructor has run.
+  val codegenEnabled: Boolean = if (sqlContext != null) {
+    sqlContext.conf.codegenEnabled
+  } else {
+    false
+  }
+
+  /** Overridden make copy also propogates sqlContext to copied plan. */
+  override def makeCopy(newArgs: Array[AnyRef]): this.type = {
+    SparkPlan.currentContext.set(sqlContext)
+    super.makeCopy(newArgs)
+  }
+
+  // 定义计算结果在各个节点上的partition规则
+  def outputPartitioning: Partitioning = UnknownPartitioning(0) // TODO: WRONG WIDTH!
+
+  // 定义输入数据的若干个节点分布要求
+  def requiredChildDistribution: Seq[Distribution] =
+    Seq.fill(children.size)(UnspecifiedDistribution)
+
+  // 定义计算结果在各个节点上的排序规则
+  def outputOrdering: Seq[SortOrder] = Nil
+
+  // 定义输入数据的每个partition的若干个排序要求
+  def requiredChildOrdering: Seq[Seq[SortOrder]] = Seq.fill(children.size)(Nil)
+
+  // 在withScope内调用doExecute方法来得出结果
+  final def execute(): RDD[Row] = {
+    RDDOperationScope.withScope(sparkContext, nodeName, false, true) {
+      doExecute()
+    }
+  }
+
+  // 由子类重载该方法返回计算结果
+  protected def doExecute(): RDD[Row]
+
+  // execute + collect
+  def executeCollect(): Array[Row] = {
+    execute().mapPartitions { iter =>
+      val converter = CatalystTypeConverters.createToScalaConverter(schema)
+      iter.map(converter(_).asInstanceOf[Row])
+    }.collect()
+  }
+
+  // execute + take(n)
+  def executeTake(n: Int): Array[Row] = {
+    if (n == 0) {
+      return new Array[Row](0)
+    }
+
+	// 先获得代表完整结果的RDD
+    val childRDD = execute().map(_.copy())
+
+	// result buffer
+    val buf = new ArrayBuffer[Row]
+	// partition总数
+    val totalParts = childRDD.partitions.length
+	// 已扫描的partition数
+    var partsScanned = 0
+    while (buf.size &lt; n && partsScanned &lt; totalParts) {
+      // 本次迭代尝试扫描的partition数
+      var numPartsToTry = 1
+      if (partsScanned > 0) { // 从第二次迭代开始
+        if (buf.size == 0) { // 如果第一次迭代完全没有获取到结果，直接扫描剩下所有partition
+          numPartsToTry = totalParts - 1
+        } else { // 1.5 * n / (buf.size / partsScanned)
+          numPartsToTry = (1.5 * n * partsScanned / buf.size).toInt
+        }
+      }
+      numPartsToTry = math.max(0, numPartsToTry)  // guard against negative num of partitions
+
+	  // 剩余所需结果数
+      val left = n - buf.size
+	  // 即将进行尝试的partition集
+      val p = partsScanned until math.min(partsScanned + numPartsToTry, totalParts)
+      val sc = sqlContext.sparkContext
+      val res =
+        sc.runJob(childRDD, (it: Iterator[Row]) => it.take(left).toArray, p, allowLocal = false)
+
+	  // 将结果放入buf
+      res.foreach(buf ++= _.take(n - buf.size))
+      partsScanned += numPartsToTry
+    }
+
+	// 改变结果类型并返回。此步同takeCollect
+    val converter = CatalystTypeConverters.createToScalaConverter(schema)
+    buf.toArray.map(converter(_).asInstanceOf[Row])
+  }
+
+  // ...
+  
+}
+</pre>
+<p>
+	真是万万没想到，<code>SparkPlan</code>与<code>LogicalPlan</code>同样继承自<code>QueryPlan</code>，但仔细想想确实很合理。
+	通过观察<code>SparkPlan</code>类便能发现，其实现类需要通过重载<code>doExecute</code>方法来定义自己的计算逻辑。在了解到这个主要入口以后，
+	剩下的问题就变得轻松很多了。
+</p>
+<p class="center"><img style="max-width: 100%" alt="" src="/img/Spark-Catalyst@15.jpg"></p>
+<p>但实际上，有一个难题我们并没有解决，有可能各位还没注意到这个问题。</p>
+<pre class="brush: scala">
+abstract class QueryPlanner[PhysicalPlan &lt;: TreeNode[PhysicalPlan]] {
+  // ...
+
+  // 返回一个占位符。该占位符将由QueryPlanner使用其它可用的Strategy替换掉
+  protected def planLater(plan: LogicalPlan) = this.plan(plan).next()
+
+  def plan(plan: LogicalPlan): Iterator[PhysicalPlan] = {
+    // Lazy地在LogicalPlan上apply所有Strategy
+    val iter = strategies.view.flatMap(_(plan)).toIterator
+    assert(iter.hasNext, s"No plan for $plan")
+    iter
+  }
+}
+</pre>
+<p>
+	<code>plan</code>函数的<code>iter = strategies.view.flatMap(_(plan)).toIterator</code>这句是不是有点问题？为什么<code>planLater</code>那个实现返回的是一个占位符？
+	这个问题我们先不着急回答，我们先看看<code>Strategy</code>实现类是怎么使用<code>planLater</code>的：
+</p>
+<pre class="brush: scala">
+// 笛卡尔积，由SQL语句的JOIN操作触发
+object CartesianProduct extends Strategy {
+  def apply(plan: LogicalPlan): Seq[SparkPlan] = plan match {
+    case logical.Join(left, right, _, None) =>
+      execution.joins.CartesianProduct(planLater(left), planLater(right)) :: Nil
+    case logical.Join(left, right, Inner, Some(condition)) =>
+      execution.Filter(condition,
+        execution.joins.CartesianProduct(planLater(left), planLater(right))) :: Nil
+    case _ => Nil
+  }
+}
+
+// 注意：这个类属于execution.joins包，放在这里只是方便参考
+case class CartesianProduct(left: SparkPlan, right: SparkPlan) extends BinaryNode {
+  override def output: Seq[Attribute] = left.output ++ right.output
+
+  protected override def doExecute(): RDD[Row] = {
+    val leftResults = left.execute().map(_.copy())
+    val rightResults = right.execute().map(_.copy())
+
+    leftResults.cartesian(rightResults).mapPartitions { iter =>
+      val joinedRow = new JoinedRow
+      iter.map(r => joinedRow(r._1, r._2))
+    }
+  }
+}
+</pre>
+<p>
+	我们注意到，在<code>object CartesianProduct</code>的<code>apply</code>中，当遇到标记为<code>Join</code>的Logical Plan时，它的做法是先对左右子树分别调用<code>planLater</code>得到结果后，
+	再构造<code>execution.joins.CartesianProduct</code>。而<code>planLater</code>又会调用<code>plan</code>，这意味着每一次调用<code>planLater</code>实际上都是一次递归，这是一个先序遍历。
+	<code>planLater</code>的实现是<code>this.plan(plan).next()</code>，意味着即使strategies中可应用于传入子树的策略不止一个，返回的Physical Plan数也可能不止一个（注意<code>Strategy</code>的<code>apply</code>函数返回的是个<code>Seq</code>），
+	但<code>planLater</code>都只取第一个。
+</p>
+<p>我们回到最初启动plan过程的入口：</p>
+<pre class="brush: scala">
+lazy val sparkPlan: SparkPlan = {
+  SparkPlan.currentContext.set(self)
+  planner.plan(optimizedPlan).next()
+}
+</pre>
+<p>
+	这里就是这个先序遍历开始的地方，同样使用了和<code>planLater</code>一样的调用方式，这就证明了我的猜想。这同时说明，尽管Spark可以为同一个Logical Plan生成多个Physical Plan，
+	但本该在这些Physical Plan中选出最低代价执行计划的功能并未实现。在<code>LogicalPlan</code>中我们有看到过疑似要用于cost-based优化的<code>Statistics</code>变量，但在Physical Plan这边实际上我们并未见到它的身影，
+	而且<code>Statistics</code>类本身的设计也过于简单（它是一个只包含了一个<code>BigInt</code>变量的case class，并未继承任何类），显得有些许儿戏。
+</p>
+<p>
+	但这毕竟是不能怪SparkSQL的，查询代价受环境的影响很大，比起rule-based优化来说，cost-based太过不稳定，实现起来也复杂很多。不过不管怎么说，SparkSQL仍然留下了可用于实现cost-based优化的接口，
+	也许有朝一日这个功能真的会实现。
+</p>
+<h2 class="jump">toRDD</h2>
+<p>我们接着往下走：</p>
+<pre class="brush: scala">
+lazy val executedPlan: SparkPlan = prepareForExecution.execute(sparkPlan)
+
+// 执行并返回结果
+lazy val toRdd: RDD[Row] = executedPlan.execute()
+</pre>
+<p>
+	上文中出现的<code>prepareForExecution</code>实际上是一个<code>RuleExecutor</code>的子类，它唯一的rule是<code>EnsureRequirements</code>，
+	它会确保输入数据的<code>Partitioning</code>满足<code>SparkPlan</code>中规定的childDistribution，如果不满足则会通过添加子结点等方式尝试修复。
+</p>
+<p>
+	最终，<code>toRDD</code>通过调用<code>SparkPlan</code>的<code>execute</code>方法，获取到计算结果。
+</p>
+<h2 class="jump">结语</h2>
+<p>
+	至此，我们大概了解了SparkSQL是如何处理用户的SQL语句，如何一步一步把它解析成Logical Plan再解析成Physical Plan再变成结果RDD。
+	如此粗略的介绍实在很难让你就此成为SparkSQL大师，因为Catalyst还有相当多的代码量用于定义优化规则即Logical/Physical Plan转换规则。
+	以后我会考虑出一些进阶篇来讲讲这之中一些进阶级的细节实现，敬请期待咯。
+</p>

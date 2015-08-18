@@ -1,46 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/default.css" rel="stylesheet">
-	<link href="/css/post.css" rel="stylesheet">
-    <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
-    
-    <script type="text/javascript" src="/js/syntaxhighlighters/shCore.js"></script>
-    <link href="/css/syntaxhighlighters/shCore.css" rel="stylesheet" type="text/css" />
-    <link href="/css/syntaxhighlighters/shThemeDefault.css" rel="stylesheet" type="text/css" />
-	
-	<link rel="shortcut icon" href="/img/favicon.ico" >
-    
-    <title>Spark Catalyst 源码解析：Analyzer与Optimizer - Robert Peng</title>
-</head>
-<body>
-    <div id="main_wrapper">
-    <div id="banner_wrapper">
-    <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
-	<p style="margin-top:8px; color: #999999; font-size: 22px">Blog is how I learn.</p>
-    </div>
-    <div id="content_wrapper">
-        <div id="right_wrapper" style="margin-left: 10px; width: 30%; font-size:15px; line-height:25px;">
-            <ul id="JumpList">
-                <li><h4>跳转目录</h4></li>
-            </ul>
-        </div>
-		<div id="left_wrapper">
-			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">Spark Catalyst 源码解析：Analyzer与Optimizer</p>
-			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 17 Aug 2015</p>
-			<!-- content starts here -->
-			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
+---
+layout: posts
+title: Spark Catalyst 源码解析：Analyzer与Optimizer
+author: Robert Peng
+---
+
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
 
 <h2 class="jump">前情提要</h2>
 <p>
-	在<a href="/2015/08/17/SparkSQL-Catalyst-Source-3.html">上一篇文章</a>中，
+	在<a href="/2015/08/18/SparkSQL-Catalyst-Source-3.html">上一篇文章</a>中，
 	我们详细了解了SparkSQL中特殊的TreeNode们以及核心类LogicalPlan，完整理解了整个执行计划树的组成。
 </p>
 <p>
@@ -376,7 +346,7 @@ object DefaultOptimizer extends Optimizer {
       ConvertToLocalRelation) :: Nil
 }
 </pre>
-<p>完全同理，相比之下<code>Optimizor</code>的执行器更加简单。</p>
+<p>完全同理，相比之下<code>Optimizor</code>执行器更加简单。</p>
 
 <h2 class="jump">总结</h2>
 <p>
@@ -388,29 +358,3 @@ object DefaultOptimizer extends Optimizer {
 	<code>Rule</code>子类的执行入口是<code>apply</code>函数后，相信各位在阅读<code>Rule</code>实现类的过程中应该不会遇到太大的问题。
 </p>
 <p>下一次，我们将继续大步向前，开始探究SparkSQL如何根据Optimized Logical Plan生成Physical Plan。敬请期待。</p>
-			<!-- and ends here -->
-			<div class="blank" style="height: 80px"></div>
-			<!-- Disqus Block starts here -->
-			<div id="disqus_thread"></div>
-			<script type="text/javascript">
-				/* * * CONFIGURATION VARIABLES * * */
-				var disqus_shortname = 'robertpsblog';
-				var disqus_identifier = 'Spark Catalyst 源码解析：Analyzer与Optimizer';
-    
-				/* * * DON'T EDIT BELOW THIS LINE * * */
-				(function() {
-					var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-					dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-					(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-				})();
-			</script>
-			<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
-			<!-- and ends here -->
-		</div>
-    </div>
-    </div>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/mrdai.js"></script>
-    <script>SyntaxHighlighter.all()</script>
-</body>
-</html>

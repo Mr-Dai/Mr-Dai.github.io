@@ -179,7 +179,7 @@ trait UnaryNode[BaseType &lt;: TreeNode[BaseType]] {
 abstract class QueryPlan[PlanType &lt;: TreeNode[PlanType]] extends TreeNode[PlanType] {
   self: PlanType with Product =>
   
-  // 返回出现在该查询计划操作符中的所有表达式（Expression）
+  // 返回该查询计划包含的所有表达式（Expression）
   def expressions: Seq[Expression] = {
     productIterator.flatMap {
       case e: Expression => e :: Nil
