@@ -1,6 +1,6 @@
 ---
 layout: posts
-title: Spark Catalyst 源码解析：Planner
+title: Spark Catalyst 源码解析：Planner与RDD
 author: Robert Peng
 ---
 
@@ -15,7 +15,7 @@ author: Robert Peng
 	再变为Optimized Logical Plan。到了这一步，Logical Plan的生命历程就走到了终点。
 </p>
 <p>
-	在这篇文章中，我将开始讲解SparkSQL如何通过Planner将Optimized Logical Plan变为Physical Plan。
+	在这篇文章中，我将开始讲解SparkSQL如何通过Planner将Optimized Logical Plan变为Physical Plan，再变为结果RDD。
 </p>
 <p class="center"><img style="max-width: 100%" alt="" src="/img/Spark-Catalyst@11.jpg"></p>
 <h2 class="jump">SparkPlanner</h2>

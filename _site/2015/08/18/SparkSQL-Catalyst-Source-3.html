@@ -19,6 +19,8 @@
     <title>Spark Catalyst 源码解析：LogicalPlan - Robert Peng</title>
 </head>
 <body>
+	<script src="/js/bootstrap.min.js"></script>
+	<script src="/js/mrdai.js"></script>
     <div id="main_wrapper">
     <div id="banner_wrapper">
     <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
@@ -33,6 +35,7 @@
 		<div id="left_wrapper">
 			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">Spark Catalyst 源码解析：LogicalPlan</p>
 			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 18 Aug 2015</p>
+			<script>SyntaxHighlighter.all()</script>
 			<!-- content starts here -->
 			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
@@ -569,6 +572,8 @@ case class Intersect(left: LogicalPlan, right: LogicalPlan) extends BinaryNode {
 <p>
 	在这篇文章中，我们学习了以<code>LogicalPlan</code>类为核心的执行计划树数据结构。下一次我们将开始讲解Analyzer的相关代码，敬请期待。
 </p>
+<hr />
+<a href="/2015/08/18/SparkSQL-Catalyst-Source-4.html">Spark Catalyst 源码解析：Analyzer与Optimizer</a>
 
 			<!-- and ends here -->
 			<div class="blank" style="height: 80px"></div>
@@ -591,8 +596,5 @@ case class Intersect(left: LogicalPlan, right: LogicalPlan) extends BinaryNode {
 		</div>
     </div>
     </div>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/mrdai.js"></script>
-    <script>SyntaxHighlighter.all()</script>
 </body>
 </html>

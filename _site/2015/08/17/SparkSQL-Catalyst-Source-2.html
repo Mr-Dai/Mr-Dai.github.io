@@ -19,6 +19,8 @@
     <title>Spark Catalyst 源码解析：Parser - Robert Peng</title>
 </head>
 <body>
+	<script src="/js/bootstrap.min.js"></script>
+	<script src="/js/mrdai.js"></script>
     <div id="main_wrapper">
     <div id="banner_wrapper">
     <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
@@ -33,6 +35,7 @@
 		<div id="left_wrapper">
 			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">Spark Catalyst 源码解析：Parser</p>
 			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 17 Aug 2015</p>
+			<script>SyntaxHighlighter.all()</script>
 			<!-- content starts here -->
 			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
@@ -248,6 +251,10 @@ private[sql] class SparkSQLParser(fallback: String => LogicalPlan) extends Abstr
 	个人认为大多数人应该不会太在意Parser的原理，毕竟没什么人会需要去修改SparkSQL语句的解析逻辑，因此这一篇文章只能算是抛砖引玉，
 	真正的解析逻辑还有待你们自己去发掘。在下一篇文章中我会先为大家讲解一下LogicalPlan的数据结构，敬请期待。
 </p>
+<hr />
+<a href="/2015/08/18/SparkSQL-Catalyst-Source-3.html">Spark Catalyst 源码解析：LogicalPlan</a><br />
+<a href="/2015/08/19/SparkSQL-Catalyst-Adv-1.html">Spark Catalyst 进阶：Parser词素</a>
+
 			<!-- and ends here -->
 			<div class="blank" style="height: 80px"></div>
 			<!-- Disqus Block starts here -->
@@ -269,8 +276,5 @@ private[sql] class SparkSQLParser(fallback: String => LogicalPlan) extends Abstr
 		</div>
     </div>
     </div>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/mrdai.js"></script>
-    <script>SyntaxHighlighter.all()</script>
 </body>
 </html>

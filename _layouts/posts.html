@@ -19,6 +19,8 @@
     <title>{{ page.title }} - {{ page.author }}</title>
 </head>
 <body>
+	<script src="/js/bootstrap.min.js"></script>
+	<script src="/js/mrdai.js"></script>
     <div id="main_wrapper">
     <div id="banner_wrapper">
     <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
@@ -33,6 +35,7 @@
 		<div id="left_wrapper">
 			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">{{ page.title }}</p>
 			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By {{ page.author }}</em>, {{ page.date | date_to_string }}</p>
+			<script>SyntaxHighlighter.all()</script>
 			<!-- content starts here -->
 			{{ content }}
 			<!-- and ends here -->
@@ -56,8 +59,5 @@
 		</div>
     </div>
     </div>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/mrdai.js"></script>
-    <script>SyntaxHighlighter.all()</script>
 </body>
 </html>

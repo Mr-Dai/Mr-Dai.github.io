@@ -50,19 +50,6 @@ $.fn.pythonStyle = function () {
 	});
 }
 
-// 代码高亮主函数
-function codeStyle() {
-	var codeArea=$("pre[class='code'], code");
-	$.each(codeArea, function(n, value){
-		var lang=searchString(value.class.split(" "), "Lang-.*").split("-")[1];
-		switch (lang) {
-			case "HTML": case "XML": value.mlStyle(); break;
-			case "Java": case "JavaScript": case "C": case "C++": value.javaStyle(); break;
-			case "Python": value.pythonStyle(); break;
-		}
-	});
-}
-
 // 浏览器跳转
 function browserRedirect() {  
 	var sUserAgent = navigator.userAgent.toLowerCase();  
@@ -82,7 +69,6 @@ function browserRedirect() {
 $(document).ready(function(){
 //	browserRedirect();
 	branchJumpBinding();
-	codeStyle();
 	$("#post_list_container ul li").last().css("border-bottom-width", "0");
 	$("html").removeClass("ui-icon-loading");
 	$(".ui-loader").remove();

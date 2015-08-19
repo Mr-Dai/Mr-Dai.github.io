@@ -16,9 +16,11 @@
 	
 	<link rel="shortcut icon" href="/img/favicon.ico" >
     
-    <title>Spark Catalyst 源码解析：Planner - Robert Peng</title>
+    <title>Spark Catalyst 源码解析：Planner与RDD - Robert Peng</title>
 </head>
 <body>
+	<script src="/js/bootstrap.min.js"></script>
+	<script src="/js/mrdai.js"></script>
     <div id="main_wrapper">
     <div id="banner_wrapper">
     <h1 style="padding-bottom:0">Robert P.'s Blog</h1>
@@ -31,8 +33,9 @@
             </ul>
         </div>
 		<div id="left_wrapper">
-			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">Spark Catalyst 源码解析：Planner</p>
-			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 19 Aug 2015</p>
+			<p style="color: rgb(50, 93, 114); font-size:30px; font-weight:300; margin-top: 0; padding-top: 30px;">Spark Catalyst 源码解析：Planner与RDD</p>
+			<p style="font-size:15px; margin-top: 0; color: #BBB"><em>By Robert Peng</em>, 18 Aug 2015</p>
+			<script>SyntaxHighlighter.all()</script>
 			<!-- content starts here -->
 			<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
@@ -45,7 +48,7 @@
 	再变为Optimized Logical Plan。到了这一步，Logical Plan的生命历程就走到了终点。
 </p>
 <p>
-	在这篇文章中，我将开始讲解SparkSQL如何通过Planner将Optimized Logical Plan变为Physical Plan。
+	在这篇文章中，我将开始讲解SparkSQL如何通过Planner将Optimized Logical Plan变为Physical Plan，再变为结果RDD。
 </p>
 <p class="center"><img style="max-width: 100%" alt="" src="/img/Spark-Catalyst@11.jpg"></p>
 <h2 class="jump">SparkPlanner</h2>
@@ -400,7 +403,7 @@ lazy val toRdd: RDD[Row] = executedPlan.execute()
 			<script type="text/javascript">
 				/* * * CONFIGURATION VARIABLES * * */
 				var disqus_shortname = 'robertpsblog';
-				var disqus_identifier = 'Spark Catalyst 源码解析：Planner';
+				var disqus_identifier = 'Spark Catalyst 源码解析：Planner与RDD';
     
 				/* * * DON'T EDIT BELOW THIS LINE * * */
 				(function() {
@@ -414,8 +417,5 @@ lazy val toRdd: RDD[Row] = executedPlan.execute()
 		</div>
     </div>
     </div>
-    <script src="/js/bootstrap.min.js"></script>
-    <script src="/js/mrdai.js"></script>
-    <script>SyntaxHighlighter.all()</script>
 </body>
 </html>
