@@ -3,8 +3,6 @@ layout: posts
 title: Spark Catalyst 进阶：Parser词素
 author: Robert Peng
 ---
-<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
-<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
 
 <h2 class="jump">前言</h2>
@@ -210,6 +208,7 @@ protected case class Keyword(str: String) {
 	</td>
   </tr>
 </table>
+<p>语文不好，就不翻译了，这种等级的英语应该不算难懂。</p>
 <h2 class="jump">DDLParser</h2>
 <p>在了解过这些运算符的意思以后，我们就可以轻松愉快地阅读Spark定义的分词规则了。我们先从<code>DDLParser</code>开始：</p>
 <pre class="brush: scala">
@@ -785,6 +784,76 @@ class SqlParser extends AbstractSparkSQLParser with DataTypeParser {
     }
 }
 </pre>
+<p>总结下来，SQL语句与<code>LogicalPlan</code>实现类之间的完整对应关系是这样的：</p>
+<p>DDLParser：</p>
+<table class="table table-bordered table-striped">
+  <tr>
+	<td>CreateTableUsingAsSelect</td>
+	<td>
+		CREATE [TEMPORARY] TABLE [IF NOT EXISTS] <span style="color: grey">&lt;Table></span> [(<span style="color: grey">&lt;Columns></span>])] USING <span style="color: grey">&lt;ClassName></span>] [OPTIONS <span style="color: grey">&lt;Options></span>] AS ...
+	</td>
+  </tr>
+  <tr>
+	<td>CreateTableUsing</td>
+	<td>
+		CREATE [TEMPORARY] TABLE [IF NOT EXISTS] <span style="color: grey">&lt;Table></span> [(<span style="color: grey">&lt;Columns></span>])] USING <span style="color: grey">&lt;ClassName></span> [OPTIONS <span style="color: grey">&lt;Options></span>]
+	</td>
+  </tr>
+  <tr>
+	<td>DescribeCommand</td>
+	<td>
+		DESCRIBE [EXTENDED] [<span style="color: grey">&lt;Database></span>.]<span style="color: grey">&lt;Table></span>
+	</td>
+  </tr>
+  <tr>
+	<td>RefreshTable</td>
+	<td>
+		REFRESH TABLE [<span style="color: grey">&lt;Database></span>.]<span style="color: grey">&lt;Table></span>
+	</td>
+  </tr>
+</table>
+<p>SparkSQLParser：</p>
+<table class="table table-bordered table-striped">
+  <tr>
+	<td>CacheTableCommand</td>
+	<td>
+		CACHE [LAZY] TABLE <span style="color: grey">&lt;Table></span> [AS ...]
+	</td>
+  </tr>
+  <tr>
+	<td>UncacheTableCommand</td>
+	<td>
+		UNCACHE TABLE <span style="color: grey">&lt;Table></span>
+	</td>
+  </tr>
+  <tr>
+	<td>ClearCacheCommand</td>
+	<td>
+		CLEAR CACHE
+	</td>
+  </tr>
+  <tr>
+	<td>SetCommand</td>
+	<td>
+		SET <span style="color: grey">&lt;key></span>=<span style="color: grey">&lt;value></span>
+	</td>
+  </tr>
+  <tr>
+	<td>ShowTablesCommand</td>
+	<td>
+		SHOW TABLES [IN <span style="color: grey">&lt;Database></span>]
+	</td>
+  </tr>
+</table>
+<p>SqlParser：</p>
+<table class="table table-bordered table-striped">
+  <tr>
+	<td></td>
+	<td>
+		
+	</td>
+  </tr>
+</table>
 <h2 class="jump">总结</h2>
 <p>
 	在本篇文章中，我们通过更加仔细地阅读<code>DDLParser</code>、<code>SparkSQLParser</code>和<code>SqlParser</code>的源代码，
@@ -792,5 +861,5 @@ class SqlParser extends AbstractSparkSQLParser with DataTypeParser {
 	这里就不赘述了。
 </p>
 <p>
-	下一次我们将移步到Analyzer，去仔细剖析Analysis的执行细节。敬请期待。
+	下一次，我们将脱离SparkSQL常规执行工作流，开始探究SparkSQL的CacheManager，敬请期待。
 </p>
