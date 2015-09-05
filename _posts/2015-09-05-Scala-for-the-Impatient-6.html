@@ -1,0 +1,265 @@
+---
+layout: posts
+title: 《快学Scala》第6章：对象
+author: Robert Peng
+---
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
+
+<h2 class="jump">前情提要</h2>
+<p>
+	在上一期的<a href="/2015/09/04/Scala-for-the-Impatient-5.html">内容</a>中，我们学习到了Scala中类的基本使用。
+	今天我们就要更进一步，去学习Scala对象的基本使用。
+</p>
+<h2 class="jump">6.1 单例对象</h2>
+<p>
+	单例模式是Java等面向对象语言中极为常用的一种设计模式，主要是考虑到在Java中新对象的分配实际上是一个消耗十分巨大的过程，
+	同时也会加大GC的压力，更进一步地提高对系统性能的影响，因此我们在Java中更倾向于对对象进行复用，而不是只在一个很小的作用域中频繁创建和释放年轻代对象。
+	单例模式即指在整个系统或应用程序的生命周期中，某个类有且只会有唯一的一个对象，这样的对象就被称为单例对象。
+</p>
+<p>
+	在Java中，单例对象需要类维持对该对象的静态引用，同时也要考虑到多个线程同时访问构造器有可能会产生出多个实例，
+	因此可能还需要对构造方法进行同步。对于Java的单例模式实现无论是在GoF或者是别的什么设计模式书中必然都会给出标准的实现代码的，
+	这里就不再赘述。单例模式的实现简单而单调，每个单例类都要写这样一段代码实在是颇为麻烦，因此现在的企业级系统更多的依赖Spring之类的第三方框架来创建和管理单例对象。
+</p>
+<p>
+	而在Scala中，我们就不需要这些第三方框架了，因为Scala自己就有一个单例模式的实现捷径。在Scala中，
+	我们通过像声明类那样将<code>class</code>关键字改为<code>object</code>关键字即可声明一个单例对象。代码大致如下：
+</p>
+<pre class="brush: scala">
+object Accounts {
+  private var lastNumber = 0
+  def newUniqueNumber() = { lastNumber += 1; lastNumber }
+}
+</pre>
+<p>反编译的结果为：</p>
+<pre class="brush: java">
+public final class Accounts {
+
+    public static int newUniqueNumber() {
+        return Accounts$.MODULE$.newUniqueNumber();
+    }
+
+}
+
+public final class Accounts$ {
+
+    public static final Accounts$ MODULE$ = this;
+	static {
+		new Accounts$();
+	}
+	
+    private int lastNumber;
+
+    private Accounts$() {
+        lastNumber = 0;
+    }
+	
+    private int lastNumber() {
+        return lastNumber;
+    }
+
+    private void lastNumber_$eq(int x$1) {
+        lastNumber = x$1;
+    }
+
+    public int newUniqueNumber() {
+        lastNumber_$eq(lastNumber() + 1);
+        return lastNumber();
+    }
+}
+</pre>
+<p>
+	这里我们可以看到，<code>Accounts</code>单例对象实际上会产生出<code>Accounts</code>和<code>Accounts$</code>两个类。
+	真正的单例对象属于<code>Accounts$</code>类，它通过将构造器的调用放入到static代码块中，
+	以确保单例对象在<code>Accounts$</code>类被类加载器所加载时便自动生成。在这样的执行环境下，自然不需要考虑多线程带来的竞争问题。
+</p>
+<p>
+	而在<code>Accounts</code>类中我们看到它包含了<code>newUniqueNumber</code>方法的静态引用。这一点或许会让人感到迷惑，
+	为何会在<code>Accounts</code>类里保存一个方法。实际上，<code>Accounts</code>类将用于保存对<code>Accounts$</code>单例对象中所有public成员的静态引用。
+</p>
+<p>
+	在书上也有提到一点，单例对象的构造器在该对象第一次被使用时调用，意味着单例对象的创建实际上是Lazy的。但从上面反编译的代码来看，这倒不像是Lazy的。
+	实际上，<code>Accounts$</code>单例对象的Lazy创建依赖于类加载器对类的懒加载，类加载器确实会把类的初始化延后到类的第一次被使用，
+	而<code>static</code>代码块也直到类初始化时才会被调用。对于<code>Accounts</code>类，它所包含的静态引用本质上都只是一些方法，
+	方法不需要在类的初始化阶段为其进行初始化，因此<code>Accounts</code>类在它的链接阶段就已经全部加载完毕了，它的初始化阶段将不会进行任何动作，
+	如此便能达成<code>Accounts</code>类的Eager加载。
+</p>
+<p>
+	如此一来，我们便能够理解为何这样的设计能够确保单例对象被Lazy地创建，而<code>Accounts</code>这个类恐怕就充当着和Java单例模式标准实现中<code>getInstance</code>
+	方法相同的角色。
+</p>
+<h2 class="jump">6.2 伴生对象</h2>
+<p>
+	实际上我们对伴生对象（Companion Object）并不陌生，在第五章的讲解中，伴生对象便已经多次出现。伴生对象在Scala中有着举足轻重的地位，
+	因为我们看到由<code>object</code>声明的单例对象中的public的方法和变量实际上最终都变为了类似于静态方法和静态变量的存在。
+</p>
+<p>
+	在Java或C++中，你通常会用到既有实例方法又有静态方法的类，但在Scala中，你必须通过与类同名的伴生对象来达到同样的目的
+	（<code>static</code>关键字在Scala中已被移除）：
+</p>
+<pre class="brush: scala">
+class Account {
+	val id = Account.newUniqueNumber // 这里看起来像是调用了一个静态方法
+}
+
+object Account {	// Account类的伴生对象
+	private var lastNumber = 0
+	private def newUniqueNumber = { lastNumber += 1; lastNumber }
+}
+</pre>
+<p>反编译的结果为：</p>
+<pre class="brush: scala">
+public class Account {
+
+    private final int id;
+
+    public Account() {
+        id = Account$.MODULE$.Account$$newUniqueNumber();
+    }
+
+    public int id() {
+        return id;
+    }
+}
+
+public final class Account$ {
+
+    public static final Account$ MODULE$ = this;
+    static {
+        new Account$();
+    }
+	
+    private int lastNumber;
+    private Account$() {
+        lastNumber = 0;
+    
+
+    public int Account$$newUniqueNumber() {
+        lastNumber_$eq(lastNumber() + 1);
+        return lastNumber();
+    }
+
+    public int lastNumber() {
+        return lastNumber;
+    }
+
+    public void lastNumber_$eq(int x$1) {
+        lastNumber = x$1;
+    }
+}
+</pre>
+<p>
+	本例中的<code>object Account</code>与之前的<code>Accounts</code>对比，唯一的差别在于方法<code>newUniqueNumber</code>变为了<code>private</code>。
+	我们知道，<code>newUniqueNumber</code>方法终将被存放在<code>Account$</code>类中，被<code>Account</code>类所使用，因此它必须是public的。
+	而我们发现，这次在<code>Account</code>类中就没有对<code>newUniqueNumber</code>的静态public引用了，
+	如此一来便能保证<code>Account$#newUniqueNumber</code>方法对<code>Account</code>以外的类不可见。
+</p>
+<p>
+	由此可见，类和它的伴生对象是能够互相访问其私有特性的，而伴生对象的私有特性最终实际上还是公有的。在Scala编译器进行静态检查时，
+	除<code>Account</code>以外的类试图直接访问<code>Account$</code>类恐怕都是不会通过编译的，但如果是通过反射机制绕过Scala编译器的静态检查，
+	恐怕外部类就能够自由访问伴生对象的“私有”特性了。至于具体是否可以，这个就留给在座的各位去自行试验了。
+</p>
+<h2 class="jump">6.3 扩展类或特质的单例对象</h2>
+<p>
+	之前我们看到，<code>object</code>声明的单例对象实际上就是一个类，它因此拥有类的所有特性，因此它自然也可以继承其他类或特质
+	（我们还没有学习过Scala的特质，这里你可以把它暂时当做类似于Java中的接口的东西，但同时也要谨记，Scala的特质和Java的接口是存在很多不同之处的）：
+</p>
+<pre class="brush: scala">
+abstract class UndoablAction(val description: String) {
+  def undo(): Unit
+  def redo(): Unit
+}
+
+object DoNothingAction extends UndoablAction("Do nothing") {
+  override def undo() {}
+  override def redo() {}
+}
+</pre>
+<p>
+	这里我们看到，<code>object</code>单例对象同样也可以通过<code>extends</code>关键字继承一个虚类。这里我们还看到，通过在父类后面写上构造参数，
+	即可在子类的主构造器中调用父类的构造器。同时在子类中复写的父类方法需要加上<code>override</code>关键字，其作用等同于Java中的<code>@Override</code>注解。
+</p>
+<h2 class="jump">6.4 apply方法</h2>
+<p>
+	对于Scala的apply方法相信大家也不会陌生了。无论是类还是单例对象的<code>apply</code>方法在Scala中都是极其好用的语法糖。以单例对象为例，
+	我们可以这样来实现<code>apply</code>方法：
+</p>
+<pre class="brush: scala">
+class Account private (val id: Int, initialBalance: Double) {
+	// ...
+}
+
+object Account {
+  def apply(initialBalance: Double) =
+    new Account(newUniqueNumber(), initialBalance)
+
+  // ...	
+}
+</pre>
+<p>
+	结合伴生对象与类同名的特性，单例对象的<code>apply</code>方法十分适合用来作为类的工厂方法，如此一来我们便能省去创建类实例时的<code>new</code>关键字了。
+</p>
+<h2 class="jump">6.5 应用程序对象</h2>
+<p>
+	注：这里只是简单介绍一下Scala的应用程序对象，实际上如今并不推荐各位在Scala中使用它。乖乖地在伴生对象中写<code>main</code>函数会是更好的做法。
+</p>
+<p>
+	对于仅用于编写<code>main</code>函数充当应用程序入口的伴生对象，Scala提供了<code>App</code>特质进行辅助。
+	单例对象通过继承<code>App</code>特质即可直接把对象实现体内的所有语句作为<code>main</code>函数，
+	也同样可以通过访问<code>args</code>变量来访问启动应用程序时用户输入的命令行参数：
+</p>
+<pre class="brush: scala">
+object Hello extends App {
+  if (args.length > 0)
+	println("Hello, " + args(0))
+  else
+    println("Hello, World!")
+}
+</pre>
+<p>
+	实际上，<code>App</code>特质扩展自<code>DelayedInit</code>特质，Scala编译器对这个特质会做出一些特殊处理。
+	所有扩展自该特质的类，其初始化方法都会被挪到<code>delayedInit</code>方法中。
+	而实现在<code>App</code>特质中的<code>main</code>函数在捕获到命令行参数<code>args</code>以后便会以它作为参数调用<code>delayedInit</code>方法。
+</p>
+<h2 class="jump">6.6 枚举</h2>
+<p>
+	Scala并不存在Java中的<code>enum</code>类型，不过Scala的标准类库提供了<code>Enumeration</code>类来实现对枚举类型的支持。
+	通过继承自该类即可创建一个枚举类型：
+</p>
+<pre class="brush: scala">
+object TrafficLightColor extends Enumeration {
+  val Red, Yellow, Green = Value
+}
+</pre>
+<p>
+	继承自<code>Enumeration</code>的类通过调用它的<code>Value</code>方法来初始化枚举的所有可选值。
+	<code>Value</code>方法会返回一个同样叫做<code>Value</code>的内部类实例。
+</p>
+<p>
+	除了调用它的默认方法，你还可以选择传入枚举可选值的ID或名称或两个参数都传：
+</p>
+<pre class="brush: scala">
+val Red = Value(0, "stop")
+val Yellow = Value(10)
+val Green = Value("Go")
+</pre>
+<p>在默认情况下，<code>Value</code>将在前一个实例ID的基础上加1作为下一个实例的ID，并以字段名作为名称。</p>
+<p>
+	在上述定义完成后，你便可通过类似<code>TrafficLightColor.Red</code>的语句来访问单例对象<code>TrafficLightColor</code>中的这些枚举值了。
+	如果你觉得这样比较麻烦，可以通过如下语句直接引入这些枚举值：
+</p>
+<p><code>import TrafficLightColor._</code></p>
+<p>注：我们将在第7章详述引入类或对象成员的有关信息。</p>
+<p>
+	注意，返回的枚举值的类型实际上是<code>TrafficLightColor</code>的内部类<code>TrafficLightColor.Value</code>。
+	<code>Value</code>类给出了枚举值ID与名称的getter，
+	你还可以通过调用<code>TrafficLightColor</code>的<code>apply</code>和<code>withName</code>方法基于枚举值ID或名称快速地获取对应的枚举值实例。
+</p>
+<h2 class="jump">总结</h2>
+<p>
+	在完成第五章的学习以后，我们更进一步，学习了Scala中单例对象的相关使用，如此一来我们便掌握了最基本的OO写法了。
+</p>
+<p>
+	在下一章的学习中，我们将开始学习Scala包和引入机制，学习如何在Scala项目中管理我们的类。
+</p>

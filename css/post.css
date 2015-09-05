@@ -10,6 +10,10 @@
 	line-height: 30px;
 }
 
+.syntaxhighlighter table {
+    background: rgb(249,249,249);
+}
+
 blockquote p {
 	margin: 0;
 }
