@@ -95,8 +95,7 @@ ul.list-unstyled {
 #right_wrapper ul {
 	width: 24%;
 	position: fixed;
-	top: 30%;
-	background: rgb(242,242,242);
+	top: 150px;
     list-style-type: none;
 	padding: 10px 5px;
     padding-left: 20px;
@@ -105,8 +104,13 @@ ul.list-unstyled {
 
 #right_wrapper li {
     border-bottom: solid 1px rgb(224,224,224);
-    padding: 10px;
+    padding: 7px;
+	padding-left: 15px;
     border-top: solid 1px rgb(255,255,255);
+}
+
+#right_wrapper li h3 {
+    padding-top: 0;
 }
 
 #right_wrapper a {

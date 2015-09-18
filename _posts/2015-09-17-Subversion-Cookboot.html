@@ -1,0 +1,69 @@
+---
+layout: posts
+title: Subversion CLI Cookbook
+author: Robert Peng
+---
+
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
+
+<h2 class="jump">Preface</h2>
+<p>
+	This is a cookbook for Subversion CLI usage. No useless sentence should be found here.
+</p>
+<p>Let's begin.</p>
+<h2 class="jump">Check out a working copy</h2>
+
+<p>
+	Everything starts from getting your own working copy. Like checking out books from library,
+	we use <kbd>svn checkout</kbd> to check out from repository.
+</p>
+<pre class="brush: bash">
+$ svn checkout http://svn.example.com:9834/repos
+</pre>
+<p>
+	Othen than <code>http</code> scheme, <code>file://</code> is also supported:
+</p>
+<pre class="brush: bash">
+# On Unix/Linux
+$ svn checkout file:///var/svn/repos
+$ svn checkout file://localhost/var/svn/repos
+# these two are the same
+
+# On Windows
+C:\> svn checkout file:///X:/var/svn/repos
+C:\> svn checkout "file:///X|/var/svn/repos"
+</pre>
+<p>
+	Note how we use forward slashes to represent file path in Windows, even though the native form
+	should use backslashed. As for the second expression, the URL should be quoted so that the vertical
+	bar wouldn't be interpreted as a pipe.
+</p>
+<p>
+	The list is not exhaustive yet. The URL scheme supported by <code>svn checkout</code> can be listed as below:
+</p>
+<table class="table table-hover">
+  <tr>
+	<td><b>Schema</b></td>
+	<td><b>Access method</b></td>
+  </tr>
+  <tr>
+    <td><code>file:///</code></td>
+	<td>Direct repository access (on local disk).</td>
+  </tr>
+  <tr>
+    <td><code>http://</code></td>
+	<td>Access via WebDAV protocol to Subversion-aware Apache server.</td>
+  </tr>
+  <tr>
+    <td><code>https://</code></td>
+	<td>Same as <code>http://</code>, but with SSL encryption.</td>
+  </tr>
+  <tr>
+    <td><code>svn://</code></td>
+	<td>Access via custom protocol to an <code>svnserve</code> server.</td>
+  </tr>
+  <tr>
+    <td><code>svn+ssh://</code></td>
+	<td>Same as <code>svn://</code>, but through an SSH tunnel.</td>
+  </tr>
+</table>

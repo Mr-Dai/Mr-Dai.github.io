@@ -1,0 +1,45 @@
+.main-title {
+	text-align: center;
+}
+
+.sub-1-title {
+	background-color: #d9edf7;
+	font-size: 22px;
+	padding: 5px 0 3px 20px;
+	border-bottom: 2px solid #b8dce6;
+}
+
+.content-table {
+	width: 870px;
+	margin: 15px;
+}
+
+.content-table td {
+	width: 50%;
+	font-size: 18px;
+	border: none;
+	padding: 3px;
+}
+
+.content-table .list-entry-title {
+	vertical-align: top;
+	width: 20px;
+}
+
+.competency-list {
+	padding-left: 0;
+	padding-top: 10px;
+}
+
+.competency-list li {
+	display: inline-block;
+	height: 1em;
+    width: 7%;
+    margin-right: 2.3%;
+    background-color: #e9edf7;
+    -webkit-transform: skewX(-30deg);
+}
+
+.competency-list li.filled {
+	background-color: #64a9b1;
+}
