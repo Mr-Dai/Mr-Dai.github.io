@@ -50,6 +50,7 @@ h2, h3, h4 {
 	width: 70%;
 	min-width: 560px;
     padding: 20px 0 0 0;
+	float: left;
 	border-right: solid 1px rgb(221, 221, 221);
     background: rgb(249,249,249);
 }
@@ -85,17 +86,15 @@ ul.list-unstyled {
 }
 
 #right_wrapper {
+	margin-left: 0 !important;
 	width: 30%;
 	min-width: 240px;
 	float: right;
-    border-left: solid 1px rgb(231,231,231);
 	padding-left: 0;
 }
 
 #right_wrapper ul {
-	width: 24%;
-	position: fixed;
-	top: 150px;
+	width: 100%;
     list-style-type: none;
 	padding: 10px 5px;
     padding-left: 20px;
@@ -104,7 +103,7 @@ ul.list-unstyled {
 
 #right_wrapper li {
     border-bottom: solid 1px rgb(224,224,224);
-    padding: 7px;
+    padding: 10px;
 	padding-left: 15px;
     border-top: solid 1px rgb(255,255,255);
 }

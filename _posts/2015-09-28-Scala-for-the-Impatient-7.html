@@ -1,0 +1,267 @@
+---
+layout: posts
+title: 《快学Scala》第7章：包
+author: Robert Peng
+category: Scala
+---
+
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
+
+<h2 class="jump">前情提要</h2>
+<p>
+	在上一期的<a href="">内容</a>中，我们学习了Scala中的单例对象，了解到如何通过<code>object</code>关键字来声明一个单例。
+	至此我们已经结束了Scala类和对象的学习。那么今天，我们就开始学习Scala的包，学习如何科学地组织我们的项目。
+</p>
+<p>那么有人就要问了，到底是豆沙包还是莲蓉包？其实，是我最喜欢的叉烧包~</p>
+<hr />
+<h2 class="jump">7.1 包</h2>
+<p>
+	Scala中的包的概念，固然是和Java中的是一致的。如果你没有学习过Java，你可以把包理解成C++中的命名空间。
+</p>
+<p>
+	在Java中，由于一个Java文件只能写一个类，因此我们只能通过在文件首部写上如<code>package com.robert</code>这样的语句来声明该Java类所属的包。
+	Java对于包和类的位置安排是十分严格的，其中类所处的Java文件必须与该类同名，类所处的Java文件必须位于其所声明Java包对应的路径之下，
+	胡乱地放置Java文件和Java类将会导致编译错误。
+</p>
+<p>
+	Java这种严格的规范，你很难说它不好，但有时候做起来真的是很麻烦，尤其是现在的IDE技术如此的发达，这样的规范显得有些没必要。
+	在Scala中就不存在这样的约束。一个Scala文件可以包含任意数量的Scala类，Scala文件名本身也没有任何约束，文件所处的路径也没有约束。
+	你同样可以通过在Scala文件首部写上像<code>package com.robert</code>这样的语句来一次性声明该文件中所有类所处的包，
+	但如果想要在一个文件中声明处于不同包的类，你可以这样写：
+</p>
+<pre class="brush: scala">
+package com {
+	package robert {
+		class Robert
+		...
+	}
+	
+	package emily {
+		class Emily
+		...
+	}
+}
+</pre>
+<p>这样你就同时声明了<code>com.robert.Robert</code>和<code>com.emily.Emily</code>了。</p>
+<p class="bg-danger" style="padding: 10px">
+	<b>注意</b>：尽管我确实觉得像Java那样严格的规范有点不必要，但毋庸置疑那样的做法是更好的习惯。尽管在Scala中这样的约束已经全部消失，
+	但随意地放置类和文件确实会极大地降低项目的可读性，尤其是当某些情况下你无法使用IDE的时候。因此，更好的做法是，继续自觉遵循Java对包与文件路径的约束，
+	仅在Scala文件首部通过声明<code>package</code>来声明文件中所有类所属的包，而不要使用像上面出现的那种写法。
+	同时，应确保在同一个文件中代码行数较多（如超过50行）的类不超过一个。
+</p>
+<hr />
+<h2 class="jump">7.2 作用域规则</h2>
+<p>
+	Scala中的包作用域规则与Java是完全一致的，子包可以访问上层作用域中的名称。这一点没什么好说的。
+</p>
+<p>
+	值得注意的是，在Scala中，包名实际上是相对的。在包<code>com.robert</code>中，你完全可以通过书写<code>robert.subrobert.Robert</code>
+	来直接访问未进行<code>import</code>的包。
+</p>
+<p>
+	这要怎么理解呢？我们可以理解为在import时，Scala便在文件内部维护了一个包别名，该别名与包的最后一个名字相同。比如，我们<code>import scala.collection.mutable</code>，
+	那么实际上文件内部就可以通过访问包别名<code>mutable</code>来访问<code>scala.collection.mutable</code>下面的类了，
+	比如我们可以直接<code>new mutable.HashMap</code>了。
+</p>
+<p>
+	在了解过Scala的这个特性以后，我们就需要避免让一个文件同时引入两个拥有相同别名的包。比如，一个文件被声明为<code>package com.robert.collection</code>的话，
+	你再<code>import scala.collection</code>，恐怕就会造成一定程度的混淆，使得编译器做出难以预料的行为了。
+</p>
+<p>
+	在Java中，这样的问题不会出现，因为Java的包名总是绝对的。如果要在Scala中使用绝对的报名，我们需要从<b>_root_</b>出发：
+</p>
+<p>
+	<code>new _root_.scala.collection.mutable.ArrayBuffer[String]</code>
+</p>
+<p>
+	由此可见，我们<code>import scala.*</code>的时候这个<code>scala</code>也是一个包的别名，全名为<code>_root_.scala</code>。
+	实际上是由于<code>_root_.scala</code>包总是会被自动引入，所以我们才能使用这样的引入语句。由此可见，除非包名以<code>_root_</code>开头，
+	否则实际上所有的包名都是相对的。
+</p>
+<p class="bg-danger" style="padding: 10px">
+	依赖Scala的包相对性当然可以写出简短的引入语句，但滥用这个特性必然会导致可读性的下降。因此，引入时写上除<code>_root_</code>
+	外的完整包名依然是更好的做法。
+</p>
+<hr />
+<h2 class="jump">7.3 串联式包语句</h2>
+<p>除了像第一节中的那种写法，我们还可以使用串联式包语句：</p>
+<pre class="brush: scala">
+package com.robert.impatient {
+  package people {
+    // 实际上在这个位置我们将无法访问com和com.robert的成员
+	// 但com.robert.impatient的成员仍然是可见的
+    class Person
+	...
+  }
+}
+</pre>
+<p class="bg-danger" style="padding: 10px">
+	同理，我并不推荐使用这样的写法。接下来我将为大家讲解推荐的写法。
+</p>
+<hr />
+<h2 class="jump">7.4 文件顶部标记法</h2>
+<p>
+	文件顶部标记法也就是最常规的，在文件首部添加<code>package</code>声明的做法了。但这样的方法在Scala中会有一点点不同，
+	这同样也是Scala的包相对性所引入的：
+</p>
+<pre class="brush: scala">
+package com.robert.impatient
+package people
+
+class Person
+...
+</pre>
+<p>
+	实际上，该语句的作用与第三节中的语句完全相同，因此我更推荐这种写法，因为这种写法约束了该文件中的所有Scala类必须处于相同的包中，
+	这样的做法实际上是更好的。
+</p>
+<hr />
+<h2 class="jump">7.5 包对象</h2>
+<p>
+	鉴于Java的本质是严格地面向对象的，因此JVM本身并不允许独立于任何类存在的函数或是变量：JVM只允许出现属于某个类的方法或是成员变量。
+	有时候，为了使用某些函数，我们只能够在包内声明一个Utils类，并把这些功能函数声明为这个类的静态方法，并利用静态引入来一定程度上的打破这层壁垒。
+</p>
+<p>
+	在Scala中，每一个包都可以有一个包对象。你需要在其所属包的父包中定义它，而且它的名称需要与其所属子包一致。例如：
+</p>
+<pre class="brush: scala">
+package com.robert.impatient
+
+package object people {
+  val DEFAULT_NAME = "John Q. Public"
+}
+
+package people {
+  class Person {
+    var name = DEFAULT_NAME  // 从包对象中获取到常量
+  }
+}
+</pre>
+<p>
+	由于<code>defaultName</code>属于<code>people</code>包的包对象，因此我们在该包内访问它时不需要加任何限定词。当你想要在其他包内访问它时，
+	你同样也可以通过<code>com.robert.impatient.people.defaultName</code>访问到它。
+</p>
+<p class="bg-danger" style="padding: 10px">
+	尽量只把包对象用来存放静态函数和常量，同时对规范地命名常量（所有字母大写，单词之间以下划线分隔）。
+	包对象中静态成员的作用域应分布在包内的多个类中。如果成员仅用于包内的一个类，应考虑将该成员改而放到该类的伴生对象中。
+</p>
+<hr />
+<h2 class="jump">7.6 包可见性</h2>
+<p>
+	类的包可见性在Java里一直是备受诟病的一个功能。
+</p>
+<p>
+	在Java中，用于设定包可见性的修饰符无非为<code>public</code>、<code>protected</code>、<code>private</code>，
+	当类未被上述三个修饰符修饰时，它的类成员便在包含该类的包中可见。在Scala中，这些修饰符有着相同的效果：
+</p>
+<pre class="brush: scala">
+package com.robert.impatient.people
+
+class Person {
+  private[people] def description = "A person with name " + name
+}
+</pre>
+<p>
+	除此之外，你还可以使用类似<code>private[impatient]</code>的修饰符把成员的可见域延伸到上层包。
+	在这一点上，Scala的灵活性比Java更高，因为Java只能够简单地把希望包外可见的类设置为<code>public</code>，
+	中间缺少这样一个过渡。例如，在著名的Apache Spark项目中，所有的类都位于<code>org.apache.spark</code>包及其子包下。
+	Spark的开发人员希望某些成员能够被Spark框架内的其他类所访问，但不希望被Spark框架以外的类访问，
+	那就将这个成员简单地设定为<code>private[spark]</code>就可以了。
+</p>
+<hr />
+<h2 class="jump">7.7 引入</h2>
+<p>Scala的引入语句与Java的极其类似，唯一的不同在于Scala引入语句的尾部不需要加上分号：</p>
+<p><code>import java.awt.Color</code></p>
+<p>我们还可以使用占位符来引入某个包中的全部成员：</p>
+<p><code>import java.awt._</code></p>
+<p>效果和在Java中的通配符*是相同的。</p>
+<p class="bg-danger" style="padding: 10px">
+	在Scala中，*是合法的标识符，你完全可以以它来命名某个包，最终定义出像<code>com.robert.*.people</code>这样的包，
+	但请别这样做。
+</p>
+<p>你还可以直接引入某个类中的所有静态成员：</p>
+<p><code>import java.awt.Color._</code></p>
+<p>这一点和Java的静态引入效果是相同的。</p>
+<p>一旦你引入了某个包，你就可以用较短的名称访问其子包：</p>
+<pre class="brush: scala">
+import java.awt._
+
+def handler(evt: event.ActionEvent) {	// 这里实际上用的是java.awt.event.ActionEvent类
+  ...
+}
+</pre>
+<p>
+	实际上，对于每个被引入的包，Scala在该文件内都会为该包赋予一个别名，该别名默认为该包的最后一个包名。
+	在上面的例子中，<code>java.awt.event</code>包被<code>import java.awt._</code>语句引入并被赋予了别名<code>event</code>，
+	所以我们才能通过<code>event.ActionEvent</code>访问到<code>java.awt.event.ActionEvent</code>类。
+</p>
+<hr />
+<h2 class="jump">7.8 任何地方都可以声明引入</h2>
+<p>
+	除了文件顶部，我们还可以在其他任何地方使用引入语句，引入的包的作用域一直延伸到包含该语句的块的末尾：
+</p>
+<pre class="brush: scala">
+class Manager {
+  import scala.collection.mutable._
+  val subordinates = new ArrayBuffer[Employee]
+}
+</pre>
+<p class="bg-danger" style="padding: 10px">
+	该功能主要用于降低名称冲突的可能性，但实际上在Scala中，接下来我们即将介绍的功能也能有效地降低这种可能性。
+	随意地在除文件顶部以外的地方使用语句很可能会使代码的可读性急剧下降，因此在使用该功能前需三思而后行。
+</p>
+<hr />
+<h2 class="jump">7.9 重命名和隐藏方法</h2>
+<p>如果你想一次性引入一个包中的几个成员，但又不想要使用占位符引入所有成员时，你可以这样写：</p>
+<p><code>import java.awt.{Color, Font}</code></p>
+<p class="bg-danger" style="padding: 10px">
+	好的编程习惯是只有在需要引入某个包中超过6个以上的类时才使用占位符引入。
+</p>
+<p>这样的选取器（selector）语法还允许你重命名你引入的成员：</p>
+<pre class="brush: scala">
+import java.util.{HashMap => JavaHashMap}
+import scala.collection.mutable._  // Scala Collection中也有一个HashMap
+</pre>
+<p>这样一来，<code>JavaHashMap</code>就是<code>java.util.HashMap</code>，而<code>HashMap</code>则对应着<code>scala.collection.muatble.HashMap</code>。</p>
+<p>你还可以使用<code>HashMap => _</code>这样的选取器语法来隐藏某个成员：</p>
+<pre class="brush: scala">
+import java.util.{_, HashMap => _}
+	// 引入了除HashMap以外的其他所有类
+import scala.collection.mutable._
+</pre>
+<p>如此一来，<code>HashMap</code>指的必然就是<code>scala.collection.mutable.HashMap</code>了。</p>
+<hr/>
+<h2 class="jump">7.10 隐式引入</h2>
+<p>每个Scala程序都会隐式地引入下面几个包：</p>
+<pre class="brush: scala">
+import java.lang._
+import scala._
+import Predef._
+</pre>
+<p>
+	和Java程序一样，<code>java.lang</code>包首先被引入。接下来，<code>scala</code>包也被引入。
+	不过这个引入和一般的引入有点不同，它会导致<code>scala</code>包中的一些类覆盖掉<code>java.lang</code>中同名的类，但不会产生冲突。
+	比如说，<code>StringBuilder</code>将指向<code>scala.StringBuilder</code>而不是<code>java.lang.StringBuilder</code>。
+</p>
+<p>
+	最后，<code>Predef</code>对象被引入，它包含了相当多有用的函数。
+</p>
+<p>
+	实际上，正如<code>java.lang</code>包在Java程序中的引入并不真的是傻乎乎地在java文件头部加个<code>import java.lang.*;</code>一样，
+	上述三个包在scala文件中也不真的是通过这三条语句引入的。在我们之前反编译的过程中我们就能看到，<code>scala</code>和<code>Predef</code>中的成员实际上是按需引入的，
+	意思就是说只有你的代码中使用到了它们的成员时，Scala编译器才会生成一条引入语句引入这个成员。
+</p>
+<p>
+	由于<code>scala</code>包默认引入，加上包在Scala中被引入后会被赋予别名的特性，你当然也可以在Scala中通过<code>collection.mutable.HashMap</code>引用到<code>scala.collection.mutable.HashMap</code>，
+	但我<b>不推荐</b>这样写。
+</p>
+<hr />
+<h2 class="jump">总结</h2>
+<p>
+	在学习过Scala项目的包管理后，你离使用Scala开发项目又近了一步。Scala比起Java提供了大量的语法糖，但同时也需要使用者能够时刻注意自己代码的可读性，
+	因为滥用Scala的这些功能将导致你的代码难以维护。但了解具体怎样的写法更好是需要一定的积累的，现在我会暂时不讲太多有关Scala的good pratice，这些我们留到以后再讲。
+</p>
+<p>
+	下一次，我们将开始探索Scala的面向对象特性，学习Scala类的继承，看看Scala是如何在Java的领地里打败Java的。敬请期待。
+</p>

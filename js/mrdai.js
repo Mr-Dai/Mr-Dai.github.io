@@ -8,9 +8,6 @@ function branchJumpBinding() {
         value.id = "index_" + (n+1);
         jumpList.append("<li><a href='#"+value.id+"'>"+value.innerHTML+"</a></li>");
     });
-	if ($("#disqus_thread")) {
-		jumpList.append("<li><a style='color: rgb(66,139,202)' href='#disqus_thread'>Post a Comment</a></li>")
-	}
 }
 
 // 查找字符串数组中首个匹配正则表达式的元素
