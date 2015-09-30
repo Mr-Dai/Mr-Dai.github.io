@@ -1,0 +1,90 @@
+---
+layout: posts
+title: 《快学Scala》第8章：继承
+author: Robert Peng
+category: Scala
+---
+
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
+
+<h2 class="jump">前情提要</h2>
+<p>
+	在<a href="/scala/2015/09/28/Scala-for-the-Impatient-7.html">上一期</a>的内容中，我们学习了Scala中的包，
+	了解了如何通过不同形式的<code>package</code>和<code>import</code>语句来管理Scala项目的包结构和包引入。
+</p>
+<p>
+	在项目开发中，光是懂得如何使用<code>package</code>和<code>import</code>是远远不够的。今天我们就来学习Scala面向对象最常用的功能——类的继承。
+</p>
+<hr />
+<h2 class="jump">8.1 扩展类</h2>
+<p>Scala使用<code>extends</code>关键字来扩展类，与Java相同：</p>
+<pre class="brush: scala">
+class Employee extends Person {
+  var salary = 0.0
+  ...
+}
+</pre>
+<p>
+	和Java一样，你可以将类声明为<code>final</code>，这样它就不能被扩展了。你还可以将单个方法或字段声明为<code>final</code>，以确保它们不能被重写。
+	注意，在Java中，<code>final</code>字段是不可重写且不可变的，相当于Scala中的<code>val</code>字段。但在Scala中，<code>final</code>字段仅仅意味着它不能被重写，
+	<code>final var</code>字段仍然是可变的。
+</p>
+<hr />
+<h2 class="jump">8.2 重写方法</h2>
+<p>在Scala中重写一个非抽象方法<b>必须</b>使用<code>override</code>修饰符：</p>
+<pre class="brush: scala">
+class Person {
+  ...
+  override def toString = getClass.getName = "[name=" + name + "]"
+}
+</pre>
+<p>
+	在这一点上，<code>override</code>修饰符与Java中的<code>@Overrides</code>注解功能相似，它主要用于确保你在子类写的方法确实重写了父类的方法，
+	并在你因打错字或使用了错误的参数类型等原因没能成功重写父类方法时给出有用的错误提示。
+</p>
+<p>
+	在子类中重写了方法以后，子类中对该方法的调用自然调用的是子类中重写后的版本。当需要调用父类的版本时，和Java一样，我们使用<code>super</code>关键字：
+</p>
+<pre class="brush: scala">
+class Employee extends Person {
+  ...
+  override def toString = super.toString + "[salary=" + salary + "]"
+}
+</pre>
+<hr />
+<h2 class="jump">8.3 类型检查和转换</h2>
+<p>
+	要测试某个对象是否属于某个给定的类或其子类时，可以用<code>isInstanceOf</code>方法。如果测试成功，
+	你就可以用<code>asInstanceOf</code>方法将引用转换为子类的引用：
+</p>
+<pre class="brush: scala">
+if (p.isInstanceOf[Employee]) {
+  val s = p.asInstanceOf[Employee]  // s的类型为Employee
+  ...
+}
+</pre>
+<p>
+	如果<code>p</code>指向的是<code>Employee</code>类及其子类的对象，则<code>p.isInstanceOf[Employee]</code>将会成功。
+	在功能上，<code>asInstanceOf</code>和Java的<code>instanceof</code>关键字是相同的。
+</p>
+<p>
+	如果<code>p</code>是<code>null</code>，则<code>p.isInstanceOf[Employee]</code>将返回<code>false</code>，
+	且<code>p.asInstanceOf[Employee]</code>将返回<code>null</code>。
+</p>
+<p>
+	如果<code>p</code>不是一个<code>Employee</code>，则<code>p.asInstanceOf[Employee]</code>将抛出<code>ClassCastException</code>异常。
+	在功能上，<code>asInstanceOf</code>和Java中的强制类型转换是相同的。
+</p>
+<p>
+	如果你想要测试<code>p</code>指向的是一个<code>Employee</code>对象但又不是其子类的话，可以用：
+</p>
+<p><code>if (p.getClass == classOf[Employee])</code></p>
+<p>其中<code>classOf[Employee]</code>相当于Java中的<code>Employee.class</code>。</p>
+<p class="bg-info" style="padding: 10px">
+	个人来讲，我很欣赏<code>asInstanceOf</code>的功能，因为Java的强制类型转换语法写在链式语句里时往往需要添加大量的括号，很影响代码的可读性。
+	Scala的<code>asInstanceOf</code>语法与方法调用相同，使得在链式操作中出现强制类型转换时，语句仍能简洁清晰。<br />
+	<code>isInstanceOf</code>的作用不好评判，因为Java中的<code>instanceof</code>关键字已经够简洁了。我想，少写两个空格也许对某些人来说还是挺受欢迎的吧。<br />
+	至于<code>classOf</code>，我个人觉得这个设计并不好。在链式调用中，Java的<code>Employee.class</code>吻合方法调用的语法，也吻合人们从左到右的阅读习惯。
+	Scala的<code>classOf[Employee]</code>则更像是函数的调用，而且也违背了人们习惯的阅读顺序。
+</p>
