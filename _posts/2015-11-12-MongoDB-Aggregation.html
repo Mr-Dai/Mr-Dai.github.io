@@ -1,0 +1,454 @@
+---
+layout: posts
+title: MongoDB Aggregation
+author: Robert Peng
+category: MongoDB
+---
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJScript.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushSql.js"></script>
+<h2 class="jump">Intro</h2>
+<p>
+	在<a href="/mongodb/2015/06/11/MongoDB-CRUD.html">之前的文章</a>中，我总结了MongoDB CRUD操作的基本方法，
+	而本文将会介绍MongoDB的Aggregation Framework。
+</p>
+<p>
+	MongoDB的Aggregation操作的灵感主要源于SQL的Aggregation操作。在SQL中，我们可以通过<code>count</code>、<code>sum</code>等运算符来为某张表的数据进行统计。
+	比如，为了统计每个电子设备制造厂商所发行的设备的种数，我们可能会这样写：
+</p>
+<pre class="brush: sql">
+SELECT manufacturer, count(*)
+  FROM products
+</pre>
+<p>
+	由此，我们便能获得统计结果，比如苹果发行了10种不同的电子设备。MongoDB同样也为用户提供了对Aggregation操作的支持。通过运用MongoDB的这项功能，
+	我们同样可以达成如上述SQL语句那般的效果。接下来我们就来学习一下MongoDB Aggregation的基本使用方法。
+</p>
+<hr />
+<h2 class="jump">Aggregation Pipeline</h2>
+<p>
+	MongoDB Aggregation使用Pipeline的形式来组织用户指定的操作。使用过Unix或Linux的读者应该对Shell的管道操作十分熟悉了，不过即使你没有学过也没有关系。
+	接下来将通过实际操作来演示MongoDB的Aggregation Pipeline。
+</p>
+<p>
+	假设我们有一个叫做<code>zips</code>的Collection（数据文件可在<a href="http://media.mongodb.org/zips.json" target="_blank">这里</a>下载到），这个Collection的模式大致如下：
+</p>
+<pre class="brush: js">
+{
+  "_id": 35004,
+  "city": "ACMAR",
+  "loc": [
+    -86.51557,
+	33.584132
+  ],
+  "pop": 6055,
+  "state": AL
+}
+</pre>
+<p>
+	可以看到，<code>zips</code>中的一条Document以城市的邮政编码（zip）作为<code>_id</code>，并给出了城市名<code>city</code>、城市坐标<code>loc</code>、
+	城市人口<code>pop</code>以及城市所属州的缩写<code>state</code>。
+</p>
+<p>
+	上述Collection的模式并不复杂，如果忽略<code>loc</code>字段，剩余的模式完全可以直接作为关系型数据库的表模式。那么假设我们有这么一条SQL语句：
+</p>
+<pre class="brush: sql">
+  SELECT city, sum(pop) AS population
+    FROM zips
+   WHERE state = "NY"
+GROUP BY city
+</pre>
+<p>
+	不难看出，上述语句计算的是纽约州每个城市的总人口（我并不是很懂SQL，写错了别打我）。那么在MongoDB中，同样的操作是这样写的：
+</p>
+<pre class="brush: js">
+db.zips.aggregate([
+  {
+    $match: {
+	  state: "NY"
+	}
+  },
+  {
+    $group: {
+      _id: "$city",
+      population: { $sum: "$pop" }	  
+    }
+  },
+  { 
+    $project:
+    {
+	  _id: 0,
+	  city: "$_id",
+	  population: 1,
+    }
+  }
+])
+</pre>
+<p>
+	首先这里出现了三个Aggregation专用的运算符：<code>$match</code>、<code>$group</code>和<code>$project</code>。它们具体的作用我会在后文详述。
+	我们之所以说MongoDB的Aggregation使用的是Pipeline来组织用户的操作，正是因为<code>db.zips.aggregate</code>方法接受的是一个由Aggregation操作组成的数列，
+	数列中的每个操作将按顺序执行，前一个操作的结果将作为后一个操作的输入。
+</p>
+<p>
+	上面这条语句中，首先第一个<code>$match</code>运算符相当于之前的SQL语句中的<code>WHERE</code>子句，它从Collection中筛选出所有属于纽约州的邮政编码，
+	并将其作为下一个操作的输入。下一个操作为<code>$group</code>操作，它相当于SQL中的<code>GROUP BY</code>，并以一个<code>_id</code>来指明，
+	我们将以<code>city</code>字段来进行group。同时在该操作中还搭配使用了<code>$sum</code>运算符，将各个城市的<code>pop</code>字段值进行求和，
+	赋给了新的<code>population</code>字段。最后的<code>$project</code>则相当于SQL中的<code>SELECT AS</code>，将上一个操作传来的结果集中的<code>_id</code>重新改名为<code>city</code>，
+	并保留了<code>population</code>字段。
+</p>
+<p>
+	尽管这么说其实还是比较模糊，但正如我所说，我将在下文逐个讲述每个Aggregation操作符的作用，
+	这里我们只需要了解到MongoDB Aggregation的Pipeline意味着所有Aggregation操作将以流水线的形式来处理数据即可。
+</p>
+<p>
+	Aggregation Pipeline中的每一次操作被称为一个<i>stage</i>。<i>Stage</i>的操作种类包括如下：
+</p>
+<table class="table table-striped">
+  <tr>
+    <th>名称</th>
+	<th>作用</th>
+  </tr>
+  <tr>
+    <td><a href="#Sproject">$project</a></td>
+	<td>改变Pipeline中的Document的模式，如添加一个新的字段、改变字段值或删除字段等</td>
+  </tr>
+  <tr>
+    <td><a href="#Smatch">$match</a></td>
+	<td>过滤传入的Document，并不做改变地输出匹配的Document</td>
+  </tr>
+  <tr>
+    <td><a href="#Sredact">$redact</a></td>
+	<td>综合<code>$project</code>和<code>$redact</code>的功能，对Document进行改写</td>
+  </tr>
+  <tr>
+    <td><a href="#Slimit">$limit</a></td>
+	<td>给定一个数字<i>n</i>，仅输出传入的前<i>n</i>个Document</td>
+  </tr>
+  <tr>
+    <td><a href="#Sskip">$skip</a></td>
+	<td>给定一个数字<i>n</i>，跳过传入的前<i>n</i>个Document</td>
+  </tr>
+  <tr>
+    <td><a href="#Sunwind">$unwind</a></td>
+	<td>拆散输入Document中指定的一个数组字段，为数组中的每个元素生成一个新的Document，并用该元素作为该字段的值</td>
+  </tr>
+  <tr>
+    <td><a href="#Sgroup">$group</a></td>
+	<td>根据给定的标识表达式组织传入的Document，并在声明了累积操作符的情况下将其应用于每一组Document</td>
+  </tr>
+  <tr>
+    <td><a href="#Ssort">$sort</a></td>
+	<td>根据指定的字段和顺序，对输入的所有Document进行排序</td>
+  </tr>
+  <tr>
+    <td><a href="#SgeoNear">$geoNear</a></td>
+	<td>根据Document与给定地理坐标的远近程度进行排序后输出</td>
+  </tr>
+  <tr>
+    <td><a href="#Sout">$out</a></td>
+	<td>将Aggregation的结果写入到指定的Collection中。<code>$out</code>只能作为Aggregation的最后一个<i>Stage</i></td>
+  </tr>
+</table>
+<p>
+	接下来我将逐个介绍上述的所有<i>Stage</i>。
+</p>
+<hr />
+<h2 class="jump" id="Sproject">$project</h2>
+<p>
+	<code>$project</code>只会将设定好的字段值传递给Pipeline的下一个Stage，这些字段可以来自原有的字段，
+	也可以是新创建的字段。从形式上，<code>$project</code>的标准使用格式如下：
+</p>
+<p><code>{ $project: { &lt;specifications&gt; } }</code></p>
+<p>
+	可以看到，<code>$project</code>的参数为一个Document，该Document说明哪些字段该输出、如何得出这些字段以及哪些字段该被删除。
+	该Document的格式如下：
+</p>
+<table class="table table-striped">
+  <tr>
+    <th>语法</th>
+	<th>说明</th>
+  </tr>
+  <tr>
+    <td><tt>&lt;field&gt;: &lt;1 or true&gt;</tt></td>
+	<td>指定结果Document包含原有的某个字段</td>
+  </tr>
+  <tr>
+    <td><tt>_id: &lt;0 or false&gt;</tt></td>
+	<td>指定结果Document不包含原有的<tt>_id</tt>字段</td>
+  </tr>
+  <tr>
+    <td><tt>&lt;field&gt;: &lt;expression&gt;</tt></td>
+	<td>根据给定表达式为结果Document创建一个新的字段</td>
+  </tr>
+</table>
+<p>
+	默认情况下，输入Document的<code>_id</code>字段将会保留在输出Document中，除非显式地将其声明为<code>_id: 0</code>或修改为其他值。
+	同时，除<code>_id</code>外的其他所有字段默认是不保留的，如果需要保留在输出Document中则必须通过上述语法显式地指定。
+</p>
+<p>
+	如果你用<code>&lt;field&gt;: &lt;1 or true&gt;</code>语法指定包含某个原本不存在的字段，<code>$project</code>会忽略你的这项设置，
+	即<code>$project</code>不会因你这项设置而为输出Document新增一个字段。
+</p>
+<p>
+	使用<code>&lt;field&gt;: &lt;expression&gt;</code>为输出Document新增字段时，我们可以指定新增字段的字段名，同时用表达式给出字段的值。
+	更多有关<i>表达式</i>的内容，详见<a href="https://docs.mongodb.org/manual/meta/aggregation-quick-reference/#aggregation-expressions" target="_blank">这里</a>。
+</p>
+<p>
+	如果要为某个字段设置一个数字或布尔值，必须使用<a href="https://docs.mongodb.org/manual/reference/operator/aggregation/literal/#exp._S_literal" target="_blank">$literal</a>操作符。否则，
+	<code>$project</code>会认为你只是在指定包含或删除某个原有字段。
+</p>
+<p>
+	举个例子，假设我们有一个叫做<code>orders</code>的Collection，其中的一个Document模式如下：
+</p>
+<pre class="brush: js">
+{
+  _id: 5,
+  product_id: 123,
+  price: 50,
+  quantity: 5
+}
+</pre>
+<p>订单给出了用户购买的物品的单价<code>price</code>以及用户购买的数量<code>quantity</code>。我们完全可以通过<code>$project</code>来生成只包含订单总价的Document：</p>
+<pre class="brush: js">
+db.orders.aggregate([
+  {
+    $project: {
+	  product_id: true,
+	  amount: { $multiply: [ $price, $quantity ] }
+	}
+  }
+])
+</pre>
+<p>
+	如此，新的Document中保留了原有的商品id<code>product_id</code>，同时利用原有的商品单价和商品数量计算出了订单总价<code>amount</code>。
+</p>
+<p>
+	实际上，<code>$project</code>所接受的参数之所以被叫做<code>specifications</code>，是因为它正是输出Document的模式的<code>specification</code>，
+	输出Document的模式将与其保持一致。我们完全可以利用这一特性使输出Document的某个字段包含一个子Document或数组：
+</p>
+<pre class="brush: js">
+db.orders.aggregate([
+  {
+    $project: {
+	  product: {
+	    product_id: "$product_id",
+		price: "$price"
+	  }
+	  amount: { $multiply: [ $price, $quantity ] }
+	}
+  }
+])
+</pre>
+<p>
+	如此一来，新的Document中的<code>product</code>字段的值便是一个包含了商品id和商品单价的Document了。
+</p>
+<hr />
+<h2 class="jump" id="Smatch">$match</h2>
+<p>
+	<code>$match</code>接受一个表示查询条件的Document作为参数，只把匹配该查询条件的Document传递到下一个Stage。
+	<code>$match</code>的标准使用格式如下：
+</p>
+<p><code>{ $match: { &lt;query&gt; } }</code></p>
+<p>
+	其中，用于表示查询条件的<code>query</code>使用与<code>find</code>和<code>findOne</code>方法中的查询条件完全相同的格式。
+	有关查询语法，详见<a href="https://docs.mongodb.org/manual/tutorial/query-documents/#read-operations-query-argument" target="_blank">这里</a>。
+</p>
+<p>
+	将<code>$match</code>放在Pipeline中尽可能靠前的位置，可以更早地降低Pipeline中Document的数量，因为Pipeline实际上是在内存中做运算的。
+	如果你将<code>$match</code>作为第一个Stage，它就可以像<code>find</code>和<code>findOne</code>那样利用上Collection中的索引了。
+</p>
+<p>
+	你不能在<code>$match</code>中使用<a href="https://docs.mongodb.org/manual/reference/operator/query/where/#op._S_where" target="_blank">$where</a>操作符。
+	同时，想要在<code>$match</code>中使用<a href="https://docs.mongodb.org/manual/reference/operator/query/text/#op._S_text" target="_blank">$text</a>操作符，
+	必须确保<code>$match</code>为Pipeline的第一个Stage。
+</p>
+<p>
+	举个例子，还是上述那个<code>orders</code> Collection，我们可以编写如下Aggregation：
+</p>
+<pre class="brush: js">
+db.orders.aggregate([
+  {
+    $project: {
+	  product: {
+	    product_id: "$product_id",
+		price: "$price"
+	  }
+	  amount: { $multiply: [ $price, $quantity ] }
+	}
+  },
+  {
+    $match: {
+	  amount: {$gt: 500}
+	}
+  }
+])
+</pre>
+<p>
+	如此一来，我们就只会得到总价大于500的订单了。
+</p>
+<hr />
+<h2 class="jump" id="Ssort">$sort</h2>
+<p>
+	<code>$sort</code>对传入的Collection进行排序后传递到下一个Stage。
+	<code>$sort</code>的标准使用格式如下：
+</p>
+<p><code>{ $sort: { &lt;field1>: &lt;sort order>, &lt;field2>: &lt;sort order> ... } }</code></p>
+<p>
+	实际上这些参数并没有看上去那么复杂，它的格式和<code>sort()</code>方法的参数是完全一致的。
+	比如：
+</p>
+<pre class="brush: js">
+db.orders.aggregate([
+  {
+    $project: {
+	  product: {
+	    product_id: "$product_id",
+		price: "$price"
+	  }
+	  amount: { $multiply: [ $price, $quantity ] }
+	}
+  },
+  {
+    $sort: {
+	  amount: -1
+	}
+  }
+])
+</pre>
+<p>
+	我们就获得了总价按降序排列的订单列表了。
+</p>
+<hr />
+<h2 class="jump" id="Slimit">$limit</h2>
+<p>
+	<code>$limit</code>接受一个正整数参数<i>n</i>，只把传入的前<i>n</i>个Document传递到下一个Stage。
+	<code>$limit</code>的标准使用格式如下：
+</p>
+<p><code>{ $limit: &lt;positive integer&gt; }</code></p>
+<p>从功能上讲，<code>$limit</code>和<code>limit()</code>方法是完全一致的。举个例子：</p>
+<pre class="brush: js">
+db.orders.aggregate(
+    { $limit : 5 }
+);
+</pre>
+<p>这样一来我们便可以获得前<i>5</i>个订单了。</p>
+<p>
+	值得注意的是，如果<code>$limit</code>紧接着一个<code>$sort</code>，<code>$sort</code>将会采用Lazy的排序方式，在选出前<i>n</i>个Document以后便结束排序，
+	而不会对整个Collection进行排序。
+</p>
+<hr />
+<h2 class="jump" id="Sskip">$skip</h2>
+<p>
+	<code>$skip</code>接受一个正整数参数<i>n</i>，跳过传入的前<i>n</i>个Document后，将剩余的Document原封不动地传给下一个Stage。
+	<code>$skip</code>的标准使用格式如下：
+</p>
+<p><code>{ $skip: &lt;positive integer&gt; }</code></p>
+<p>从功能上讲，<code>$skip</code>和<code>skip()</code>方法是完全一致的。举个例子：</p>
+<pre class="brush: js">
+db.orders.aggregate(
+    { $skip : 5 }
+);
+</pre>
+<p>这样一来我们便跳过了前<i>5</i>个订单了。</p>
+<hr />
+<h2 class="jump" id="Sunwind">$unwind</h2>
+<p>
+	<code>$unwind</code>接受一个字段名作为参数，拆散指定的数组字段，为数组中的每一个元素生成一个新的Document，并以该元素作为新的Document中该数组字段的值。
+	<code>$unwind</code>的标准使用格式如下：
+</p>
+<p><code>{ $unwind: &lt;field path> }</code></p>
+<p>注意，在指定字段名时，字段名前面要加上一个<code>$</code>符号。举个例子，假设我们有Document如下：</p>
+<pre class="brush: js">
+{ a : 0, b : 0, c : [ 0 1 2 ] }
+</pre>
+<p>我们执行<code>{ $unwind: "$c" }</code>操作后，将得到如下几个Document：</p>
+<pre class="brush: js">
+{ a : 0, b : 0, c : 0 }
+{ a : 0, b : 0, c : 1 }
+{ a : 0, b : 0, c : 2 }
+</pre>
+<p>在使用<code>$unwind</code>时，有几点需要注意一下：</p>
+<ul>
+  <li>如果传入的某个Document的指定字段的值不是一个数组，<code>aggregate</code>方法会抛出一个错误；</li>
+  <li>如果传入的某个Document不包含你所指定的字段，<code>$match</code>会忽略该Document，不会为其生成任何Document；</li>
+  <li>如果传入的某个Document的该字段的值为空数组（<code>[]</code>），<code>$match</code>同样会忽略该Document，不为其生成任何Document。</li>
+</ul>
+<hr />
+<h2 class="jump" id="Sgroup">$group</h2>
+<p>
+	<code>$group</code>基于给定的规则将Document分入不同的分组中，为每个分组产生一个新的Document，该Document的字段值将由累积表达式给出。
+	<code>$group</code>的标准适用格式如下：
+</p>
+<p><code>{ $group: { _id: &lt;expression>, &lt;field1>: { &lt;accumulator1> : &lt;expression1> }, ... } }</code></p>
+<p>
+	其中，我们需要显式地给出<code>_id</code>的值的计算方式，被计算出拥有相同的<code>_id</code>值的Document将被放入到同一组中。
+	如果你想要让所有Document都被分入同一组，将<code>_id</code>设为<code>null</code>即可。
+</p>
+<p>
+	其他字段的值将由累积表达式给出，而累积表达式由累积操作符和普通的表达式组成。可选的累积操作符如下：
+</p>
+<table class="table table-striped">
+  <tr>
+    <th>名称</th>
+	<th>作用</th>
+  </tr>
+  <tr>
+    <td><tt>$sum</tt></td>
+	<td>返回每组Document的表达式所得值的和。自动忽略非数字的值。</td>
+  </tr>
+  <tr>
+    <td><tt>$avg</tt></td>
+	<td>返回每组Document的表达式所得值的平均数。自动忽略非数字的值。</td>
+  </tr>
+  <tr>
+    <td><tt>$first</tt></td>
+	<td>返回每组中第一个Document的表达式所得值。</td>
+  </tr>
+  <tr>
+    <td><tt>$last</tt></td>
+	<td>返回每组中最后一个Document的表达式所得值。</td>
+  </tr>
+  <tr>
+    <td><tt>$max</tt></td>
+	<td>返回每组Document的表达式所得值的最大值。</td>
+  </tr>
+  <tr>
+    <td><tt>$min</tt></td>
+	<td>返回每组Document的表达式所得值的最小值</td>
+  </tr>
+  <tr>
+    <td><tt>$push</tt></td>
+	<td>以一个数组包含一组所有Document的表达式所得值</td>
+  </tr>
+  <tr>
+    <td><tt>$addToSet</tt></td>
+	<td>以一个集合包含一组所有Document的表达式所得值</td>
+  </tr>
+</table>
+<p>举个例子，假设我们有Document如下：</p>
+<pre class="brush: js">
+{ a : 0, b : 0, c : 0 }
+{ a : 0, b : 0, c : 1 }
+{ a : 0, b : 1, c : 0 }
+{ a : 0, b : 1, c : 1 }
+{ a : 1, b : 0, c : 0 }
+{ a : 1, b : 0, c : 1 }
+{ a : 1, b : 1, c : 0 }
+{ a : 1, b : 1, c : 1 }
+</pre>
+<p>我们执行如下操作：</p>
+<pre class="brush: js">
+{
+  $group: {
+    _id: {a: "$a", b: "$b"},
+	c: {$max: "$c"}
+  }
+}
+</pre>
+<p>即可获得结果如下：</p>
+<pre class="brush: js">
+{ _id : { a : 0, b : 0 }, c : 1 }
+{ _id : { a : 0, b : 1 }, c : 1 }
+{ _id : { a : 1, b : 0 }, c : 1 }
+{ _id : { a : 1, b : 1 }, c : 1 }
+</pre>
+<p>其他累积运算符的用法也是类似，这里不再赘述。具体的用法可以参考<a href="https://docs.mongodb.org/manual/reference/operator/aggregation/#aggregation-pipeline-operator-reference" target="_blank">这里</a>。</p>
