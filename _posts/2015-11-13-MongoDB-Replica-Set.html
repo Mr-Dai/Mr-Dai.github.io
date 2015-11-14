@@ -1,0 +1,259 @@
+---
+layout: posts
+title: MongoDB Replica Set
+author: Robert Peng
+category: MongoDB
+---
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJScript.js"></script>
+<h2 class="jump">什么是Replica Set</h2>
+<p>
+	本篇文章将脱离基本的MongoDB数据存储和操作，立足于MongoDB提供的高可用方案。MongoDB的高可用方案包括Replica Set和Sharding，
+	这篇文章将介绍MongoDB的Replica Set。
+</p>
+<p>
+	Replica Set由一组<code>mongod</code>实例组成，这些<code>mongod</code>都维护着相同的数据集。
+	其中一个被称为<code>Primary</code>（等同于<code>Master</code>）的<code>mongod</code>负责接受所有写操作。
+	其他的被称为<code>Secondary</code>（等同于<code>Slave</code>）的<code>mongod</code>也会执行这些操作，以与<code>Primary</code>进行同步。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/replica-set-read-write-operations-primary.png" /></p>
+<p>
+	<code>Primary</code>会将发生在数据集上的改动记录在自己的<a href="#oplog">oplog</a>中，其他<code>Secondary</code>则负责复制<code>Primary</code>的oplog，
+	并把相关的改动应用在自己的数据集上。由此，<code>Secondary</code>将始终持有与<code>Primary</code>完全相同的数据。
+</p>
+<p>
+	Replica Set中的任何成员都可以接受客户端发来的读请求，但默认情况下，应用程序的驱动程序只会把读请求发往<code>Primary</code>。
+	必须通过设置<a href="#read-preference">Read Preference</a>才能改变这种行为。
+</p>
+<p>
+	整个Replica Set通过在实例间发送心跳信号来互相知会哪些实例在正常运转，任意一个实例都会与其他所有实例进行心跳通信。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/replica-set-primary-with-two-secondaries.png" /></p>
+<p>
+	当<code>Primary</code>超过10秒不与Replica Set中其他成员通信时，Replica Set则认为该<code>Primary</code>因各种原因不可用了（断电、断网、死机）。
+	此时，<code>Secondary</code>们会开始<a href="#election">选举</a>，得票最高的<code>Secondary</code>则成为新的<code>Primary</code>。
+	Replica Set的这项特性被称为<a href="#automatic-failover">Automatic Failover</a>（自动恢复）。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/replica-set-trigger-election.png" /></p>
+<p>
+	除此之外，Replica Set中还可以存在一种特殊的<code>Secondary</code>，它不负责备份任何数据，只负责在<code>Primary</code>不可用时进行投票，
+	这样的<code>Secondary</code>被称为<a href="#arbiter">Arbiter</a>（仲裁者）。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/replica-set-primary-with-secondary-and-arbiter.png" /></p>
+<p>
+	在<code>Primary</code>不可用时，其他某个<code>Secondary</code>可能成为新的<code>Primary</code>，而原本的<code>Primary</code>在重新上线后变为<code>Secondary</code>，
+	但<code>Arbiter</code>永远都是<code>Arbiter</code>。
+</p>
+<p>接下来我会逐个介绍每个相关概念。</p>
+<hr />
+
+<h2 class="jump" id="data-synchronization">Replica Set 主从数据同步</h2>
+<p>
+	为确保每个<code>Secondary</code>上都能保持一份最新的数据备份，Replica Set的实例间会相互进行同步。具体而言，MongoDB所使用的同步方式可以被分为两种形式：
+	MongoDB会使用<a href="initial-sync">初始化同步</a>为新加入的成员在本地迅速生成一份完整的数据备份；在这之后，便不断地将数据集发生的变化同步应用在备份数据集上，
+	以确保<code>Secondary</code>的数据集能和<code>Primary</code>保持同步。
+</p>
+<p>接下来我们就分开来看一下这两种同步形式。</p>
+<h3 id="initial-sync">初始化同步</h3>
+<p>
+	当新的<code>mongod</code>实例加入Replica Set，或者某个旧的成员的同步状态落后太多，以至于<code>Primary</code>的oplog中某些它还未同步的修改记录已经被覆写，
+	这时候就需要进行一次初始化同步了。初始化同步相当于从同步源将整个数据集复制到本地，这个过程大概包含三个方面：
+</p>
+<ul>
+  <li>复制同步源上的所有Database。这个过程也会同时创建<code>_id</code>索引；</li>
+  <li>开始使用同步源的oplog将后来发生的数据集变动应用到本地的备份数据集上。这个过程在后面会一直进行，以始终确保<code>Secondary</code>的同步性；</li>
+  <li>为所有Collection构建除<code>_id</code>外的其他索引。</li>
+</ul>
+<p>在上述三步完成后，新的节点也就会进入到了正常运转的状态，成为一个可用的<code>Secondary</code>。</p>
+<p>有关手动初始化同步的更多细节，详见<a href="https://docs.mongodb.org/manual/tutorial/resync-replica-set-member/">这里</a>。</p>
+<p>接下来我们来讲述第二种同步形式。</p>
+<hr />
+
+<h2 class="jump" id="oplog">Replica Set Oplog</h2>
+<p>
+	<code>Oplog</code>（operations log）是用于保存所有应用在数据库上的数据修改。MongoDB会把数据库的写操作发往<code>Primary</code>，
+	由<code>Primary</code>将该操作所产生的数据修改记录到oplog上。其他所有的<code>Secondary</code>将异步地将<code>Primary</code>的oplog复制到本地并将其中的数据修改应用到自己的数据集中。
+	所有的<code>mongod</code>实例都会有一个自己的oplog，储存在<code>local.oplog.rs</code>中。
+</p>
+<h3>Replica Set数据同步的异步性</h3>
+<p>
+	<code>Secondary</code>与<code>Primary</code>之间的同步实际上是异步的。当用户发送写操作到<code>Primary</code>时，<code>Primary</code>在oplog上写下记录并将操作应用在自己的数据集上，
+	然后便会立刻向客户端返回写操作的结果（成功或失败、修改了多少个Document）。同步的同步操作会使得<code>Primary</code>等到所有的<code>Secondary</code>都将该操作应用到自己的数据集上时才向客户端返回响应，
+	而MongoDB Replica Set的同步操作是异步的，<code>Primary</code>不会等待其他<code>Secondary</code>。<code>Secondary</code>通过心跳信号发现<code>Primary</code>的oplog上的新修改后才会将其复制到自己的oplog上，
+	并应用在自己的数据集上。
+</p>
+<h3>Oplog记录的幂等性</h3>
+<p>
+	<code>Primary</code>并不会把用户传来的写操作直接原封不动地记录在oplog上，oplog上记录的操作必须确保是幂等的（idempotent）。所谓幂等，即指这些操作对于同一个Collection，无论应用多少次都应产生相同的输出。
+</p>
+<p>
+	举个例子。比如说我们发送了一个删除记录的请求：<code>db.users.remove({ age : 30 })</code>。这个记录删除掉<code>users</code>中所有年龄为30的用户记录。这个操作不是幂等的，因为对于同一个<code>users</code>，
+	<code>users</code>中的数据将会影响请求执行的结果。实际上，<code>Primary</code>接收到这样的请求，真正记录到oplog上的请求会是：
+</p>
+<pre class="brush: js">
+db.users.remove({ _id : ... })
+db.users.remove({ _id : ... })
+db.users.remove({ _id : ... })
+db.users.remove({ _id : ... })
+db.users.remove({ _id : ... })
+</pre>
+<p>
+	也就是说，<code>Primary</code>会先计算这个操作所会影响的Document，并在oplog中写下对这些Document的修改。正是由于<code>_id</code>的唯一性，我们可以确保这样的记录是幂等的。
+</p>
+<hr />
+<h2 class="jump" id="read-preference">Read Preference</h2>
+<p>
+	客户端使用Read Preference来决定将读操作发往Replica Set的哪个成员，简单而言这是个Configuration相关的概念。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/replica-set-read-preference.png" /></p>
+<p>
+	默认的Read Preference会把读操作发往<code>Primary</code>。考虑到Replica Set数据同步的异步性，<code>Secondary</code>的备份数据集实际上总是滞后于<code>Primary</code>的状态的，
+	甚至有可能十分滞后以至于某个<code>Secondary</code>已经和<code>Primary</code>失去同步，这样的事实是客户端无法知晓的。因此，
+	将读操作发往<code>Primary</code>可以确保拿到的数据只会是最新的数据。
+</p>
+<p>
+	而对于那些对数据同步性要求不是那么高的应用程序，将读操作发往距离客户端最近的Replica Set成员可以有效地降低<code>Primary</code>的压力，提高客户端请求的响应速度。
+	总的来讲，可以直接从<code>Secondary</code>读取数据的应用程序用例包括如下几种：
+</p>
+<ul>
+  <li>执行不会影响前端应用程序的系统操作；</li>
+  <li>
+    直接从位于本地的Replica Set成员读取数据。在这种情况下，<code>Primary</code>可能距离客户端十分遥远，一次读操作光是花费在链路上的时间可能就达到了上百毫秒，
+	而直接访问位于本地数据中心的<code>Secondary</code>忘忘可以在几毫秒之内得到响应；
+  </li>
+  <li>确保应用程序在<code>Primary</code>不可用时不会受到影响。尽管MongoDB有着自动恢复的特性，但仍然需要花费几十秒的时间来重新选举出一个新的<code>Primary</code>。</li>
+</ul>
+<p>
+	但实际上，更多时候我们并不推荐使用这种读取模式，因为：
+</p>
+<ul>
+  <li>
+	Replica Set中的每个成员都有着大致相同的写操作压力。尽管写操作会被直接发往<code>Primary</code>，但数据的同步使得这些操作也会发生在每一个<code>Secondary</code>上，
+	而每一个写操作往往都隐含着读操作，因此Replica Set的每个成员也有着大致相同的读操作压力；
+  </li>
+  <li>
+    Replica Set的数据同步是异步的，这意味着<code>Secondary</code>的数据必然或多或少落后于<code>Primary</code>，从<code>Secondary</code>读取数据很有可能会拿到过时的数据；
+  </li>
+  <li>
+    读操作分布在<code>Secondary</code>上，这同样要求在某个<code>Secondary</code>不可用时，其他<code>Secondary</code>要能够处理所有这些多出来的请求。在某种程度上，
+	这样的读取模式会使得系统的可用性难以估量；
+  </li>
+</ul>
+<p>总的来看，在大多数时候，使用Shard来分散压力会是更好的选择。</p>
+<p>MongoDB驱动所支持的Read Preference包括如下几种：</p>
+<table class="table table-sriped">
+  <tr>
+    <th>Read Preference 模式</th>
+	<th>功能</th>
+  </tr>
+  <tr>
+    <td><a href="https://docs.mongodb.org/manual/reference/read-preference/#primary" target="_blank">primary</a></td>
+	<td>默认的模式，所有读操作都发往<code>Primary</code></td>
+  </tr>
+  <tr>
+    <td><a href="https://docs.mongodb.org/manual/reference/read-preference/#primaryPreferred" target="_blank">primaryPreferred</a></td>
+	<td>优先将读操作发往<code>Primary</code>，仅在<code>Primary</code>不可用时才把读操作发往<code>Secondary</code></td>
+  </tr>
+  <tr>
+    <td><a href="https://docs.mongodb.org/manual/reference/read-preference/#secondary" target="_blank">secondary</a></td>
+	<td>所有读操作都发往<code>Secondary</code></td>
+  </tr>
+  <tr>
+    <td><a href="https://docs.mongodb.org/manual/reference/read-preference/#secondaryPreferred" target="_blank">secondaryPreferred</a></td>
+	<td>优先将读操作发往<code>Secondary</code>，仅在所有<code>Secondary</code>都不可用时才把读操作发往<code>Primary</code></td>
+  </tr>
+  <tr>
+    <td><a href="https://docs.mongodb.org/manual/reference/read-preference/#nearest" target="_blank">nearest</a></td>
+	<td>将读操作发往与客户端有着最低网络延迟（最“近”）的Replica Set成员，不管它是<code>Primary</code>还是<code>Secondary</code></td>
+  </tr>
+</table>
+<p>有关Read Preference的更多内容，详见<a href="https://docs.mongodb.org/manual/core/read-preference-mechanics" target="_blank">这里</a>。</p>
+<hr />
+
+<h2 class="jump" id="automatic-failover">Replica Set 自动恢复</h2>
+<p>
+	MongoDB Replica Set的高可用性体现在其所提供的自动恢复功能上。当Replica Set的<code>Primary</code>因各种原因而不可用时，
+	Replica Set的自动恢复特性使得某个<code>Secondary</code>可以升级为<code>Primary</code>而替代原本的已经不可用的<code>Primary</code>。
+	这个过程是完全自动的，不需要任何人的手动干预即可自然发生。
+</p>
+<p>Replica Set的自动恢复特性包含两个方面：</p>
+<ul>
+  <li><code>Secondary</code>会在发现<code>Primary</code>不可用时进行<a href="#election">选举</a>，获得最高票数的<code>Secondary</code>成为新的<code>Primary</code>；</li>
+  <li>有些情况下，自动恢复的过程可能还需要进行一次<a href="#rollback">回滚</a>。</li>
+</ul>
+<p>接下来我们逐个看一下这两种不同的恢复动作。</p>
+<h3 id="election">Replica Set 选举</h3>
+<p>
+	Replica Set会使用选举的形式来决定谁成为<code>Primary</code>。这个过程在启动Replica Set时会发生一次。在Replica Set运行的过程中，
+	每当其他<code>Secondary</code>达成共识认为<code>Primary</code>已经不可用时，它们就会发起一次选举，得票数最高的<code>Secondary</code>成为新的<code>Primary</code>。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/replica-set-trigger-election.png" /></p>
+<p>
+	尽管这样的功能十分fancy，但选举的过程仍然是需要时间的。在进行选举时，整个Replica Set没有<code>Primary</code>，因此整个Replica Set也无法接受任何写操作，所有的结点都会是只读的。
+	因此，MongoDB会尽可能地避免进行选举。
+</p>
+<p>除了上述两种情况，当<code>Primary</code>降级时，Replica Set也会进行一次选举。总的来说，<code>Primary</code>在如下情况下会降级：</p>
+<ul>
+  <li>接收到<a href="https://docs.mongodb.org/manual/reference/command/replSetStepDown/#dbcmd.replSetStepDown" target="_blank">replSetStepDown</a>命令；</li>
+  <li>某个<code>Secondary</code>被选举为新的<code>Primary</code>而且它有更高的优先级；</li>
+  <li><code>Primary</code>无法连接到Replica Set中的其他大多数成员（<code>Primary</code>会得出自己已经断网了的结论）。</li>
+</ul>
+<p>
+	Replica Set通过让每个成员相互之间发送心跳信号来判断某个成员是否已经变得不可用。因此，成员所处的网络拓补结构将会影响选举的结果。
+	在选取网络拓补结构时，我们应确保在某个<code>Primary</code>节点不可用时，剩下的节点确实能够选举出新的<code>Primary</code>，因为<code>Secondary</code>成为新的<code>Primary</code>除了需要得到最高的票数，
+	要需要其所得票数超过一定的阈值（大约是成员数的三分之二）。如果有相当一部分成员同时不可用，Replica Set将始终无法收集到足够多的票数，那么Replica Set将无法选举出新的<code>Primary</code>。
+	由此，我们应该将Replica Set的大多数投票成员以及所有可以成为<code>Primary</code>的成员放置在与应用程序系统相同的设施中，使得Replica Set不至于因为网络隔离而无法收集到大多数成员的选票。
+</p>
+<p>更多有关选举的内容，详见<a href="https://docs.mongodb.org/manual/core/replica-set-elections/" target="_blank">这里</a>。</p>
+<h3 id="rollback">回滚</h3>
+<p>
+	Replica Set的<code>Secondary</code>在发现<code>Primary</code>前是需要花费一些时间的：每个成员每隔两秒会发送一次心跳信号，如果该心跳信号在10秒内没有收到某个节点的响应，
+	则这个节点被标记为“不可达”；当大多数<code>Secondary</code>都将<code>Primary</code>标记为“不可达”时，它们才会达成共识认为<code>Primary</code>已经从Replica Set不可达。
+	而原本的<code>Primary</code>如果只是从大多数节点不可达但不是因为断电或死机之类的原因导致其不可用的话，它在意识到自己已经不可达并主动降级为<code>Secondary</code>前也会经过一定的时间。
+</p>
+<p>
+	然而网络环境是复杂的。有些时候，Replica Set成员间的不可达并不代表这个结点是客户端所不可达的。在Replica Set的<code>Secondary</code>选举出新的<code>Primary</code>以及原有的<code>Primary</code>主动降级之前，
+	只要客户端仍能连接上原本的<code>Primary</code>，那么客户端就会认为一切正常，依旧将写操作发往这个原有的<code>Primary</code>，尽管由于该<code>Primary</code>已与大多数<code>Secondary</code>无法连接，
+	这些写操作很有可能永远不会被同步到其他<code>Secondary</code>上。
+</p>
+<p>
+	在选举的过程中，<code>Secondary</code>们会倾向于将票投给拥有最“新”的备份数据（上一次备份时间最近）的<code>Secondary</code>。但尽管如此，
+	原本的<code>Primary</code>仍然可能已经执行了其他所有<code>Secondary</code>都没有同步的数据修改。在原本的<code>Primary</code>降级为<code>Secondary</code>，
+	或者说它以<code>Secondary</code>的身份重新加入Replica Set时，这些数据修改是仍然会保留在它的本地数据里的。
+</p>
+<p>
+	这个时候，为了让它与新的<code>Primary</code>进行同步，它会根据自己的oplog对本地数据进行回滚，撤销那些未同步的数据修改，然后再从新的<code>Primary</code>上同步新的数据修改。
+	尽管很可惜，但遗憾的是，这些没能被同步的修改确实会被抛弃掉。
+</p>
+<p>
+	由于MongoDB的这项设置，我们需要确保Replica Set中的成员全都有着大致相同的性能。由于网络不可达而导致回滚是一回事，但如果<code>Secondary</code>由于性能限制无法跟上<code>Primary</code>的节拍，
+	<code>Secondary</code>的备份数据则会始终落后于<code>Primary</code>，也就导致<code>Primary</code>在降级时需要回滚更多的操作了。由此我们也可以认识到，
+	同一个Replica Set中的所有成员都始终经受着大致相同的读写压力，企图通过将读操作分布在不同的Replica Set成员上来提高吞吐量并不是最好的做法，更好的做法应该是使用Shard。
+</p>
+<p>更多有关回滚的内容，详见<a href="https://docs.mongodb.org/manual/core/replica-set-rollbacks/" target="_blank">这里</a>。</p>
+<hr />
+
+<h2 class="jump" id="arbiter">Arbiter</h2>
+<p>
+	正如我之前所说，一旦涉及到分布式，网络环境可能出现的情况是繁杂多样的，我们很难考虑全面。考虑这么一种情况：你的Replica Set中有两个服务器，突然<code>Primary</code>不可用了。
+	实际上在这个时候，你的Replica Set无法进行自动恢复，因为整个Replica Set中只剩下一个可用的<code>Secondary</code>，它无法获得“大多数”的选票，因为它只能获得它自己的那一票，
+	而整个Replica Set有两张票，50%可不是“大多数”。最直观的解决方案，便是为Replica Set引入一名新的成员。在成员数为3的情况下，任意一名成员不可用都不会导致Replica Set无法自动恢复，
+	因为新的<code>Primary</code>会在选举时获得2/3的票数，正好属于“大多数”。
+</p>
+<p>
+	但这个解决方案有个不好的地方。我们引入一个新的节点只是为了打破原有结构的选票平局，我们真正需要的是它的选票。但加入Replica Set成为<code>Secondary</code>意味着它也要备份<code>Primary</code>的数据，
+	经受和<code>Primary</code>相当的读写压力，也就要求它的性能起码能与<code>Primary</code>相当了。这么想来，性价比还是比较低的。MongoDB为此提供的解决方案，便是Arbiter（仲裁者）。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/replica-set-primary-with-secondary-and-arbiter.png" /></p>
+<p>
+	<code>Arbiter</code>也是Replica Set的成员，但它不是<code>Secondary</code>：<code>Arbiter</code>会在Replica Set发起选举时参与投票，但它不会像<code>Secondary</code>那样备份<code>Primary</code>的数据，
+	而这正是我们想要的：我们想要的就是<code>Arbiter</code>的投票能力。没有了备份<code>Primary</code>数据所带来的读写压力，<code>Arbiter</code>的性能要求实际上会很低很低，
+	我们完全可以用一台小型机来支撑起一个担任<code>Arbiter</code>的<code>mongod</code>。
+</p>
+<p>更多关于Arbiter的内容，详见<a href="https://docs.mongodb.org/manual/core/replica-set-members/#replica-set-arbiters" target="_blank">这里</a>。</p>
+<hr />
+
+<h2 class="jump">结语</h2>
+<p>
+	关于MongoDB高可用解决方案之一的Replica Set，其分布式备份的功能固然使其需要考虑更多的情况。本文只是对Replica Set相关概念的一个Intro，更多详细内容还需直接查阅MongoDB的Docs。
+	Anyway, I did what I could. Hopefully you can enjoy it.
+</p>

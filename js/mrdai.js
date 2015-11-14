@@ -5,7 +5,8 @@ function branchJumpBinding() {
     // 若本页无跳转目标则隐藏跳转目录
     // 加入#right_wrapper li的个数判断是为了防止index页的#right_wrapper被隐藏
     $.each(jumpDest, function(n, value) {
-        value.id = "index_" + (n+1);
+		if (value.id == "")
+			value.id = "index_" + (n+1);
         jumpList.append("<li><a href='#"+value.id+"'>"+value.innerHTML+"</a></li>");
     });
 }
