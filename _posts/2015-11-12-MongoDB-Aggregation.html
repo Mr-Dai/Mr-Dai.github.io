@@ -452,3 +452,20 @@ db.orders.aggregate(
 { _id : { a : 1, b : 1 }, c : 1 }
 </pre>
 <p>其他累积运算符的用法也是类似，这里不再赘述。具体的用法可以参考<a href="https://docs.mongodb.org/manual/reference/operator/aggregation/#aggregation-pipeline-operator-reference" target="_blank">这里</a>。</p>
+<hr />
+
+<h2 class="jump">Aggregation的局限</h2>
+<p>尽管MongoDB Aggregation和SQL Aggregation相同，都会是我们日常生产所必须用到的工具，但在使用的时候，MongoDB Aggregation相关的几个条件限制也是我们所需要考虑的。</p>
+<h3>最大内存占用：100MB</h3>
+<p>
+	MongoDB Aggregation为单个Stage所能分配的最大内存为100MB，当某个Stage的内存占用超过100MB时，你可能就拿不到结果了。因此，我们应将<code>$match</code>等可削减Document数量的Stage放在尽可能靠前的位置，
+	以免某个Stage产生了过大的中间结果。如果无论如何都需要使用上超过100MB的内存，可以在为<code>aggregate</code>方法加上<code>allowDiskUse: true</code>参数，
+	允许其使用磁盘空间来辅助计算。
+</p>
+<p>更多有关<code>allowDiskUse</code>的内容，详见<a href="https://docs.mongodb.org/manual/reference/method/db.collection.aggregate/#db.collection.aggregate" target="_blank">这里</a>。</p>
+<h3>单个结果Document最大体积：16MB</h3>
+<p>
+	MongoDB Document不能超过16MB大小这一限制来自于其所使用的BSON格式的大小限制。鉴于Aggregation产生的结果固然也会以BSON Document的形式传递给客户端，
+	自然单个结果Document也不能超过16MB。
+</p>
+<p>更多有关Aggregation限制的内容，详见<a href="https://docs.mongodb.org/manual/core/aggregation-pipeline-limits/" target="_blank">这里</a>。</p>

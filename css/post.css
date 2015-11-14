@@ -14,6 +14,11 @@
     background: rgb(249,249,249);
 }
 
+h3 {
+	font-size: 18px;
+	color: black;
+}
+
 blockquote p {
 	margin: 0;
 }
