@@ -1,6 +1,6 @@
 ---
 layout: posts
-title: MongoDB Replica Set 部署教程
+title: MongoDB 分布式部署教程
 author: Robert Peng
 category: MongoDB
 ---
@@ -199,4 +199,37 @@ for (int i = 0; i &lt; Integer.MAX_VALUE; i++) {
 	驱动便可以再次进行写操作了。
 </p>
 <p>通过观察MongoDB Java驱动输出的日志信息，你可以更细致地观察驱动的行为。这里就不直接给出了，有兴趣可自己尝试。</p>
+<hr />
+<h2 class="jump">Shard 部署</h2>
+<p>在本节中，我们将会部署一个由3个Replica Set组成的Shard，其中每个Replica Set由三个成员组成。</p>
+<p>假设我们已经通过上述的教程成功部署了这3个Replica Set：</p>
+<pre class="brush: js">
+{
+  _id : "rs1",
+  members : [
+    { _id : 1, host : "localhost:27001" },
+    { _id : 2, host : "localhost:27002" },
+    { _id : 3, host : "localhost:27003" }
+  ]
+}
+
+{
+  _id : "rs2",
+  members : [
+    { _id : 4, host : "localhost:27004" },
+    { _id : 5, host : "localhost:27005" },
+    { _id : 6, host : "localhost:27006" }
+  ]
+}
+
+{
+  _id : "rs3",
+  members : [
+    { _id : 7, host : "localhost:27007" },
+    { _id : 8, host : "localhost:27008" },
+    { _id : 9, host : "localhost:27009" }
+  ]
+}
+</pre>
+	
 
