@@ -200,36 +200,126 @@ for (int i = 0; i &lt; Integer.MAX_VALUE; i++) {
 </p>
 <p>通过观察MongoDB Java驱动输出的日志信息，你可以更细致地观察驱动的行为。这里就不直接给出了，有兴趣可自己尝试。</p>
 <hr />
-<h2 class="jump">Shard 部署</h2>
-<p>在本节中，我们将会部署一个由3个Replica Set组成的Shard，其中每个Replica Set由三个成员组成。</p>
-<p>假设我们已经通过上述的教程成功部署了这3个Replica Set：</p>
+<h2 class="jump">Shard 集群部署</h2>
+<p>
+	在本节中，我们将会在本机上部署一个完整的生产级别的MongoDB Shard集群。集群由4个Shard负责存储数据，其中每个Shard都是包含三个结点的Replica Set。
+	除此之外，集群还包括4个<code>mongos</code>和3个Config Server。
+</p>
+<p class="bg-danger" style="padding-left: 3px">
+	<b>注意</b>，用于生产环境的Shard集群必须遵循如下几个原则：<b>必须</b>使用Replica Set来作为Shard，任何一个Shard的不可用都会导致集群出现异常；
+	<b>必须</b>使用正好3个Config Server，Config Server不可用将导致整个集群不可用。除此之外，使用两个以上的<code>mongos</code>实例可以更好地分散压力。
+</p>
+<p>4个Replica Set的信息分别如下：</p>
 <pre class="brush: js">
 {
-  _id : "rs1",
+  _id : "a",
   members : [
-    { _id : 1, host : "localhost:27001" },
-    { _id : 2, host : "localhost:27002" },
-    { _id : 3, host : "localhost:27003" }
+    { _id : "a1", host : "localhost:27001" },
+    { _id : "a2", host : "localhost:27002" },
+    { _id : "a3", host : "localhost:27003" }
   ]
 }
 
 {
-  _id : "rs2",
+  _id : "b",
   members : [
-    { _id : 4, host : "localhost:27004" },
-    { _id : 5, host : "localhost:27005" },
-    { _id : 6, host : "localhost:27006" }
+    { _id : "b1", host : "localhost:27101" },
+    { _id : "b2", host : "localhost:27102" },
+    { _id : "b3", host : "localhost:27103" }
   ]
 }
 
 {
-  _id : "rs3",
+  _id : "c",
   members : [
-    { _id : 7, host : "localhost:27007" },
-    { _id : 8, host : "localhost:27008" },
-    { _id : 9, host : "localhost:27009" }
+    { _id : "c1", host : "localhost:27201" },
+    { _id : "c2", host : "localhost:27202" },
+    { _id : "c3", host : "localhost:27203" }
+  ]
+}
+
+
+{
+  _id : "d",
+  members : [
+    { _id : "d1", host : "localhost:27301" },
+    { _id : "d2", host : "localhost:27302" },
+    { _id : "d3", host : "localhost:27303" }
   ]
 }
 </pre>
-	
+<h3>集群各成员启动</h3>
+<p>首先我们分别启动集群的各个成员，分别是Shard、Config Server和Query Router。其中前两种成员均为<code>mongod</code>，而Query Router则是<code>mongos</code>。</p>
+<p>
+	单个Replica Set的配置方式大致上无太大变化，只是作为Shard Server在启动<code>mongod</code>时需要加上<kbd>--shardsvr</kbd>选项。
+	以Replica Set <code>a</code>为例：
+</p>
+<pre class="brush: bash">
+mkdir a{1,2,3}
+
+mongod --shardsvr --replSet a --dbpath a1 --logpath log.a1 --port 27001 --fork
+mongod --shardsvr --replSet a --dbpath a2 --logpath log.a2 --port 27002 --fork
+mongod --shardsvr --replSet a --dbpath a3 --logpath log.a3 --port 27003 --fork
+</pre>
+<p class="bg-info" style="padding-left: 3px">
+	<b>注</b>：当<code>--shardsvr</code>选项被打开时，<code>mongod</code>的默认端口号变为<b>27018</b>。
+</p>
+<p>
+	再使用<code>mongo</code>连接至任意一个<code>mongod</code>实例，启动Replica Set：
+</p>
+<pre class="brush: js">
+var conf = {
+  _id : "a",
+  members : [
+    { _id : "a1", host : "localhost:27001" },
+    { _id : "a2", host : "localhost:27002" },
+    { _id : "a3", host : "localhost:27003" }
+  ]
+}
+
+rs.initiate(conf)
+</pre>
+<p>重复上述操作即可启动其余三个Replica Set。</p>
+<p>
+	接下来开始启动Config Server：
+</p>
+<pre class="brush: bash">
+mkdir cfg{1,2,3}
+
+mongod --configsvr --dbpath cfg1 --logpath log.cfg1 --port 26050 --fork
+mongod --configsvr --dbpath cfg2 --logpath log.cfg2 --port 26051 --fork
+mongod --configsvr --dbpath cfg3 --logpath log.cfg3 --port 26052 --fork
+</pre>
+<p class="bg-info" style="padding-left: 3px">
+	<b>注</b>：当<code>--configvr</code>选项被打开时，<code>mongod</code>的默认端口号变为<b>27019</b>。
+</p>
+<p>最后，启动Query Router：</p>
+<pre class="brush: bash">
+mongos --configdb localhost:26050,localhost:26051,localhost:26052 --logpath log.mongos1 --fork
+mongos --configdb localhost:26050,localhost:26051,localhost:26052 --logpath log.mongos2 --port 26061 --fork
+mongos --configdb localhost:26050,localhost:26051,localhost:26052 --logpath log.mongos3 --port 26062 --fork
+mongos --configdb localhost:26050,localhost:26051,localhost:26052 --logpath log.mongos4 --port 26063 --fork
+</pre>
+<p class="bg-info" style="padding-left: 3px">
+	<b>注</b>：<code>mongos</code>的默认端口号为<b>27017</b>，与<code>mongod</code>、<code>mongo</code>的默认端口号相同。
+</p>
+<p>如此一来，集群的各个成员都启动完毕了，可以开始配置集群了。</p>
+<h3>添加Shard</h3>
+<p>
+	实际上，在启动<code>mongos</code>时，我们已经指定了集群所使用的Config Server的地址。接下来就是为集群指定每个Shard的地址了。
+</p>
+<p>
+	打开<code>mongo</code>连接至任意一个<code>mongos</code>，并执行如下指令：
+</p>
+<pre class="brush: bash">
+sh.addShard("a/localhost:27001")
+sh.addShard("b/localhost:27101")
+sh.addShard("c/localhost:27201")
+sh.addShard("d/localhost:27301")
+</pre>
+<p>
+	注意到，我们添加Shard时，输入了Replica Set的名称以及其中一个成员的地址。该成员并不一定得是<code>Primary</code>，只要它是该Replica Set的成员，
+	<code>mongos</code>就能自动发现Replica Set的其他所有成员。
+</p>
+<p>在添加了4个Shard以后，整个Shard集群便配置完毕，可以开始使用了。</p>
 
