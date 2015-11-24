@@ -3,15 +3,16 @@
 	min-width: 500px;
 	padding-top: 0px;
 	padding-right: 20px;
+	border-right: none;
+}
+
+#right_wrapper {
+	border-left: solid 1px rgb(221, 221, 221);
 }
 
 #content_wrapper {
 	padding: 0 20px;
 	line-height: 30px;
-}
-
-.syntaxhighlighter table {
-    background: rgb(249,249,249);
 }
 
 h3 {
@@ -21,4 +22,8 @@ h3 {
 
 blockquote p {
 	margin: 0;
+}
+
+.syntaxhighlighter .toolbar {
+	display: none;
 }

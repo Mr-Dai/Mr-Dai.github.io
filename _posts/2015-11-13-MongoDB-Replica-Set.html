@@ -169,6 +169,78 @@ db.users.remove({ _id : ... })
 <p>有关Read Preference的更多内容，详见<a href="https://docs.mongodb.org/manual/core/read-preference-mechanics" target="_blank">这里</a>。</p>
 <hr />
 
+<h2 class="jump" id="write-concern">Write Concern</h2>
+<p>前文的Read Preference决定了驱动程序从Replica Set读取数据时的行为，而相对的Write Concern则决定了驱动程序写数据时的行为。</p>
+<p>
+	实际上，比起只用于Replica Set的Read Preference，Write Concern还适用于standalone的MongoDB实例。
+	驱动程序在发出写操作请求时同时发出Write Concern，MongoDB实例则会根据Write Concern的设置来决定什么时候给客户端返回写操作成功的响应。
+	因此，对于越强的Write Concern，当MongoDB成功返回响应时，你就更能确定数据已被安全保存。但实际上，越强的Write Concern往往需要更多的时间等到MongoDB返回。
+</p>
+<p>Write Concern由三个参数组成，分别是<code>w</code>、<code>j</code>和<code>wtimeout</code>。接下来将一一介绍。</p>
+<h3>w参数</h3>
+<p>
+  <code>w</code>参数决定了MongoDB在多少个实例上写入数据后返回响应。该响应实际上是在MongoDB将数据写入到内存缓存后返回，
+  因此返回后仍有可能因为断电等原因导致内存缓存丢失从而丢失该操作引起的数据修改。更高等级的Write Concern需由<code>j</code>参数给出，
+  我们将在后文讲述。
+</p>
+<p><code>w</code>参数可选的值包括如下：</p>
+<table class="table">
+  <tr>
+    <th>值</th>
+	<th>功能</th>
+  </tr>
+  <tr>
+    <td>1</td>
+	<td>默认值，在standalone的MongoDB实例或者Replica Set的<code>Primary</code>成功执行该写操作后返回响应。</td>
+  </tr>
+  <tr>
+    <td>0</td>
+	<td>
+	  完全关闭MongoDB的执行响应，但由网络错误引起的Exception仍会抛出。<br />值得注意的是，即使使用了该设定，
+	  如果你还用<code>j</code>参数要求MongoDB返回日志提交的响应，MongoDB还是会返回写操作响应的。
+	</td>
+  </tr>
+  <tr>
+    <td>>1 的任意整数</td>
+	<td>
+	  MongoDB会确保该操作顺利传播到指定数量的Replica Set成员上再返回。<br /><b>注意</b>，如果设定的值大于Replica Set的总成员数，
+	  MongoDB会继续等待那些“不存在”的成员接收到该操作，这意味着驱动可能会一直阻塞。此时我们应使用<code>wtimeout</code>参数。
+	</td>
+  </tr>
+  <tr>
+    <td>"majority"</td>
+	<td>MongoDB确保该操作顺利传播到大多数Replica Set数据成员上后返回。</td>
+  </tr>
+  <tr>
+    <td>&lt;tag set></td>
+	<td>
+	  MongoDB确定该操作顺利传播到属于给定Tag Set的Replica Set成员上后返回。<br />
+	  关于Tag Set，详见<a href="https://docs.mongodb.org/manual/tutorial/configure-replica-set-tag-sets/#replica-set-configuration-tag-sets" target="_blank">这里</a>。
+	</td>
+  </tr>
+</table>
+<h3>j参数</h3>
+<p>
+  <code>j</code>参数决定了MongoDB是否要在将该操作成功写入到日志后再返回。<code>j</code>参数只有两种值：<code>false</code>和<code>true</code>。
+  当设定为<code>j: true</code>时，驱动将会等待MongoDB把该写操作记录到日志上以后再返回。
+</p>
+<p>
+  通常情况下，<code>j: true</code>意味着最高级别的Write Concern，操作一旦记录到日志上以后就意味着该改动已被安全保存，即使因断电导致内存数据丢失，
+  MongoDB实例在重新启动时也可根据日志恢复该操作。不过，对于Replica Set的<code>Primary</code>而言，如果该操作在传播到其它Replica Set成员的oplog之前，
+  该<code>Primary</code>就降级了的话，在该结点重新上线时还是会回滚该操作，导致该操作丢失。因此，对于Replica Set而言，最安全的做法是<code>{w: "majority", j: true}</code>。
+</p>
+<h3>wtimeout参数</h3>
+<p>
+  <code>wtimeout</code>参数只在<code>w</code>被设定为大于1的值时才会生效，它用于为Write Concern设定以毫秒为单位的超时时间，
+  在时限到达后直接抛出错误。
+</p>
+<p>
+  如果你设定的<code>w</code>参数值大于Replica Set当前成员数且没有设置<code>wtimeout</code>，驱动将会一直阻塞。
+  设定<code>wtimeout: 0</code>会使MongoDB忽略该<code>wtimeout</code>参数。
+</p>
+<p>关于Write Concern的更多内容，请看<a href="https://docs.mongodb.org/manual/core/write-concern" target="_blank">这里</a>和<a href="https://docs.mongodb.org/manual/reference/write-concern/" target="_blank">这里</a>。</p>
+<hr />
+
 <h2 class="jump" id="automatic-failover">Replica Set 自动恢复</h2>
 <p>
 	MongoDB Replica Set的高可用性体现在其所提供的自动恢复功能上。当Replica Set的<code>Primary</code>因各种原因而不可用时，
@@ -200,7 +272,7 @@ db.users.remove({ _id : ... })
 <p>
 	Replica Set通过让每个成员相互之间发送心跳信号来判断某个成员是否已经变得不可用。因此，成员所处的网络拓补结构将会影响选举的结果。
 	在选取网络拓补结构时，我们应确保在某个<code>Primary</code>节点不可用时，剩下的节点确实能够选举出新的<code>Primary</code>，因为<code>Secondary</code>成为新的<code>Primary</code>除了需要得到最高的票数，
-	要需要其所得票数超过一定的阈值（大约是成员数的三分之二）。如果有相当一部分成员同时不可用，Replica Set将始终无法收集到足够多的票数，那么Replica Set将无法选举出新的<code>Primary</code>。
+	要需要其所得票数达到集群的总票数的大多数。如果有相当一部分成员同时不可用，Replica Set将始终无法收集到足够多的票数，那么Replica Set将无法选举出新的<code>Primary</code>。
 	由此，我们应该将Replica Set的大多数投票成员以及所有可以成为<code>Primary</code>的成员放置在与应用程序系统相同的设施中，使得Replica Set不至于因为网络隔离而无法收集到大多数成员的选票。
 </p>
 <p>更多有关选举的内容，详见<a href="https://docs.mongodb.org/manual/core/replica-set-elections/" target="_blank">这里</a>。</p>
