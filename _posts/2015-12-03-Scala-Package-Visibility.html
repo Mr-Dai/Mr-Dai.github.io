@@ -1,0 +1,225 @@
+---
+layout: posts
+title: Scala包可见性
+author: Robert Peng
+category: Scala
+---
+
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
+
+<h2 class="jump">前言</h2>
+<p>
+	在《快学Scala》的第<a href="/scala/2015/09/04/Scala-for-the-Impatient-5.html#private-this" target="_blank">5.4</a>、
+	<a href="/scala/2015/09/28/Scala-for-the-Impatient-7.html#package-visibility" target="_blank">7.6</a>、
+	<a href="/scala/2015/09/30/Scala-for-the-Impatient-8.html#protected" target="_blank">8.4</a>节中，
+	我们学习了如何在Scala中利用<code>public</code>、<code>protected</code>、<code>private</code>关键字，
+	结合包修饰符来设定类及成员的包可见范围。
+</p>
+<p>
+	但实际上，仅仅是这点点描述，感觉还是比较迷。
+</p>
+<hr />
+<h2 class="jump">Java包可见性</h2>
+<p>
+	先来小小地回顾一下Java的包可见性。
+</p>
+<p>
+	在Java里，改变包可见范围只能使用<code>public</code>、<code>protected</code>、<code>private</code>三个关键字，
+	其中<code>protected</code>和<code>private</code>不能用于修饰顶级类。除了由三个关键字指定的包可见级别，Java还包括一个默认的包可见级别，
+	未使用上述三个关键字修饰的成员和类即默认获得该可见级别。
+</p>
+<p>
+	四个可见级别的规律大致如下：
+</p>
+<table class="table">
+  <tr>
+    <th>可见级别</th>
+	<th>顶级类</th>
+	<th>成员</th>
+  </tr>
+  <tr>
+    <td><code>public</code></td>
+	<td>该类/接口可由任意类访问（实例化、继承、实现）</td>
+	<td>该成员可由任意类访问</td>
+  </tr>
+  <tr>
+    <td><code>protected</code></td>
+	<td>不可用</td>
+	<td>该成员可由其所属类的子类以及与其所属类处于同一包中的其他所有类访问</td>
+  </tr>
+  <tr>
+    <td>默认</td>
+	<td>只可被处于同一个包中的类访问。处于其所属包的子包中的类不能访问到它</td>
+	<td>只可被与其所属类处于同一包中的其他类访问</td>
+  </tr>
+  <tr>
+    <td><code>private</code></td>
+	<td>不可用</td>
+	<td>只可被其所属类的其他对象所访问</td>
+  </tr>
+</table>
+<p>
+	Java包可见级别的设定大致上有如下几个缺点：
+</p>
+<ul>
+  <li><code>private</code>的范围过大：只要两个对象属于同一个类，对象可以访问另一个对象的<code>private</code>成员</li>
+  <li>
+    <code>protected</code>的范围过大：C++的<code>protected</code>只能被子类所访问，而Java的<code>protected</code>还允许同一包中的其他非子类所访问，
+	一定程度上引起了C++程序员的误用
+  </li>
+  <li>
+    <code>protected</code>到<code>public</code>之间的跨度过大
+  </li>
+</ul>
+<p>实际上，这些缺点并不算是什么很严重的缺点，充其量只能说Java的三个关键字的表达能力不足。那么我们接下来看看Scala。</p>
+<hr />
+<h2 class="jump">Scala包可见性</h2>
+<p>
+	Scala移除了Java的<code>public</code>关键字，在剩余两个关键字的基础上引入了包修饰符的概念，极大地提高了其包可见性的表达能力。
+	包修饰符只能与两个关键字结合使用，因此Scala有5种可见级别：
+	<code>private</code>、<code>private[]</code>、<code>protected</code>、<code>protected[]</code>、默认。
+</p>
+<h3 id="private">private</h3>
+<p>
+	当一个成员被声明为<code>private</code>时，只有其所属类和其伴生对象或其所属对象和其伴生类可以访问。
+</p>
+<p>
+  <code>private</code>修饰符可由一个标识符<code>C</code>所修饰（即<code>private[C]</code>），<code>C</code>必须为包含该定义的类的名或包的名。
+  由此，该成员便可被处于包<code>C</code>或者类<code>C</code>及其伴生对象之中的代码所访问。
+</p>
+<p>
+  <code>private[this]</code>是一种较为特殊的修饰形式。被这样的修饰符所标识的成员是 <i>object-private</i> 的：它只能被定义它的对象所访问。
+</p>
+<p>
+  被未被修饰的<code>private</code>修饰符所标识的成员被称为是 <i>class-private</i> 的。如果一个成员是 <i>object-private</i> 或 <i>class-private</i> 的，我们则说它是<i>私有</i>的（<i>private</i>）。
+  但被<code>private[C]</code>标识的成员则不属于这种情况，它们被称为是 <i>qualified private</i> 的。
+</p>
+<p>
+  <i>object-private</i> 和 <i>class-private</i> 的成员不能是 <i>abstract</i> 的，它们也不可以有<code>protected</code>和<code>override</code>修饰符。
+  它们不会被子类所继承，也不会重载父类中的定义。
+</p>
+<p>原文见<a href="http://www.scala-lang.org/files/archive/spec/2.11/05-classes-and-objects.html#private" target="_blank">Scala Specification</a>。</p>
+<p>
+  实际上，上文只提到了<code>private</code>用于修饰成员时的情形。尽管我们都很熟悉用<code>private[C]</code>来修饰一个顶级类会发生什么，但直接用<code>private</code>来修饰一个顶级类则不那么明显了。
+  实际上，这样做会使得该类在其所属的包内可见。但与Java的默认可见等级不同的是，该类所属包的子包下仍然可以访问该类。将顶级类声明为<code>private[this]</code>则和声明为<code>private</code>没什么不同。
+</p>
+</p>
+<h3>protected</h3>
+<p>
+  <code>protected</code>可被用于修饰类成员。这样的成员可在如下范围内被访问：
+</p>
+<ul>
+  <li>其所属的类</li>
+  <li>其所属类的子类</li>
+  <li>上述类的伴生对象</li>
+</ul>
+<p>
+  同样，<code>protected</code>可被标识符所修饰（即<code>protected[C]</code>），被这样的修饰符修饰的成员还能够在包<code>C</code>或者类<code>C</code>及其伴生对象之中的代码所访问。
+</p>
+<p>
+  同样，<code>protected[this]</code>是一种较为特殊的修饰形式。被这样的修饰符所标识的成员是 <i>object-protected</i> 的：它只能被定义它的对象所访问，与<code>private[this]</code>效果相同。
+</p>
+<p>原文见<a href="http://www.scala-lang.org/files/archive/spec/2.11/05-classes-and-objects.html#protected" target="_blank">Scala Specification</a>。</p>
+<p>
+  同样，上文也只提到了<code>protected</code>应用于类成员的效果。实际上，<code>protected</code>应用于顶级类的效果和<code>private</code>应用于顶级类的效果是完全相同的。
+</p>
+<h3>总结</h3>
+<p>
+  Scala的包可见性规律如下：
+</p>
+<table class="table">
+  <tr>
+    <th>可见类型</th>
+	<th>顶级类</th>
+	<th>类成员</th>
+  </tr>
+  <tr>
+    <td>默认（无可见性修饰符）</td>
+	<td>在任意位置可见。同Java的<code>public</code></td>
+	<td>在任意位置可见。同Java的<code>public</code></td>
+  </tr>
+  <tr>
+    <td><code>private</code></td>
+	<td>在类所属包及其子包内可见</td>
+	<td>在所属类及其伴生对象或所属对象及其伴生类内可见</td>
+  </tr>
+  <tr>
+    <td><code>private[C]</code></td>
+	<td>在包<code>C</code>及其子包或类<code>C</code>及其伴生对象内可见</td>
+	<td>在包<code>C</code>及其子包或类<code>C</code>及其伴生对象内可见。相当于在<code>private</code>的基础上加了个<code>[C]</code>所描述的可见范围</td>
+  </tr>
+  <tr>
+    <td><code>private[this]</code></td>
+	<td>在类所属包及其子包内可见。同<code>private</code></td>
+	<td>仅在定义该成员的对象内可见。</td>
+  </tr>
+  <tr>
+    <td><code>protected</code></td>
+	<td>在类所属包及其子包内可见。同<code>private</code></td>
+	<td>在所属类及其子类及它们的伴生对象内可见</td>
+  </tr>
+  <tr>
+    <td><code>protected[C]</code></td>
+	<td>在包<code>C</code>及其子包或类<code>C</code>及其伴生对象内可见。同<code>private[C]</code></td>
+	<td>
+	  除在在所属类及其子类及它们的伴生对象内可见外，还在包<code>C</code>及其子包或类<code>C</code>及其伴生对象内可见。
+	  相当于在<code>protected</code>的基础上加了个<code>[C]</code>所描述的可见范围
+	</td>
+  </tr>
+  <tr>
+    <td><code>protected[this]</code></td>
+	<td>在类所属包及其子包内可见。同<code>private</code></td>
+	<td>仅在定义该成员的对象内可见。同<code>private[this]</code></td>
+  </tr>
+</table>
+<h2 class="jump">Java眼中的Scala包可见性</h2>
+<p>其实也就一点点题外话，只是考虑到Java与Scala的互操作也很重要，所以在这里提一下。</p>
+<p>对于Scala眼中的Java包可见性，这个没什么可讲的，因为JVM本身也会在运行时检查字节码对类成员的访问是否合法，因此Scala眼中的Java包可见性不会发生偏差，该<code>public</code>还是<code>public</code>。</p>
+<p>
+  但对于Java眼中的Scala包可见性，实际上有看过我之前的<a href="/scala/2015/09/04/Scala-for-the-Impatient-5.html#private-this" target="_blank">博客</a>就能了解到，Scala中的<code>private[this]</code>实际上在编译后就变成了<code>private</code>。 
+  所有的Scala包可见性只能由<code>scalac</code>进行静态检查，一旦编译完成后，JVM在运行时就无法识别这些差异了。在这种情况下，用Scala开发的类库原本可能有着十分良好的包可见性设计，但在被Java代码调用时，这些限制就变得荡然无存了。
+  因此，对于Scala类库开发者而言，了解Scala包可见修饰符在编译后所对应的Java修饰符也是有必要的。
+</p>
+<p>实际上，这个对应关系可以归纳如下：</p>
+<table class="table">
+  <tr>
+    <th>可见类型</th>
+	<th>顶级类</th>
+	<th>类成员</th>
+  <tr>
+    <td>默认</td>
+	<td><code>public</code></td>
+	<td><code>public</code></td>
+  </tr>
+  <tr>
+    <td><code>private</code></td>
+    <td><code>public</code></td>	
+    <td><code>private</code></td>	
+  </tr>
+  <tr>
+    <td><code>private[C]</code></td>
+    <td><code>public</code></td>	
+    <td><code>public</code></td>	
+  </tr>
+  <tr>
+    <td><code>private[this]</code></td>
+    <td><code>public</code></td>	
+    <td><code>private</code></td>	
+  </tr>
+  <tr>
+    <td><code>protected</code></td>
+    <td><code>public</code></td>	
+    <td><code>protected</code></td>	
+  </tr>
+  <tr>
+    <td><code>protected[C]</code></td>
+    <td><code>public</code></td>	
+    <td><code>public</code></td>	
+  </tr>
+  <tr>
+    <td><code>protected[this]</code></td>
+    <td><code>public</code></td>	
+    <td><code>private</code></td>	
+  </tr>
+</table>

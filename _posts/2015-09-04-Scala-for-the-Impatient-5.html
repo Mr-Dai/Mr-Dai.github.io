@@ -243,7 +243,7 @@ fred.age = 30 // 有效，Fred的privateAge变为30
 fred.age = 21 // 无效，Fred的privateAge大于21，因此不会发生改变
 println(fred.age) // 30
 </pre>
-<h2 class="jump">5.4 对象私有字段</h2>
+<h2 class="jump" id="private-this">5.4 对象私有字段</h2>
 <p>
 	与Java/C++相同，通过为字段添加上<code>private</code>即可将其声明为类私有字段。对象私有字段只能被同一个类的对象所访问，
 	这意味着<code>A</code>类对象<code>a</code>实际上可以访问同为<code>A</code>类对象的<code>b</code>的类私有字段。
@@ -262,7 +262,7 @@ class Privacy {
 }
 </pre>
 <p>反编译结果为：</p>
-<pre class="brush: scala">
+<pre class="brush: java">
 public class Privacy {
 
     public Privacy() {}
@@ -279,7 +279,7 @@ public class Privacy {
 	我们看到，Scala像往常一样为类私有字段生成了一个getter，但并没有对对象私有字段生成任何getter。可见，尽管Java中的private仅能做到类私有，
 	考虑到Scala会把所有类字段的访问转换为对其getter的调用，不为对象私有字段生成getter和setter便能确保其无法被其他对象所访问。
 </p>
-<h2 class="jump">5.4 Bean属性</h2>
+<h2 class="jump">5.5 Bean属性</h2>
 <p>
 	正如我们之前所学的那样，Scala会为类的字段自动生成getter和setter方法，但从这些方法的命名上看，很明显这样的方法不是Java工具所预期的，
 	这样的方法无法被Spring、Hibernate等依赖于JavaBean规范的工具所使用。

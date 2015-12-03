@@ -88,3 +88,18 @@ if (p.isInstanceOf[Employee]) {
 	至于<code>classOf</code>，我个人觉得这个设计并不好。在链式调用中，Java的<code>Employee.class</code>吻合方法调用的语法，也吻合人们从左到右的阅读习惯。
 	Scala的<code>classOf[Employee]</code>则更像是函数的调用，而且也违背了人们习惯的阅读顺序。
 </p>
+<hr />
+<h2 class="jump" id="protected">8.4 受保护字段和方法</h2>
+<p>
+	Scala可以和Java一样，将类的字段或方法声明为<code>protected</code>。和Java有所不同，Scala的<code>protected</code>成员只能被所属类及其子类所访问，
+	而Java的<code>protected</code>在此基础上还允许同一个包内的其他任意类所访问。个人认为Scala的设计更好，因为这样的<code>protected</code>与我们熟知的C++中的<code>protected</code>保持了一致。
+	如果我们确实需要像Java的<code>protected</code>那样的包可见性，我们也可以通过Scala的<a href="/scala/2015/09/28/Scala-for-the-Impatient-7.html#package-visibility" target="_blank">包修饰符</a>来指定任意粒度的包可见性。
+</p>
+<p>
+	Scala还提供了<code>protected[this]</code>这样的写法。包修饰符限定了该成员只可被<a href="/scala/2015/09/04/Scala-for-the-Impatient-5.html#private-this" target="_blank">当前对象</a>访问，比Java的<code>private</code>可见范围更小。
+	实际上，<code>protected[this]</code>和<code>private[this]</code>的功能是一样的。
+</p>
+<p>
+	有关Scala类和成员的包可见性，我会在<a href="/scala/2015/12/03/Scala-Package-Visibility.html" target="_blank">另一篇博文</a>中进行详述。
+</p>
+<hr />

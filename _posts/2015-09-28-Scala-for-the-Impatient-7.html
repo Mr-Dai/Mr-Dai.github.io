@@ -147,14 +147,15 @@ package people {
 	包对象中静态成员的作用域应分布在包内的多个类中。如果成员仅用于包内的一个类，应考虑将该成员改而放到该类的伴生对象中。
 </p>
 <hr />
-<h2 class="jump">7.6 包可见性</h2>
+<h2 class="jump" id="package-visibility">7.6 包可见性</h2>
 <p>
 	类的包可见性在Java里一直是备受诟病的一个功能。
 </p>
 <p>
-	在Java中，用于设定包可见性的修饰符无非为<code>public</code>、<code>protected</code>、<code>private</code>，
-	当类未被上述三个修饰符修饰时，它的类成员便在包含该类的包中可见。在Scala中，这些修饰符有着相同的效果：
+	在Java中，用于设定成员包可见性的修饰符无非为<code>public</code>、<code>protected</code>、<code>private</code>，
+	当类未被上述三个修饰符修饰时，它的类成员便在包含该类的包中可见。在Scala中，<code>public</code>、<code>private</code>默认可见性有着相同的效果。
 </p>
+<p>除此之外，你还可以使用类似<code>private[impatient]</code>的修饰符把成员的可见域延伸到上层包：</p>
 <pre class="brush: scala">
 package com.robert.impatient.people
 
@@ -163,9 +164,8 @@ class Person {
 }
 </pre>
 <p>
-	除此之外，你还可以使用类似<code>private[impatient]</code>的修饰符把成员的可见域延伸到上层包。
 	在这一点上，Scala的灵活性比Java更高，因为Java只能够简单地把希望包外可见的类设置为<code>public</code>，
-	中间缺少这样一个过渡。例如，在著名的Apache Spark项目中，所有的类都位于<code>org.apache.spark</code>包及其子包下。
+	中间缺少这样一个过渡。例如，在Apache Spark中，所有的类都位于<code>org.apache.spark</code>包及其子包下。
 	Spark的开发人员希望某些成员能够被Spark框架内的其他类所访问，但不希望被Spark框架以外的类访问，
 	那就将这个成员简单地设定为<code>private[spark]</code>就可以了。
 </p>

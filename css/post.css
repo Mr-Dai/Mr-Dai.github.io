@@ -27,3 +27,12 @@ blockquote p {
 .syntaxhighlighter .toolbar {
 	display: none;
 }
+
+div .copyright {
+	background-color: #d9edf7;
+	padding: 10px;
+}
+
+.copyright p {
+	margin: 0;
+}

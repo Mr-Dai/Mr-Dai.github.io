@@ -1,0 +1,141 @@
+---
+layout: posts
+title: Scala 语言规范 - 第一章：语法
+author: Robert Peng
+category: Scala
+---
+<div class="copyright">
+  <p>本文由 <a href="http://mr-dai.github.io">Robert Peng</a> 翻译。未经许可，不得转载！</p>
+  <p>原文出处： <a href="http://www.scala-lang.org/files/archive/spec/2.11/01-lexical-syntax.html" target="_blank">Scala Specification</a></p>
+</div>
+<p>
+	Scala程序由Unicode基本多文种平面（Basic Multilingual Plane, <a href="https://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane" target="_blank">BMP</a>）字符集构成，
+	暂不支持Unicode补充字符（Unicode supplementary character）。本章将描述Scala语法的两种模式：Scala模式（Scala mode）和XML模式（XML mode）。如无另外提及，
+	下文中出现的Scala词法单元（token）均属Scala模式，字符<code>c</code>指代Unicode中的ASCII片段<code>\u0000</code>-<code>\u007F</code>。
+</p>
+<p>
+	在Scala模式中，Unicode转义（Unicode escape）将被替换为拥有给定十六进制码的Unicode字符。
+</p>
+<pre>
+  UnicodeEscape ::= '\' 'u' {'u'} hexDigit hexDigit hexDigit hexDigit
+  hexDigit      ::= '0' | … | '9' | 'A' | … | 'F' | 'a' | … | 'f'
+</pre>
+<p>
+	为方便构造词法单元，字符将被分为如下几个类别（<a href="https://en.wikipedia.org/wiki/Unicode#Character_General_Category" target="_blank">Unicode general category</a>由括号给出）：
+</p>
+<ul>
+  <li>空白字符：<code>\u0020 | \u0009 | \u000D | \u000A</code></li>
+  <li>
+    字母，包括小写字母（Ll）、大写字母（Lu）、首字母大写字母（titlecase letter, Lt）、其它字母（Lo）、数字字母（Nl）。除此之外还包括两个特殊的字符<code>\u0024 '$'</code>和<code>\u005F '_'</code>，
+	这两个字符被视为大写字母
+  </li>
+  <li>数字：<code>'0' | … | '9'</code></li>
+  <li>括号：<code>'(' | ')' | '[' | ']' | '{' | '}'</code></li>
+  <li>分隔符：<code>'`' | ''' | '"' | '.' | ';' | ','</code></li>
+  <li>运算符，包括不在上述几个类别中的所有可打印ASCII字符<code>\u0020</code> - <code>\u007F</code>、数学符号（Sm）和其他符号（So）</li>
+</ul>
+<hr />
+<h2 class="jump" id="identifiers">1.1 标识符</h2>
+<pre>
+  op      ::= opchar {opchar}
+  varid   ::= lower idrest
+  plainid ::= upper idrest
+            | varid
+            | op
+  id      ::= plainid
+            | '`' stringLiteral '`'
+  idrest  ::= {letter | digit} ['_' op]
+</pre>
+<p>
+	标识符（identifier）包括三种形式。首先，一个标识符可以以一个字母开头，并跟上任意的字母和数字。接着，你还可以加上一个下划线<code>_</code>然后再加上由字母、数字或运算符字符组成的另一个字符串。
+	其次，一个标识符可以以一个运算符字符开头，再跟上任意数量的运算符字符。上述两种形式的标识符称为<em>普通</em>标识符（<em>plain</em> identifier）。最后，标识符还可以由任意以反引号包围的字符串组成
+	（用于运行程序的系统可能会对“合法标识符”添加一些额外的限制）。由此，标识符便由除反引号外的其他所有字符组成。
+</p>
+<p>
+	按照惯例，我们同样使用最长匹配原则。比如，字符串
+</p>
+<p><code>big_bob++=`def`</code></p>
+<p>
+	被拆分为三个标识符：<code>big_bob</code>、<code>++=</code>和<code>def</code>。在识别模式匹配语法时，我们还会把标识符分为以小写字母开头的变量标识符（variable identifier）和不以小写字母开头的常量标识符（constant identifier）。
+</p>
+<p>
+	<code>$</code>则被保留为了编译器合成标识符（compiler-synthesized identifier）。用户程序不能定义包含<code>$</code>的标识符。
+</p>
+<p>
+	下述命名均属于保留字（reserved word），无法被识别为标识符语法类（syntactic class）<code>id</code>（译者注：指上面那个上下文无关文法里的<code>id</code>）：
+</p>
+<pre>
+  abstract    case        catch       class       def
+  do          else        extends     false       final
+  finally     for         forSome     if          implicit
+  import      lazy        macro       match       new
+  null        object      override    package     private
+  protected   return      sealed      super       this
+  throw       trait       try         true        type
+  val         var         while       with        yield
+  _    :    =    =>    &lt;-    &lt;:    &lt;%     >:    #    @
+</pre>
+<p>对应于ASCII中的<code>=></code>和<code>&lt;-</code>的Unicode字符<code>\u21D2 '⇒'</code>和<code>\u2190 '←'</code>同为保留字。
+<blockquote>
+<p>合法的标识符包括如下：</p>
+<pre>
+  x         Object        maxIndex   p2p      empty_?
+  +         `yield`       αρετη     _y       dot_product_*
+  __system  _MAX_LEN_
+</pre>
+</blockquote>
+<blockquote>
+当需要使用被识别为Scala保留字的Java标识符时，可以使用反引号包围字符串。比如，语句<code>Thread.yeild()</code>是不合法的，因为<code>yield</code>是Scala中的一个保留字。
+将语句写为<code>Thread.`yield`()</code>即可。
+</blockquote>
+<hr />
+<h2 class="jump" id="newline-characters">1.2 换行符</h2>
+<pre>
+  semi ::= ‘;’ |  nl {nl}
+</pre>
+<p>
+  Scala是面向行（line-oriented）的编程语言，语句需要以分号或换行符来标识结尾。Scala源代码文本中满足下列三个要求的换行符将被视为特殊词法单元“nl”：
+</p>
+<ul>
+  <li>紧接着换行符的前一个词法单元可作为一个语句的结尾</li>
+  <li>紧接着换行符的后一个词法单元可作为一个语句的开头</li>
+  <li>该词法单元出现在换行可用的区域（region）</li>
+</ul>
+<p>可作为语句结尾的词法单元包括字面值（literal）、标识符以及如下的几个分隔符和保留字：</p>
+<pre>
+  this    null    true    false    return    type    &lt;xml-start>
+  _       )       ]       }
+</pre>
+<p>除以下几个分隔符和保留字的所有Scala词法单元均可作为语句的开头：</p>
+<pre>
+  catch    else    extends    finally    forSome    match
+  with    yield    ,    .    ;    :    =    =>    &lt;-    &lt;:    &lt;%
+  >:    #    [    )    ]    }
+</pre>
+<p><code>case</code>单元当且仅当紧接着一个<code>class</code>单元或<code>object</code>单元时才可作为语句开头。
+<p>换行可用的区域包括：</p>
+<ul>
+  <li>除换行不可用的嵌套区域外的Scala源代码文件中的任意位置</li>
+  <li>除换行不可用的嵌套区域外的位于一对匹配的<code>{</code>和</code>}</code>单元间的任意位置</li>
+</ul>
+<p>在如下区域，换行不可用：</p>
+<ul>
+  <li>除换行可用的嵌套区域外的位于一对匹配的<code>(</code>和</code>)</code>单元间的任意位置</li>
+  <li>除换行可用的嵌套区域外的位于一对匹配的<code>[</code>和</code>]</code>单元间的任意位置</li>
+  <li>除换行可用的嵌套区域外的，位于<code>case</code>单元与其匹配的<code>=></code>单元间的任意位置</li>
+  <li>使用<a href="#xml-mode">XML模式</a>识别的任意位置</li>
+</ul>
+<p>注意，括号包围的<code>{...}</code>XML转义和字符串字面值不是词法单元，因此它们不包含换行可用的区域。</p>
+<p>
+	通常来讲，连续的两个位于不同行之中的非换行单元之间只会有一个<code>nl</code>单元，即使这两个单元之间隔了很多行。
+	然而，如果两个单元被至少一个完全空白的行（不包含可打印字符的行）所分隔，它们之间会包含两个<code>nl</code>单元。
+</p>
+<p>
+	Scala的文法（在<a href="http://www.scala-lang.org/files/archive/spec/2.11/13-syntax-summary.html" target="_blank">这里</a>可以查看完整版）包含接受可选（optional）<code>nl</code>单元但不接受可选分号的产生式。
+	由此，处于这些位置的换行便不会终结一个表达式或语句。这些位置大致包括如下：
+</p>
+<ul>
+  <li>
+    <a href="http://www.scala-lang.org/files/archive/spec/2.11/06-expressions.html#conditional-expressions" target="_blank">条件表达式</a>的条件之间或<a href="http://www.scala-lang.org/files/archive/spec/2.11/06-expressions.html#while-loop-expressions" target="_blank">while</a>循环与下一个表达式之间
+  </li>
+	
