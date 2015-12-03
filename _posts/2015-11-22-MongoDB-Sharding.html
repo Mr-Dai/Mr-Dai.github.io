@@ -1,0 +1,132 @@
+---
+layout: posts
+title: MongoDB Sharding
+author: Robert Peng
+category: MongoDB
+---
+
+<p>
+	在<a href="/mongodb/2015/11/13/MongoDB-Replica-Set.html" target="_blank">这篇</a>博文中，
+	我详细讲解了MongoDB Replica Set相关的概念。作为MongoDB分布式解决方案之一，Replica Set主要用于提高MongoDB集群的可用性，
+	但不难发现，同一个Replica Set中的<code>Primary</code>和<code>Secondary</code>往往承受着大致相同的读写压力，
+	因此Replica Set实际上并不能用来提高集群的处理能力。
+</p>
+<p>
+	在这篇博文中，我将详细介绍另一种MongoDB分布式解决方案——Sharding的相关概念，并介绍如何利用Sharding来对数据库进行水平拓展。
+</p>
+
+<h2 class="jump">Why Sharding?</h2>
+<p>
+	MongoDB提供了Sharding机制来为数据库系统提供横向扩展（horizontal scaling），
+	生产系统可利用Sharding机制来存储庞大的数据集或是提高系统的数据吞吐量。
+</p>
+<p>
+	当应用程序需要数据库存储更多的数据并提供更高的吞吐量时，往往单一机器的处理能力就成了数据库系统的瓶颈：
+	高吞吐量意味着高CPU占用，而日渐庞大的数据集也会挑战机器的磁盘容量。
+</p>
+<p>
+	当我们拓展一个系统的性能时，往往有两种拓展方向，分别是纵向拓展（vertical scaling）和横向拓展（horizontal scaling）。
+</p>
+<p>
+	纵向拓展即为机器换上更强的CPU或者加内存加硬盘。在一定程度内，纵向拓展是可行的，但一旦超过某种程度就会出现限制：
+	越高性能的硬件往往性价比越低。除此之外，如亚马逊和阿里云等云服务器提供商往往不会为单个实例提供过高的性能。比如，
+	阿里云的单个ECS服务实例最高的配置只能去到16核CPU+64G内存。综合考虑上述两个因素，不难看出纵向扩展是存在极限的，
+	而且实例越接近该极限，扩展的性价比就越低。
+</p>
+<p>
+	横向扩展则是在不改变单个实例的配置的情况下，通过增加新的实例来扩展系统的处理能力。横向扩展的案例有很多，比如目前十分热门的分布式计算，
+	或者只是简单的负载均衡。横向扩展允许每个实例的配置相对较低，因此横向扩展有着高得多的性价比，不会再受到限制。
+</p>
+<p>
+	具体到MongoDB上，其所提供的Sharding便是横向扩展的典型代表。采用Sharding构成的高可用MongoDB架构由多个shard组成，每个shard可以是一个单一的<code>mongod</code>实例，
+	也可以是一个Replica Set。Sharding将Collection里的数据分成若干个块（chunk），再将每个块分散到shard中。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/sharded-collection.png" /></p>
+<hr />
+<h2 class="jump">Shard集群成员</h2>
+<p>
+	一个MongoDB Shard集群由如下几种成员组成：
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/sharded-cluster-production-architecture.png" /></p>
+<p>
+	<b>Shard</b>负责存储数据，类似于HDFS中的DataNode。它可以是一个<code>mongod</code>实例，也可以是一个Replica Set。
+	但为了在生产环境下提供高可用，每个Shard<b>必须</b>是一个Replica Set。
+</p>
+<p>
+	<b>Query Router</b>（查询路由），即<a href="https://docs.mongodb.org/manual/reference/program/mongos/#bin.mongos" target="_blank">mongos</a>实例，
+	是客户端与Shard之间沟通的桥梁。Query Router接收来自客户端的查询请求并将请求分发到对应的Shard，并收集结果返回至客户端。通常，为了减轻Query Router的压力，
+	生产系统可以有多个Query Router。
+</p>
+<p>
+	<b>Config Server</b>（配置服务器）保存着集群的元数据，记录着每个Document所在的Shard，由Query Router使用这些元信息来分发请求。
+	生产系统<b>有且仅有</b>3个Config Server。
+</p>
+<hr />
+<h2 class="jump">Shard集群数据切分</h2>
+<p>
+	MongoDB将Collection内的数据分散到Shard上，而如何分配这些数据则取决于数据的<b>shard key</b>。
+</p>
+<h3>Shard Key</h3>
+<p>
+	在分割一个Collection之前，我们必须先为其指定一个Shard Key。Shard Key必须是该Collection中每个Document都存在的索引域或复合索引域（即必须已存在该域的索引）。
+	由此，MongoDB根据Shard Key的值将每个Document放入到不同的chunk中，再将这些chunk平均地分配到每个shard上。在将Document放入到chunk时，MongoDB提供了两种不同的算法，
+	分别是基于值域分割和基于哈希值分割。
+</p>
+<p>有关Shard Key的更多内容，详见<a href="https://docs.mongodb.org/manual/core/sharding-shard-key/" target="_blank">这里</a>。</p>
+<h3>基于值域分割</h3>
+<p>
+	<b>Range based partitioning</b>将Shard Key所处的值域空间分为若干个子域，Shard Key值位于某个子域中的Document则被分配到对应的chunk中。例如，我们考虑一个由数字组成的shard key，
+	那么shard key本身可属的值域自然是从全局最小值直到全局的最大值。MongoDB将这个值域分成若干个不重叠的子域，比如其中有一个子域是从25到175，那么所有Shard Key在这个范围之间的Document就会被分配到它对应的chunk之中。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/sharding-range-based.png" /></p>
+<p>
+	基于值域的分割模型可以让比较“接近”的Document有很高的几率被分配到同一个chunk中，从而被分配到同一个shard中。而且Query Router在接收到基于Shard Key大小比较的查询时也可以立刻得知自己应该讲请求分发到哪些shard中，
+	相当于在集群范围内维持了一个有序索引。但基于值域的分割模型很可能使请求被经常发往某几个shard中：比如，若以日期作为shard key，当系统需要频繁查询某一天的记录时，所有的这些查询请求必然会落入到同一个shard中，
+	某种程度上也使得Sharding所提供的分布式横向拓展失去了效果。
+</p>
+<h3>基于哈希值分割</h3>
+<p>
+	<b>Hash based partitioning</b>为每个Document的Shard Key计算哈希值，并将其放入到哈希值对应的chunk中。如此一来，Document会被分配到哪个chunk可以视为是随机的，
+	而且比较“接近”的Document反而不大可能会被放入到同一个chunk中。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/sharding-hash-based.png" /></p>
+<p>
+	基于哈希值的分割模型固然能够很好地将查询压力平均地分散在每个Shard上，但这样的模型无法像基于值域分割那样维持一个集群范围内的索引，当系统请求基于Shard Key大小比较的查询时，
+	Query Router只能把该请求发送到每个Shard上。
+</p>
+<hr />
+<h2 class="jump">数据均衡</h2>
+<p>
+	在生产系统的日常使用中，新的数据会加入到数据库中，也有可能会有新的Shard加入集群。这样的事件会导致数据分布的不均衡，比如某个chunk特别大，或者某个shard包含特别多的chunk。
+</p>
+<p>
+	MongoDB维持数据分布均衡的方法可分为两种：split和balance。
+</p>
+<h3>Splitting</h3>
+<p>
+	在某个chunk的大小超过了某个<a href="https://docs.mongodb.org/manual/core/sharding-chunk-splitting/#sharding-chunk-size" target="_blank">特定的数值</a>时，
+	MongoDB对其进行split操作，将其对半切开。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/sharding-splitting.png" /></p>
+<p>
+	Splitting并不会带来太多的元数据变动，因为该过程实际上不会改变Document所处的Shard。
+</p>
+<h3>Balancing</h3>
+<p>
+	<a href="https://docs.mongodb.org/manual/core/sharding-balancing/#sharding-balancing-internals" target="_blank">Balancer</a>负责管理Shard集群的chunk迁移。
+	在集群的chunk分布不平均时，即可从任意一个Query Router启动Balancer，重新调整chunk的分布。
+</p>
+<p class="center"><img src="https://docs.mongodb.org/manual/_images/sharding-migrating.png" /></p>
+<p>
+	这个过程可能涉及元数据的大量改动。整个过程可以分为如下几个步骤：
+</p>
+<ul>
+	<li>Balancer计算出迁移的计划。单次的迁移计划包括从哪个Shard把哪个chunk转移到哪个Shard</li>
+	<li>迁移过程作为后台进程在源Shard和目标Shard上启动，指定的chunk开始把当前的所有Document复制到目标Shard</li>
+	<li>发送完毕后，目标Shard将迁移期间发生在该chunk上的改动应用到它本地的chunk副本中。这个过程类似于Replica Set的同步</li>
+	<li>最后，修改Config Server的元数据，迁移完成，源Shard可以释放它的chunk副本了。</li>
+</ul>
+<p>
+	整个过程可能会花费大量的时间，因此Config Server数据的修改和源Shard对该chunk的释放被安排在了最后。在整个过程顺利完成之前，
+	对该chunk的请求仍然会被发到源shard中。在这个过程中如果发生了错误，MongoDB也会立刻终止该过程，源Shard上的chunk依然完好如初。
+</p>
