@@ -40,11 +40,11 @@ class Person {
 }
 </pre>
 <p>
-	在这一点上，<code>override</code>修饰符与Java中的<code>@Overrides</code>注解功能相似，它主要用于确保你在子类写的方法确实重写了父类的方法，
-	并在你因打错字或使用了错误的参数类型等原因没能成功重写父类方法时给出有用的错误提示。
+	在这一点上，<code>override</code>修饰符与Java中的<code>@Overrides</code>注解功能相似，它主要用于确保你在子类写的方法确实重写了超类的方法，
+	并在你因打错字或使用了错误的参数类型等原因没能成功重写超类方法时给出有用的错误提示。
 </p>
 <p>
-	在子类中重写了方法以后，子类中对该方法的调用自然调用的是子类中重写后的版本。当需要调用父类的版本时，和Java一样，我们使用<code>super</code>关键字：
+	在子类中重写了方法以后，子类中对该方法的调用自然调用的是子类中重写后的版本。当需要调用超类的版本时，和Java一样，我们使用<code>super</code>关键字：
 </p>
 <pre class="brush: scala">
 class Employee extends Person {
@@ -103,3 +103,146 @@ if (p.isInstanceOf[Employee]) {
 	有关Scala类和成员的包可见性，我会在<a href="/scala/2015/12/03/Scala-Package-Visibility.html" target="_blank">另一篇博文</a>中进行详述。
 </p>
 <hr />
+<h2 class="jump" id="constructing-super-class">8.5 超类的构造</h2>
+<p>
+	在之前的<a href="/scala/2015/09/04/Scala-for-the-Impatient-5.html#primary-and-auxiliary-constructor" target="_blank">章节</a>中，我们提到过，一个类有一个主构造器和任意数量的辅助构造器，而每个辅助构造器都必须以对先前定义的辅助构造器或主构造器的调用开始。
+</p>
+<p>
+	同时，考虑到子类对超类构造器的调用是写在<code>extends</code>子句中的，如下面一段示例：
+</p>
+<pre class="brush: scala">
+class Employee(name: String, age: Int, val salary: Double) extends
+  Person(name, age)
+</pre>
+<p>
+	上述代码实际上由子类<code>Employee</code>的主构造器调用了超类<code>Person</code>的构造器。因此，
+	实际上子类的辅助构造器<b>永远都不可能</b>直接调用超类的构造器。子类的辅助构造器最终都会调用子类的主构造器，而只有子类的主构造器可以调用超类的构造器。
+</p>
+<p>
+	尽管对于Java程序员来讲，这样的写法可能不是那么的直接，但它显然是简洁的。与上述代码等价的Java大致如下：
+</p>
+<pre class="brush: java">
+public class Employee extends Person {
+  public String name;
+  public int age;
+  private final double salary;
+  
+  public Employee(String name, int age, double salary) {
+    super(name, age);
+	this.salary = salary;
+  }
+}
+</pre>
+<p>
+	Scala类也可以扩展Java类，扩展时的写法不变，同样是在主构造器里调用Java超类的一个构造器：
+</p>
+<pre class="brush: scala">
+class Square(x: Int, y: Int, width: Int) extends
+  java.awt.Rectable(x, y, width, width)
+</pre>
+<hr />
+<h2 class="jump" id="overriding-field">8.6 重写字段</h2>
+<p>
+	<a href="/scala/2015/09/04/Scala-for-the-Impatient-5.html#getter-and-setter" target="_blank">之前</a>我们提到过，
+	Scala的字段由一个私有字段和它的Getter、Setter方法组成。
+</p>
+<p>
+	在子类中，你可以用一个同名的<code>val</code>字段重写超类的一个<code>val</code>（或不带参数的<code>def</code>）。
+	实际的效果是，子类中将多出一个私有字段（该字段不会重写超类的字段）和一个公有的Getter方法，该Getter方法重写了超类的Getter方法。
+</p>
+<p>例如：</p>
+<pre class="brush: scala">
+abstract class Person(val name: String) {
+  def id: Int
+  override def toString = getClass.getName + "[name=" + name + "]"
+}
+
+class Student(override val id: Int) extends Person
+
+class SecretAgent(codename: String) extends Person(codename) {
+  override val name = "secret"
+  override val toString = "secret"
+}
+</pre>
+<p>
+	其中，<code>Student</code>类用一个<code>val</code>重写了超类<code>Person</code>中的无参数<code>def</code>方法<code>id</code>，
+	<code>SecretAgent</code>用<code>val name</code>重写了超类<code>Person</code>中的<code>val</code>，
+	并用<code>val toString</code>重写了超类<code>Person</code>中的无参数<code>def</code>方法。
+</p>
+<p>简单来讲，子类对超类字段的重写有如下规律：</p>
+<table class="table">
+  <tr>
+    <th></th>
+	<th>用<code>val</code></th>
+	<th>用<code>def</code></th>
+	<th>用<code>var</code></th>
+  </tr>
+  <tr>
+    <th>重写<code>val</code></th>
+	<td>
+	  <ul>
+	    <li>子类产生一个与超类字段同名的私有字段</li>
+		<li>子类字段的Getter方法重写超类的Getter方法</li>
+	  </ul>
+	</td>
+	<td>错误</td>
+	<td>错误</td>
+  </tr>
+  <tr>
+    <th>重写<code>def</code></th>
+	<td>
+	  <ul>
+	    <li>子类产生一个与超类字段同名的私有字段</li>
+		<li>子类字段的Getter方法重写超类的Getter方法</li>
+	  </ul>
+	</td>
+	<td>子类方法重写父类方法，与Java相同</td>
+	<td><code>var</code>将同时重写Getter/Setter对。只重写Getter将出错</td>
+  </tr>
+  <tr>
+    <th>重写<code>var</code></th>
+	<td>错误</td>
+	<td>错误</td>
+	<td>只可以重写抽象的<code>var</code></td>
+  </tr>
+</table>
+<p>
+	由此可见，在类中用<code>var</code>没有什么问题，但实际上这样会使得类的可扩展性下降，因为只有抽象的<code>var</code>可以被子类的<code>var</code>重写，
+	如果你使用的是非抽象的<code>var</code>，子类将无法重写该字段。
+</p>
+<hr />
+<h2 class="jump" id="anonymous-subclass">8.7 匿名子类</h2>
+<p>
+	和Java一样，Scala可以以同样的方式在创建对象时构建一个匿名子类：
+</p>
+<pre class="brush: scala">
+val alien = new Person("Fred") {
+  def greeting = "Grettings, Earthling! My name is Fred."
+}
+</pre>
+<p>
+	实际上，这会产生出一个结构类型（structural type）对象，记作<code>Person{def greeting: String}</code>。
+	你甚至可以用这个类型作为参数的类型：
+</p>
+<pre class="brush: scala">
+def meet(p: Person{def greeting: String}) {
+  println(p.name + "says: " + p.greeting)
+}
+</pre>
+<hr />
+<h2 class="jump" id="abstract-class">8.8 抽象类</h2>
+<p>和Java一样，你可以用<code>abstract</code>关键字来把某个没有完整定义所有方法的类标记为不能实例化的虚类：</p>
+<pre class="brush: scala">
+abstract class Person(val name: String) {
+  def id: Int
+}
+</pre>
+<p>其中方法<code>id</code>没有方法体，自动被识别为抽象方法。</p>
+<p>在子类中重写超类的抽象方法时，你不需要使用<code>override</code>关键字：</p>
+<pre class="brush: scala">
+class Employee(name: String) extends Person(name) {
+  def id = name.hashCode
+}
+</pre>
+<hr />
+<h2 class="jump" id="abstract-field">8.9 抽象字段</h2>

@@ -89,7 +89,7 @@ public class ParenOrNot {
 }
 </pre>
 <p>看起来，声明无参函数时圆括号的有无并不会改变编译得出的Java字节码，圆括号的约束完全由Scala的编译器所定义。</p>
-<h2 class="jump">5.2 Getter与Setter</h2>
+<h2 class="jump" id="getter-and-setter">5.2 Getter与Setter</h2>
 <p>注：本节包括原书的5.2与5.3节的内容</p>
 <p>
 	我们在编写Java类的时候，我们并不喜欢使用public字段。我们更加倾向于使用private或protected字段，并为他们加上public的getter和setter，
@@ -321,7 +321,7 @@ public class Bean {
 }
 </pre>
 <p>如此可见，Scala确实为一个<code>BeanProperty</code>生成了4个方法。</p>
-<h2 class="jump">5.6 主构造器与辅助构造器</h2>
+<h2 class="jump" id="primary-and-auxiliary-constructor">5.6 主构造器与辅助构造器</h2>
 <p>注：这里整合了原书的5.6节与5.7节，并改变了编写顺序。</p>
 <p>
 	Scala和Java或C++相同，一个类可以拥有任意数量的构造器。不过，Scala类会拥有一个<b>主构造器</b>（Primary Constructor），
@@ -337,7 +337,7 @@ class Person(val name: String, val age: Int) {
 	我们通过在声明类时在类名后加入参数列表，便能以该参数列表自动生成一个主构造器；当我们不加入参数列表，或者说没有为类显式定义主构造器时，Scala便会自动为类生成一个无参的主构造器。
 	而类定义体内的所有语句都将被放入到主构造器中。像上述的代码，反编译的结果为：
 </p>
-<pre class="brush: scala">
+<pre class="brush: java">
 import scala.Predef$;
 
 public class Person {
@@ -389,7 +389,7 @@ class Person(val name: String, val age: Int) {
 }
 </pre>
 <p>
-	在辅助构造器中，我们通过调用其他<code>this</code>方法来将构造工作委托给其他构造器，所有辅助构造器都将直接或间接地调用主构造器，这一点上和Java是一致的。
+	在辅助构造器中，我们通过调用其他<code>this</code>方法来将构造工作委托给其他构造器，所有辅助构造器都必须以对主构造器和其他已定义的辅助构造器的调用开始。
 	相比于Java，Scala使用<code>this</code>来为一个类声明更多的构造器，而Java需要让构造器的名字与类名保持一致，这样一来当你需要修改类名的时候就不那么方便了。
 </p>
 <h2 class="jump">5.8 嵌套类</h2>
