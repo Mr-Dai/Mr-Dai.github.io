@@ -6,3 +6,79 @@ category: Java
 ---
 
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+
+<h2 class="jump" id="intro">前言</h2>
+<p>
+	Java8 中最为人津津乐道的新改变恐怕当属函数式 API 的加入。但实际上，Java8 所加入的新功能远不止这个。
+	本文将基于《<a href="http://t.cn/R4ZQRBh" target="_blank">Java SE8 for the Really Impatient</a>》的第 5 章，详细讲讲 Java8 加入的日期和时间 API。
+</p>
+<hr />
+
+<h2 class="jump" id="instant-and-duration">时间点与时间间隔</h2>
+<p>
+	在我们常说的四维空间体系中，时间轴往往作为除长宽高三轴以外的第四轴。时间轴由无穷多个时间点组成，而两个时间点之间的距离组成一个时间间隔。相较于我们常说的日期、时间，时间点本身所携带的信息是很少的，不会携带如时区等冗余的信息。作为时间轴上的一个点，我们可以将它称为绝对时间。
+</p>
+<p>
+	Java8 引入了 <code>Instant</code> 类（瞬时）来表示时间轴上的一个点。<code>Instant</code> 的构造方法是 <code>private</code> 的，我们只能通过调用它的静态工厂方法来产生一个 <code>Instant</code> 实例。其中最常用的是 <code>Instant.now()</code> 方法，返回当前的时间点。<code>Instant</code> 类也实现了 <code>comparesTo</code> 和 <code>equals</code> 方法来对比两个瞬时点。
+</p>
+<p>
+	通过调用 <code>Duration.between()</code> 方法我们便可以计算两个时间点之间的时间间隔：
+</p>
+<pre class="brush: java">
+Instant start = Instant.now();
+
+runAlgorithm();
+
+Instant end = Instant.now();
+
+Duration timeElapsed = Duration.between(start, end);
+long millis = timeElapsed.toMillis();
+</pre>
+<p>
+	<code>between</code> 方法返回一个 <code>Duration</code> 实例。<code>Duration</code> 内部以 <code>long</code> 成员来存储时间间隔信息，最小单位可去到纳秒，同时提供了如 <code>toMillis</code>、<code>toSeconds</code> 等方法。
+</p>
+<p>
+	<code>Instant</code> 和 <code>Duration</code> 类常用的方法包括如下：
+</p>
+<table class="table">
+	<tr>
+		<th>方法</th>
+		<th>描述</th>
+	</tr>
+	<tr>
+		<td><code>plus</code>、<code>minus</code></td>
+		<td>对当前 <code>Instant</code> 或 <code>Duration</code> 增加或减少一段时间</td>
+	</tr>
+	<tr>
+		<td>
+			<code>plusNanos<code>、<code>plusMillis</code>、<code>plusSeconds</code>、<br /><code>plusMinutes</code>、<code>plusHours</code>、<code>plusDays</code>
+		</td>
+		<td>
+			根据指定的时间单位，对当前 <code>Instant</code> 或者 <code>Duration</code> 添加一段时间。
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<code>minusNanos</code>、<code>minusMillis</code>、<code>minusSeconds</code>、<br /><code>minusMinutes</code>、<code>minusHours</code>、<code>minusDays</code>
+		</td>
+		<td>
+			根据指定的时间单位，对当前 <code>Instant</code> 或者 <code>Duration</code> 减少一段时间。
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<code>multipliedBy</code>、<code>dividedBy<code>、<code>negated</code>
+		</td>
+		<td>
+			返回当前 <code>Duration</code> 与指定 <code>long</code> 值相乘或相除得到的时间间隔
+		</td>
+	</tr>
+	<tr>
+		<td><code>isZero</code>、<code>isNegativ</code></td>
+		<td>检查 <code>Duration</code> 是否为0或负数</td>
+	</tr>
+</table>
+<p class="bg-info" style="padding-left: 3px">
+	<b>注意</b>：<code>Instant</code> 类和 <code>Duration</code> 类都是不可变的，上述方法都会返回一个新的实例。
+</p>
+<hr />
