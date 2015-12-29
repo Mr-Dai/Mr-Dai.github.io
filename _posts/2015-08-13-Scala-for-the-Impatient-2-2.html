@@ -180,7 +180,7 @@ def echo(s: String) {
 }
 </pre>
 <p>但从编程习惯上来讲，并不推荐这样做。</p>
-<h2 class="jump">2.11 懒值</h2>
+<h2 class="jump" id="lazy-value">2.11 懒值</h2>
 <p>当<code>val</code>被声明为<code>lazy</code>时，它的初始化将被推迟，直到我们首次对它取值。例如：</p>
 <pre class="brush: scala">
 lazy val words = scala.io.Source.fromFile("/usr/share/dict/words").mkString

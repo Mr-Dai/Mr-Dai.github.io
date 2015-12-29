@@ -30,6 +30,54 @@ class Employee extends Person {
 	注意，在Java中，<code>final</code>字段是不可重写且不可变的，相当于Scala中的<code>val</code>字段。但在Scala中，<code>final</code>字段仅仅意味着它不能被重写，
 	<code>final var</code>字段仍然是可变的。
 </p>
+<p>
+	为了确保确实不可继承，在编译后使对应的JVM类中的变量也标记为<code>final</code>是必须的，但JVM的<code>final</code>又会使得Scala中的<code>final var</code>不可变了。
+	那么Scala类是怎么处理的呢？我们不妨试验一下。编写Scala类如下：
+</p>
+<pre class="brush: scala">
+class A {
+
+  final val finalVal : Int = 1
+
+  final var finalVar : Int = 1
+  
+  final def finalMethod = finalVar
+
+}
+</pre>
+<p>反编译的结果为：</p>
+<pre class="brush: java">
+public class A {
+
+    private final int finalVal = 1;
+    private int finalVar;
+
+    public A() {
+        finalVar = 1;
+    }
+
+    public final int finalMethod() {
+        return finalVar();
+    }
+	
+    public final int finalVal() {
+        return finalVal;
+    }
+
+    public final int finalVar() {
+        return finalVar;
+    }
+
+    public final void finalVar_$eq(int x$1) {
+        finalVar = x$1;
+    }
+}
+</pre>
+<p>
+	可以看到，<code>final val</code>和<code>final</code>方法确实会在编译后被标记为<code>final</code>。其中，<code>val</code>变量在编译后本身就是会变成<code>private final</code>的，
+	而<code>final val</code>在此基础上连Getter都被标记为了<code>final</code>。除此之外，<code>final var</code>的变量本身并没有被标记为<code>final</code>，确保了值可变，
+	而它的Getter和Setter均被设置为了<code>final</code>，确保了它不能被继承。
+</p>
 <hr />
 <h2 class="jump">8.2 重写方法</h2>
 <p>在Scala中重写一个非抽象方法<b>必须</b>使用<code>override</code>修饰符：</p>
@@ -85,8 +133,8 @@ if (p.isInstanceOf[Employee]) {
 	个人来讲，我很欣赏<code>asInstanceOf</code>的功能，因为Java的强制类型转换语法写在链式语句里时往往需要添加大量的括号，很影响代码的可读性。
 	Scala的<code>asInstanceOf</code>语法与方法调用相同，使得在链式操作中出现强制类型转换时，语句仍能简洁清晰。<br />
 	<code>isInstanceOf</code>的作用不好评判，因为Java中的<code>instanceof</code>关键字已经够简洁了。我想，少写两个空格也许对某些人来说还是挺受欢迎的吧。<br />
-	至于<code>classOf</code>，我个人觉得这个设计并不好。在链式调用中，Java的<code>Employee.class</code>吻合方法调用的语法，也吻合人们从左到右的阅读习惯。
-	Scala的<code>classOf[Employee]</code>则更像是函数的调用，而且也违背了人们习惯的阅读顺序。
+	至于<code>classOf</code>，我个人觉得这个设计并不好。在链式调用中，Java的<code>Employee.class</code>吻合静态方法调用的语法，
+	而Scala的<code>classOf[Employee]</code>则更像是函数的调用，尽管更吻合英文的语序。也许这就是中文和英文思维的差异吧~
 </p>
 <hr />
 <h2 class="jump" id="protected">8.4 受保护字段和方法</h2>
@@ -238,7 +286,7 @@ abstract class Person(val name: String) {
 }
 </pre>
 <p>其中方法<code>id</code>没有方法体，自动被识别为抽象方法。</p>
-<p>在子类中重写超类的抽象方法时，你不需要使用<code>override</code>关键字：</p>
+<p>在子类中重写超类的抽象方法时，你可以不使用<code>override</code>关键字，但最好还是写上，这样可以让后来的阅读者知道你这个方法来自于父类。</p>
 <pre class="brush: scala">
 class Employee(name: String) extends Person(name) {
   def id = name.hashCode
@@ -246,3 +294,55 @@ class Employee(name: String) extends Person(name) {
 </pre>
 <hr />
 <h2 class="jump" id="abstract-field">8.9 抽象字段</h2>
+<p>
+	除了抽象方法外，抽象类还可以拥有抽象字段。抽象字段在写法上表现为一个没有初始值的字段。例如：
+</p>
+<pre class="brush: scala">
+abstract class Person {
+  val id : Int
+    // 没有初始化，这是一个抽象字段
+  var name : String
+    // 又一个抽象字段
+}
+</pre>
+<p>
+	Java类中是不存在抽象字段这种东西的。实际上并不难猜，Scala的编译器并不会在编译后的类中生成一个对应的字段，而是生成抽象的Getter和Setter。
+	例如上述类中，<code>id</code>字段便生成了一个抽象的Getter，而<code>name</code>则生成了抽象的Getter和Setter。
+</p>
+<p>
+	同样，重写抽象字段时你可以不写上<code>override</code>，但写上可以让代码更加可读。
+</p>
+<hr />
+<h2 class="jump" id="construct-order">8.10 构造顺序</h2>
+<p>
+	如果你的构造器使用了类中某个<code>val</code>的值的话，如果子类重写了这个<code>val</code>，类的行为可能就不是那么显而易见了。
+	考虑类如下：
+</p>
+<pre class="brush: scala">
+class Creature {
+  val range : Int = 10
+  val env : Array[Int] = new Array[Int](range) // 动物可以感知到它附近的环境
+}
+
+class Ant extends Creature {
+  override val range = 2 // 但蚂蚁是近视的
+}
+</pre>
+<p>执行的结果是，<code>Ant</code>的对象中的<code>env</code>数组长度会为0。为什么会这样呢？实际上事情发生的过程是这样的：</p>
+<ol>
+  <li>父类<code>Creature</code>的构造器先于子类<code>Ant</code>被调用</li>
+  <li><code>Creature</code>的构造器将它的<code>range</code>字段设为<code>10</code>（注：Scala字段在编译后生成的字段都是<code>private</code>的）</li>
+  <li><code>Creature</code>的构造器为了初始化<code>env</code>，调用了<code>range</code>的Getter</li>
+  <li><code>range</code>的Getter方法被<code>Ant</code>类重写，输出（还未初始化的）<code>Ant</code>类的<code>range</code>字段</li>
+  <li><code>range</code>的Getter返回了<code>0</code></li>
+  <li><code>env</code>被设为长度为<code>0<code>的数组</li>
+  <li><code>Ant</code>的构造器继续执行，将其<code>range</code>字段设为<code>2</code></li>
+</ol>
+<p>
+	在Java中，如果超类的构造器调用了某个方法，当这个方法被子类重写时，也会遇到同样的问题。因此这里的教训是，无论是Java类还是Scala类都不应该在构造器中依赖可被重写的方法，
+	尤其是Scala类对某些方法的调用还不那么容易看出来（比如字段的Getter）。
+</p>
+<p>
+	实际上，对于Scala而言，将超类中的<code>range</code>设为<code>lazy</code>变量也是不错的解决方案。<code>lazy</code>变量的初始化发生在Getter第一次被调用时，
+	并不依赖于子类构造器的执行。关于<code>lazy</code>变量的更多细节详见<a href="/scala/2015/08/13/Scala-for-the-Impatient-2-2.html#lazy-value" target="_blank">这里</a>。
+</p>
