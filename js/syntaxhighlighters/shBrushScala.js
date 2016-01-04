@@ -23,12 +23,13 @@
 	{
 		// Contributed by Yegor Jbanov and David Bernard.
 	
-		var keywords =	'val sealed case def true trait implicit forSome import match object null finally super ' +
-						'override try lazy for var catch throw type extends class while with new final yield abstract ' +
-						'else do if return protected private this package false';
+		var keywords =	'abstract case catch class def do else extends false final finally for forSome if implicit ' +
+						'import lazy macro match new null object override package private protected return sealed super this ' +
+						'throw trait try true type val var while with yield ' +
+						'_ : = => <- <: <% >: # @';
 
-		var keyops =	'[_:=><%#@]+';
-
+		var keyops =	'[_]{1}';
+		
 		this.regexList = [
 			{ regex: SyntaxHighlighter.regexLib.singleLineCComments,			css: 'comments' },	// one line comments
 			{ regex: SyntaxHighlighter.regexLib.multiLineCComments,				css: 'comments' },	// multiline comments
