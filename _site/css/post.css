@@ -27,3 +27,20 @@ blockquote p {
 .syntaxhighlighter .toolbar {
 	display: none;
 }
+<<<<<<< HEAD
+=======
+
+div .copyright {
+	background-color: #d9edf7;
+	padding: 10px;
+}
+
+.copyright p {
+	margin: 0;
+}
+
+.bg-info {
+	background-color: #d9edf7;
+	padding: 5px;
+}
+>>>>>>> scala

@@ -9,7 +9,7 @@ category: Scala
 
 <h2 class="jump">前情提要</h2>
 <p>
-	在<a href="/2015/08/13/Scala-for-the-Impatient-2-2.html">上一篇文章</a>中，我们完成了《快学Scala》第二章的学习，了解了Scala的控制结构与函数声明。
+	在<a href="/scala/2015/08/13/Scala-for-the-Impatient-2-2.html">上一篇文章</a>中，我们完成了《快学Scala》第二章的学习，了解了Scala的控制结构与函数声明。
 </p>
 <p>
 	这里我决定跳过《快学Scala》的第3、4章，这两章分别讲解的是Scala中的Array、ArrayBuffer、Seq、List、Map、Set的用法。
@@ -38,9 +38,9 @@ val myCount = new Counter // 或new Counter()
 <p>
 	这里就出现了Scala的一个特性。调用无参方法，比如<code>Counter</code>的构造方法或<code>increment</code>时，你可以写上圆括号，也可以不写。
 	这种可写可不写的自由容易导致代码变得难以理解，毕竟如果不写上圆括号很容易把这个方法误解为一个变量。但我们不妨将错就错。
-	实际上，推荐的做法是我们仅在类似于getter这样不会改变对象自身的取值方法上使用无括号的写法，如<code>Iterator#next</code>等方法，
+	实际上，推荐的做法是我们仅在类似于 Getter 这样不会改变对象自身的取值方法上使用无括号的写法，如<code>Iterator#next</code>等方法，
 	让阅读者将其“暂时地”理解为一个变量，反而可以有效地避免阅读者陷入复杂的取值逻辑之中。
-	而对于像<code>increment</code>这样确实会改变对象自身的setter方法，我们最好还是加上一对圆括号提醒阅读者，这个方法会导致对象发生改变。
+	而对于像<code>increment</code>这样确实会改变对象自身的 Setter 方法，我们最好还是加上一对圆括号提醒阅读者，这个方法会导致对象发生改变。
 </p>
 <p>在声明无参函数时，我们同样可以不加上圆括号：</p>
 <pre class="brush: scala">
@@ -89,10 +89,10 @@ public class ParenOrNot {
 }
 </pre>
 <p>看起来，声明无参函数时圆括号的有无并不会改变编译得出的Java字节码，圆括号的约束完全由Scala的编译器所定义。</p>
-<h2 class="jump">5.2 Getter与Setter</h2>
+<h2 class="jump" id=" Getter -and- Setter ">5.2 Getter与Setter</h2>
 <p>注：本节包括原书的5.2与5.3节的内容</p>
 <p>
-	我们在编写Java类的时候，我们并不喜欢使用public字段。我们更加倾向于使用private或protected字段，并为他们加上public的getter和setter，
+	我们在编写Java类的时候，我们并不喜欢使用public字段。我们更加倾向于使用private或protected字段，并为他们加上public的 Getter 和 Setter ，
 	就像这样：
 </p>
 <pre class="brush: java">
@@ -120,8 +120,8 @@ public class Person {
 }
 </pre>
 <p>
-	为什么要这样写？为什么不直接把变量置为public？当然，在如此简单的情况下，把变量置为private然后加上public的getter和setter当然是一种相当无聊的做法，
-	但实际上getter方法和setter方法的存在使得为这两个操作添加复杂逻辑提供了可能。比如说上面的<code>setAge</code>，我们可以将其设定为不能使一个人变年轻：
+	为什么要这样写？为什么不直接把变量置为public？当然，在如此简单的情况下，把变量置为private然后加上public的 Getter 和 Setter 当然是一种相当无聊的做法，
+	但实际上 Getter 方法和 Setter 方法的存在使得为这两个操作添加复杂逻辑提供了可能。比如说上面的<code>setAge</code>，我们可以将其设定为不能使一个人变年轻：
 </p>
 <pre class="brush: java">
 public void setAge(int age) {
@@ -130,11 +130,11 @@ public void setAge(int age) {
 }
 </pre>
 <p>
-	要实现这样的功能只能通过setter方法。即使你原本是public的变量，当你需要实现这样的功能时，你还是得将其重写为这种繁杂的形式。尽管这种形式也是Java规范的面向对象特性之一，
+	要实现这样的功能只能通过 Setter 方法。即使你原本是public的变量，当你需要实现这样的功能时，你还是得将其重写为这种繁杂的形式。尽管这种形式也是Java规范的面向对象特性之一，
 	但这样写起来确实是很费事。那有没有一些折衷的办法呢？
 </p>
 <p>
-	在Scala中，编译器会为每个public的字段自动生成getter和setter方法（注：必须谨记Scala中不存在<code>public</code>关键字）。
+	在Scala中，编译器会为每个public的字段自动生成 Getter 和 Setter 方法（注：必须谨记Scala中不存在<code>public</code>关键字）。
 	我们可以这样定义一个字段：
 </p>
 <pre class="brush: scala">
@@ -143,8 +143,8 @@ class Person {
 }
 </pre>
 <p>
-	而后，Scala便会生成一个private的变量，并添加上public的getter和setter。像上述的<code>age</code>变量，Scala为其生成的getter和setter分别名为
-	<code>age</code>和<code>age_=</code>。当我们把变量声明为<code>val</code>时，Scala则只会为该变量生成getter，不会生成setter。
+	而后，Scala便会生成一个private的变量，并添加上public的 Getter 和 Setter 。像上述的<code>age</code>变量，Scala为其生成的 Getter 和 Setter 分别名为
+	<code>age</code>和<code>age_=</code>。当我们把变量声明为<code>val</code>时，Scala则只会为该变量生成 Getter ，不会生成 Setter 。
 </p>
 <p>
 	我们不妨来试验一下：
@@ -219,12 +219,12 @@ public class GetAndSet {
 }
 </pre>
 <p>
-	我们看到，对于<code>private</code>的变量，Scala同样会生成<code>private</code>的getter和setter，但<code>protected</code>变量的getter和setter却被声明为了
+	我们看到，对于<code>private</code>的变量，Scala同样会生成<code>private</code>的 Getter 和 Setter ，但<code>protected</code>变量的 Getter 和 Setter 却被声明为了
 	<code>public</code>。
 </p>
 <p>
-	但实际上Scala这个特性并不是十分有用。考虑刚才的<code>Person</code>类，我们又想对<code>age</code>的setter加入较为复杂的逻辑。
-	这个时候我们仍然需要将<code>age</code>置为<code>private</code>并改名，并写上getter：
+	但为了给Setter添加更多的逻辑，我们仍然需要显式地给出Setter的实现。考虑刚才的<code>Person</code>类，我们又想对<code>age</code>的 Setter 加入较为复杂的逻辑。
+	这个时候我们仍然需要将<code>age</code>置为<code>private</code>并改名，并写上 Getter ：
 </p>
 <pre class="brush: scala">
 class Person {
@@ -243,13 +243,26 @@ fred.age = 30 // 有效，Fred的privateAge变为30
 fred.age = 21 // 无效，Fred的privateAge大于21，因此不会发生改变
 println(fred.age) // 30
 </pre>
-<h2 class="jump">5.4 对象私有字段</h2>
 <p>
-	与Java/C++相同，通过为字段添加上<code>private</code>即可将其声明为类私有字段。对象私有字段只能被同一个类的对象所访问，
+	实际上，Scala这样的设计是为了遵循一个名为“统一访问原则”的设计原则：
+</p>
+<blockquote>
+<p>All services offered by a module should be available through a uniform notation, which does not betray whether they are implemented through storage or through computation.</p>
+<footer>Uniform Access Principle</footer>
+</blockquote>
+<p>
+	这样的设定对Scala类来讲是很有益处的。试想你是一个库开发者，你开发的库中的一个接口类中有一个变量<code>a</code>，库的使用者们开发了大量的客户端代码，依赖于变量<code>a</code>。
+	终于，随着版本的更新，你觉得<code>a</code>的设定很不好，你决定从类中移除它，但又考虑到有那么多的客户端代码依赖着它。这时，你可能会想将它设置为<code>@Deprecated</code>并在未来某个版本中移除它。
+	<code>@Deprecated</code>可以给客户端代码的开发者一段时间，警告他们不要再使用这个变量，但在你真正删除了这个变量的时候，总是会有那么一些客户端代码还没来得及更新。
+	由此，与其只是删掉它，你可以显式地继续提供它对应的Getter和Setter：<code>a()</code>和<code>a_=(newVal)</code>。如此一来，即使<code>a</code>变量事实上已经被删除，客户端代码仍然不会受到任何影响。
+</p>
+<h2 class="jump" id="private-this">5.3 对象私有字段</h2>
+<p>
+	与Java/C++相同，通过为字段添加上<code>private</code>即可将其声明为类私有字段。类私有字段可以被属于同一个类的任意对象所访问，
 	这意味着<code>A</code>类对象<code>a</code>实际上可以访问同为<code>A</code>类对象的<code>b</code>的类私有字段。
 </p>
 <p>
-	这种设定其实很奇怪，很多时候我们会希望<code>private</code>字段只能由当前对象访问，即使是同一个类的其他对象也不能访问。
+	这种设定其实很奇怪，有些时候我们会希望<code>private</code>字段只能由当前对象访问，即使是同一个类的其他对象也不能访问。
 	这样的设定在Scala中是支持的，我们把这样的字段称为对象私有字段。通过将字段声明为<code>private[this]</code>即可将其设为对象私有字段。
 </p>
 <p>
@@ -262,7 +275,7 @@ class Privacy {
 }
 </pre>
 <p>反编译结果为：</p>
-<pre class="brush: scala">
+<pre class="brush: java">
 public class Privacy {
 
     public Privacy() {}
@@ -276,16 +289,16 @@ public class Privacy {
 }
 </pre>
 <p>
-	我们看到，Scala像往常一样为类私有字段生成了一个getter，但并没有对对象私有字段生成任何getter。可见，尽管Java中的private仅能做到类私有，
-	考虑到Scala会把所有类字段的访问转换为对其getter的调用，不为对象私有字段生成getter和setter便能确保其无法被其他对象所访问。
+	我们看到，Scala像往常一样为类私有字段生成了一个 Getter ，但并没有对对象私有字段生成任何 Getter 。可见，尽管Java中的private仅能做到类私有，
+	考虑到Scala会把所有类字段的访问转换为对其 Getter 的调用，不为对象私有字段生成 Getter 和 Setter 便能确保其无法被其他对象所访问。
 </p>
 <h2 class="jump">5.4 Bean属性</h2>
 <p>
-	正如我们之前所学的那样，Scala会为类的字段自动生成getter和setter方法，但从这些方法的命名上看，很明显这样的方法不是Java工具所预期的，
+	正如我们之前所学的那样，Scala会为类的字段自动生成 Getter 和 Setter 方法，但从这些方法的命名上看，很明显这样的方法不是Java工具所预期的，
 	这样的方法无法被Spring、Hibernate等依赖于JavaBean规范的工具所使用。
 </p>
 <p>
-	Scala提供了一个<code>@BeanProperty</code>注解。当你为某个字段添加上该注解时，Scala会在原有getter/setter的基础上再加上一对满足JavaBean规范的getter和setter：
+	Scala提供了一个<code>@BeanProperty</code>注解。当你为某个字段添加上该注解时，Scala会在原有 Getter / Setter 的基础上再加上一对满足JavaBean规范的 Getter 和 Setter ：
 </p>
 <pre class="brush: scala">
 import scala.beans.BeanProperty
@@ -321,7 +334,11 @@ public class Bean {
 }
 </pre>
 <p>如此可见，Scala确实为一个<code>BeanProperty</code>生成了4个方法。</p>
-<h2 class="jump">5.6 主构造器与辅助构造器</h2>
+<p>
+	除了<code>BeanProperty</code>以外实际上还有一个<code>BooleanBeanProperty</code>。它和<code>BeanProperty</code>的功能基本相同，
+	但它为变量生成的 Getter 的名称为<code>isXXX</code>。
+</p>
+<h2 class="jump" id="primary-and-auxiliary-constructor">5.5 主构造器与辅助构造器</h2>
 <p>注：这里整合了原书的5.6节与5.7节，并改变了编写顺序。</p>
 <p>
 	Scala和Java或C++相同，一个类可以拥有任意数量的构造器。不过，Scala类会拥有一个<b>主构造器</b>（Primary Constructor），
@@ -337,7 +354,7 @@ class Person(val name: String, val age: Int) {
 	我们通过在声明类时在类名后加入参数列表，便能以该参数列表自动生成一个主构造器；当我们不加入参数列表，或者说没有为类显式定义主构造器时，Scala便会自动为类生成一个无参的主构造器。
 	而类定义体内的所有语句都将被放入到主构造器中。像上述的代码，反编译的结果为：
 </p>
-<pre class="brush: scala">
+<pre class="brush: java">
 import scala.Predef$;
 
 public class Person {
@@ -363,20 +380,20 @@ public class Person {
 </pre>
 <p>
 	这里我们就能看到，写在类定义体中的<code>println</code>语句确实被放入了构造器之中，Scala也将主构造器的参数作为类的<code>public</code>字段，
-	按照类字段的规则为它们生成getter和setter。由于<code>Person</code>类主构造器的两个参数被定义为了<code>val</code>，那么不难想象，通过将它们定义为<code>var</code>
-	或加上<code>BeanProperty</code>注解便能让Scala为我们生成我们想要的getter和setter了。
+	按照类字段的规则为它们生成 Getter 和 Setter 。由于<code>Person</code>类主构造器的两个参数被定义为了<code>val</code>，那么不难想象，通过将它们定义为<code>var</code>
+	或加上<code>BeanProperty</code>注解便能让Scala为我们生成我们想要的 Getter 和 Setter 了。
 </p>
 <p>
 	如此看来，Scala一小行代码便能完成Java好几十行才能写完的功能，可谓便捷至极。
 </p>
 <p>如果我们需要改变主构造器或者主构造器参数所对应字段的可访问范围，我们也可以在它们之前加上<code>private</code>关键字：</p>
 <p><code>class Person private(val name: String, private val age: Int)</code></p>
-<p>如此一来，<code>Person</code>类的主构造器便会被声明为<code>private</code>，而<code>age</code>的getter也不会被生成。</p>
+<p>如此一来，<code>Person</code>类的主构造器便会被声明为<code>private</code>，而<code>age</code>的 Getter 也不会被生成。</p>
 <p>我们还可以选择不为主构造器的参数声明<code>var</code>或<code>val</code>：</p>
 <p><code>class Person(name: String, age: Int)</code></p>
 <p>
-	这种做法使得主构造器参数可以变为单纯的方法参数，而不会在类中生成同名字段以及getter和setter。但即便如此，如果参数被类中其他方法所引用的话，它依然会被升格为字段，
-	但这样的字段是等同于被声明为<code>private[this]</code>的对象私有字段，它的getter和setter方法均不会被生成。
+	这种做法使得主构造器参数可以变为单纯的方法参数，而不会在类中生成同名字段以及 Getter 和 Setter 。但即便如此，如果参数被类中其他方法所引用的话，它依然会被升格为字段，
+	但这样的字段是等同于被声明为<code>private[this]</code>的对象私有字段，它的 Getter 和 Setter 方法均不会被生成。
 </p>
 <p>
 	除了主构造器以外，Scala类还能拥有任意数量的<b>辅助构造器</b>（Auxilary Constructor）。我们通过在类中<code>def</code>一个名为<code>this</code>的方法来定义一个辅助构造器：
@@ -389,10 +406,10 @@ class Person(val name: String, val age: Int) {
 }
 </pre>
 <p>
-	在辅助构造器中，我们通过调用其他<code>this</code>方法来将构造工作委托给其他构造器，所有辅助构造器都将直接或间接地调用主构造器，这一点上和Java是一致的。
+	在辅助构造器中，我们通过调用其他<code>this</code>方法来将构造工作委托给其他构造器，所有辅助构造器都必须以对主构造器和其他已定义的辅助构造器的调用开始。
 	相比于Java，Scala使用<code>this</code>来为一个类声明更多的构造器，而Java需要让构造器的名字与类名保持一致，这样一来当你需要修改类名的时候就不那么方便了。
 </p>
-<h2 class="jump">5.8 嵌套类</h2>
+<h2 class="jump">5.6 嵌套类</h2>
 <p>在Java中，我们可以在类中定义方法，可以在类或方法中定义类（嵌套类），而Scala更进一步，还可以在方法中定义方法。我们一步一步来，先从嵌套类开始。</p>
 <p>Scala嵌套类的声明方式实际上和Java完全一致：</p>
 <pre class="brush: scala">
@@ -491,7 +508,7 @@ public class Outer {
     public int Outer$$outerX() {
         return Outer$$outerX;
     }
-	// 在确定Outer.outerX的实际变量名后，同样生成了对应的getter
+	// 在确定Outer.outerX的实际变量名后，同样生成了对应的 Getter 
 	
     public class Inner {
 
@@ -519,8 +536,8 @@ public class Outer {
         public int getOuterX() {
             return Outer$Inner$$$outer().Outer$$outerX();
         }
-		// 调用了$outer的getter取得外部类对象的引用
-		// 再调用了Outer$$outerX的getter来获得外部类对象的outerX
+		// 调用了$outer的 Getter 取得外部类对象的引用
+		// 再调用了Outer$$outerX的 Getter 来获得外部类对象的outerX
 
         public Outer Outer$Inner$$$outer() {
             return $outer;
@@ -718,4 +735,4 @@ public void main(String args[]) {
 	下一次，我们将进入《快学Scala》第六章的学习，开始研究Scala中的对象。
 </p>
 <hr />
-<p>下一篇：<a href="/2015/09/05/Scala-for-the-Impatient-6.html">《快学Scala》第6章：对象</a></p>
+<p>下一篇：<a href="/scala/2015/09/05/Scala-for-the-Impatient-6.html">《快学Scala》第6章：对象</a></p>
