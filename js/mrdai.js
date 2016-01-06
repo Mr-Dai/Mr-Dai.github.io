@@ -11,6 +11,15 @@ function branchJumpBinding() {
     });
 }
 
+// 将文章内容内的每个链接都设定为在新标签页中打开
+function aAttributeSetting() {
+	var aList = $("#left_wrapper a")
+	$.each(aList, function(n, value) {
+		if (value.target == "")
+			value.target = "_blank";
+	});
+}
+
 // 查找字符串数组中首个匹配正则表达式的元素
 function searchString(stringArray, reString) {
 	for (elem in stringArray) {
@@ -67,6 +76,7 @@ function browserRedirect() {
 $(document).ready(function(){
 //	browserRedirect();
 	branchJumpBinding();
+	aAttributeSetting();
 	$("#post_list_container ul li").last().css("border-bottom-width", "0");
 	$("html").removeClass("ui-icon-loading");
 	$(".ui-loader").remove();
