@@ -20,6 +20,20 @@ h3 {
 	color: black;
 }
 
+p {
+	text-align: justify;
+}
+
+.bg-info {
+	background-color: #d9edf7;
+	padding: 0 8px;
+}
+
+.bg-danger {
+	background-color: #f2dede;
+	padding: 0 8px;
+}
+
 blockquote p {
 	margin: 0;
 }

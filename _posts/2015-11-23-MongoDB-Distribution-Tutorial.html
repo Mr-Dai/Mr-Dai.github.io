@@ -76,12 +76,12 @@ rs.initiate(conf)
 <p>
 	在<code>conf</code>中，我们将<code>_id</code>设置为Replica Set的名称，并在<code>members</code>中设置了Replica Set所有成员的信息，其中包括成员的名称<code>_id</code>以及成员的主机名<code>host</code>。
 </p>
-<p class="bg-danger" style="padding-left: 3px">
+<p class="bg-danger">
 	<b>注意</b>，尽管这里可以直接使用了<code>IP:端口</code>的形式来指定<code>mongod</code>实例，但在真实环境中，<b>不要</b>这么做，这种做法十分糟糕。
 	不过现在搭建分布式，大家的做法似乎更倾向于为每台机器修改<code>hosts</code>文件。同样，<b>不要</b>这么做，这两种做法都属于bad practice。最好的做法，是在你的集群环境中配置一台DNS服务器。
 	这样，当你的某一个结点的IP发生变化时，你就只需要修改DNS服务器中的那条解析条目，而不需要修改每个结点的<code>hosts</code>文件了。
 </p>
-<p class="bg-danger" style="padding-left: 3px">
+<p class="bg-danger">
 	直接以数字作为每个结点的名称也是不好的做法，因为这个名称在<code>mongod</code>的日志信息中会经常出现。使用更加可读的名称是更好的做法。
 </p>
 <p>一切正常的话，你应该会在其中一个结点上看到如下日志信息：</p>
@@ -205,7 +205,7 @@ for (int i = 0; i &lt; Integer.MAX_VALUE; i++) {
 	在本节中，我们将会在本机上部署一个完整的生产级别的MongoDB Shard集群。集群由4个Shard负责存储数据，其中每个Shard都是包含三个结点的Replica Set。
 	除此之外，集群还包括4个<code>mongos</code>和3个Config Server。
 </p>
-<p class="bg-danger" style="padding-left: 3px">
+<p class="bg-danger">
 	<b>注意</b>，用于生产环境的Shard集群必须遵循如下几个原则：<b>必须</b>使用Replica Set来作为Shard，任何一个Shard的不可用都会导致集群出现异常；
 	<b>必须</b>使用正好3个Config Server，Config Server不可用将导致整个集群不可用。除此之外，使用两个以上的<code>mongos</code>实例可以更好地分散压力。
 </p>
@@ -261,7 +261,7 @@ mongod --shardsvr --replSet a --dbpath a1 --logpath log.a1 --port 27001 --fork
 mongod --shardsvr --replSet a --dbpath a2 --logpath log.a2 --port 27002 --fork
 mongod --shardsvr --replSet a --dbpath a3 --logpath log.a3 --port 27003 --fork
 </pre>
-<p class="bg-info" style="padding-left: 3px">
+<p class="bg-info">
 	<b>注</b>：当<code>--shardsvr</code>选项被打开时，<code>mongod</code>的默认端口号变为<b>27018</b>。
 </p>
 <p>
@@ -290,7 +290,7 @@ mongod --configsvr --dbpath cfg1 --logpath log.cfg1 --port 26050 --fork
 mongod --configsvr --dbpath cfg2 --logpath log.cfg2 --port 26051 --fork
 mongod --configsvr --dbpath cfg3 --logpath log.cfg3 --port 26052 --fork
 </pre>
-<p class="bg-info" style="padding-left: 3px">
+<p class="bg-info">
 	<b>注</b>：当<code>--configvr</code>选项被打开时，<code>mongod</code>的默认端口号变为<b>27019</b>。
 </p>
 <p>最后，启动Query Router：</p>
@@ -300,7 +300,7 @@ mongos --configdb localhost:26050,localhost:26051,localhost:26052 --logpath log.
 mongos --configdb localhost:26050,localhost:26051,localhost:26052 --logpath log.mongos3 --port 26062 --fork
 mongos --configdb localhost:26050,localhost:26051,localhost:26052 --logpath log.mongos4 --port 26063 --fork
 </pre>
-<p class="bg-info" style="padding-left: 3px">
+<p class="bg-info">
 	<b>注</b>：<code>mongos</code>的默认端口号为<b>27017</b>，与<code>mongod</code>、<code>mongo</code>的默认端口号相同。
 </p>
 <p>如此一来，集群的各个成员都启动完毕了，可以开始配置集群了。</p>
