@@ -105,13 +105,15 @@ alonzosBirthday = LocalDate.of(1903, Month.JUNE, 14);
 	</tr>
 	<tr>
 		<td>
-			<code>plusDays</code>、<code>plusWeeks</code>、<code>plusMonths</code>、<code>plusYears</code>
+			<code>plusDays</code>、<code>plusWeeks</code>、<br />
+			<code>plusMonths</code>、<code>plusYears</code>
 		</td>
 		<td>返回在当前<code>LocalDate</code>的基础上加上几天、几周、几个月或者几年后的新的<code>LocalDate</code>对象，原有的<code>LocalDate</code>对象保持不变</td>
 	</tr>
 	<tr>
 		<td>
-			<code>minusDays</code>、<code>minusWeeks</code>、<code>minusMonths</code>、<code>minusYears</code>
+			<code>minusDays</code>、<code>minusWeeks</code>、<br />
+			<code>minusMonths</code>、<code>minusYears</code>
 		</td>
 		<td>返回在当前<code>LocalDate</code>的基础上减去几天、几周、几个月或者几年后的新的<code>LocalDate</code>对象，原有的<code>LocalDate</code>对象保持不变</td>
 	</tr>
@@ -120,7 +122,10 @@ alonzosBirthday = LocalDate.of(1903, Month.JUNE, 14);
 		<td>返回在当前<code>LocalDate</code>的基础上加上或减去一个<code>Duration</code>或者<code>Period</code>的新的<code>LocalDate</code>对象，原有的<code>LocalDate</code>对象保持不变</td>
 	</tr>
 	<tr>
-		<td><code>withDayOfMonth</code>、<code>withDayOfYear</code>、<code>withMonth</code>、<code>withYear</code></td>
+		<td>
+		    <code>withDayOfMonth</code>、<code>withDayOfYear</code>、<br />
+		    <code>withMonth</code>、<code>withYear</code>
+		</td>
 		<td>返回一个月份天数、年份天数、月份、年份修改为指定的值的新的<code>LocalDate</code>对象，原有的<code>LocalDate</code>对象保持不变</td>
 	</tr>
 	<tr>
@@ -188,13 +193,15 @@ LocalTime bedtime= LocalTime.of(22, 30)
 	</tr>
 	<tr>
 		<td>
-			<code>plusHours</code>、<code>plusMinutes</code>、<code>plusSeconds</code>、<code>plusNanos</code>
+			<code>plusHours</code>、<code>plusMinutes</code>、<br />
+			<code>plusSeconds</code>、<code>plusNanos</code>
 		</td>
 		<td>返回在当前<code>LocalTime</code>的基础上加上几小时、几分钟、几秒或者几纳秒后的新的<code>LocalTime</code>对象，原有的<code>LocalTime</code>对象保持不变</td>
 	</tr>
 	<tr>
 		<td>
-			<code>minusHours</code>、<code>minusMinutes</code>、<code>minusSeconds</code>、<code>minusNanos</code>
+			<code>minusHours</code>、<code>minusMinutes</code>、<br />
+			<code>minusSeconds</code>、<code>minusNanos</code>
 		</td>
 		<td>返回在当前<code>LocalTime</code>的基础上减去几小时、几分钟、几秒或者几纳秒后的新的<code>LocalTime</code>对象，原有的<code>LocalTime</code>对象保持不变</td>
 	</tr>
@@ -203,11 +210,17 @@ LocalTime bedtime= LocalTime.of(22, 30)
 		<td>返回在当前<code>LocalTime</code>的基础上加上或减去一个<code>Duration</code>的新的<code>LocalTime</code>对象，原有的<code>LocalTime</code>对象保持不变</td>
 	</tr>
 	<tr>
-		<td><code>withHour</code>、<code>withMinute</code>、<code>withSecond</code>、<code>withNano</code></td>
+		<td>
+			<code>withHour</code>、<code>withMinute</code>、<br />
+			<code>withSecond</code>、<code>withNano</code>
+		</td>
 		<td>返回一个小时数、分钟数、秒数、纳秒数修改为指定的值的新的<code>LocalTime</code>对象，原有的<code>LocalTime</code>对象保持不变</td>
 	</tr>
 	<tr>
-		<td><code>getHour</code>、<code>getMinute</code>、<code>getSecond</code>、<code>getNano</code></td>
+		<td>
+			<code>getHour</code>、<code>getMinute</code>、<br />
+			<code>getSecond</code>、<code>getNano</code>
+		</td>
 		<td>返回该<code>LocalTime</code>的小时、分钟、秒钟及纳秒值</td>
 	</tr>
 	<tr>
@@ -273,4 +286,482 @@ LocalTime bedtime= LocalTime.of(22, 30)
 <p>详情请查阅<code>OffsetDateTime</code>的 <a href="http://docs.oracle.com/javase/8/docs/api/java/time/OffsetDateTime.html">JavaDoc</a>。</p>
 <hr />
 <h2 class="jump" id="temporal-adjuster">日期校正器</h2>
+<p>
+	有些时候，我们可以能需要得到类似“每月的第一个星期二”这样的日期。Java8 提供了<code>TemporalAdjuster</code>接口，用以实现自定义的日期校正逻辑。
+	通过将创建好的<code>TemporalAdjuster</code>传递给日期时间类的<code>with</code>方法便可在原有日期时间对象的基础上产生出一个符合要求的日期时间。
+	例如，你可以通过如下代码来计算下一个星期二：
+</p>
+<pre class="brush: java">
+TemporalAdjuster NEXT_TUESDAY = (Temporal temporal) -> {
+    int dowValue = DayOfWeek.TUESDAY.getValue();
+    int calDow = temporal.get(ChronoField.DAY_OF_WEEK);
+    if (calDow == dowValue) {
+        return temporal;
+    }
+    int daysDiff = calDow - dowValue;
+    return temporal.plus(daysDiff >= 0 ? 7 - daysDiff : -daysDiff, DAYS);
+};
+
+LocalDate nextTuesDay = today.with(NEXT_TUESDAY);
+</pre>
+<p>
+	此处利用 Lambda 表达式快速实现了一个匿名的<code>TemporalAdjuster</code>对象。注意 Lambda 表达式的参数类型为 <code>Temporal</code>，
+	某些<code>LocalDate</code>或者<code>LocalDateTime</code>之类的类特有的方法将不可用，在使用前必须进行强制转换。
+	你可以通过<code>ofDateAdjuster</code>方法和一个<code>UnaryOperator&lt;LocalDate&gt;</code>来避免强制转换：
+</p>
+<pre class="brush: java">
+TermporalAdjuster NEXT_WORKDAY = TemporalAdjusters.ofDateAdjuster((LocalDate w) -> {
+	LocalDate result;
+	DayOfWeek dow = w.getDayOfWeek();
+	if (dow == DayOfWeek.FRIDAY)
+		result = w.plusDays(3);
+	else if (dow == DayOfWeek.SATURDAY)
+		result = w.plusDays(2);
+	else
+		result = w.plusDays(1);
+
+    return result;
+});
+</pre>
+<p>
+	上述代码中使用的<code>ofDateAdjuster</code>方法来自类<code>TemporalAdjusters</code>。实际上这个类通过静态方法提供了大量的常用<code>TemporalAdjuster</code>实现。
+	比如，我们也可以通过如下代码来计算下一个星期二：
+</p>
+<pre class="brush: java">
+LocalDate nextTuesDay = LocalDate.now().with(
+  TemporalAdjusters.nextOrSame(DayOfWeek.TUESDAY)
+);
+</pre>
+<p>
+	下表中列出了<code>TemporalAdjusters</code>的一些常用方法。详细的方法说明请参考<code>TemporalAdjusters</code>的
+	<a href="http://docs.oracle.com/javase/8/docs/api/java/time/temporal/TemporalAdjusters.html">JavaDoc</a>。
+</p>
+<table class="table">
+  <tr>
+  	<th>方法</th>
+  	<th>描述</th>
+  </tr>
+  <tr>
+  	<td><code>previous(dayOfWeek)</code>、<code>next(dayOfWeek)</code></td>
+  	<td>返回被校正日期之后或之前最近的指定星期几</td>
+  </tr>
+  <tr>
+  	<td><code>previoursOrSame(dayOfWeek)</code>、<code>nextOrSame(dayOfWeek)</code></td>
+  	<td>返回从被校正日期开始，之前或之后的指定星期几。如果被校正日期已吻合条件，被校正的日期实例将被直接返回</td>
+  </tr>
+  <tr>
+  	<td><code>dayOfWeekInMonth(n, dayOfWeek)</code></td>
+  	<td>返回该月中指定的第几个星期几</td>
+  </tr>
+  <tr>
+  	<td><code>firstInMonth(dayOfWeek)</code>、<code>lastInMonth(dayOfWeek)</code></td>
+  	<td>返回该月第一个或最后一个星期几</td>
+  </tr>
+  <tr>
+  	<td>
+  	  <code>firstDayOfMonth()</code>、<code>firstDayOfNextMonth()</code>、<br />
+  	  <code>firstDayOfNextYear()</code>、<code>lastDayOfMonth()</code>、<br />
+  	  <code>lastDayOfPreviousMonth()</code>、<code>lastDayOfYear()</code>
+  	</td>
+  	<td>返回方法名所描述的日期</td>
+  </tr>
+</table>
 <hr />
+<h2 class="jump" id="formatting-and-parsing">格式化和解析</h2>
+<p>
+	除了日期校正，日期与字符串之间的相互转换也是十分常见的操作。对于原有的<code>java.util.Date</code>等类，我们使用<code>java.text.DateFormat</code>来对日期进行格式化和解析。
+	对于 Java8 新引入的日期时间类，我们使用<code>java.time.format.DateTimeFormatter</code>类。
+</p>
+<p>
+	<code>DateTimeFormatter</code>类提供了三种格式化方法来打印日期时间：
+</p>
+<ul>
+  <li>预定义的标准格式</li>
+  <li>语言环境相关的格式</li>
+  <li>自定义的格式</li>
+</ul>
+<p>
+	下表中列出了所有预定义的<code>DateTimeFormatter</code>。详细说明可参考<code>DateTimeFormatter</code>的
+	<a href="http://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#predefined">JavaDoc</a>。
+</p>
+<table class="table">
+  <tr>
+  	<th>格式</th>
+  	<th>示例</th>
+  </tr>
+  <tr>
+  	<td><code>BASIC_ISO_DATE</code></td>
+  	<td><code>20111203</code></td>
+  </tr>
+  <tr>
+  	<td>
+  	  <code>ISO_LOCAL_DATE</code><br/>
+  	  <code>ISO_LOCAL_TIME</code><br/>
+  	  <code>ISO_LOCAL_DATE_TIME</code>
+  	</td>
+  	<td>
+      <code>2011-12-03</code><br/>
+      <code>10:15:30</code><br/>
+      <code>2011-12-03T10:15:30</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td>
+  	  <code>ISO_OFFSET_DATE</code><br/>
+  	  <code>ISO_OFFSET_TIME</code><br/>
+  	  <code>ISO_OFFSET_DATE_TIME</code>
+  	</td>
+  	<td>
+  	  <code>2011-12-03+01:00</code><br/>
+  	  <code>10:15:30+01:00</code><br/>
+  	  <code>2011-12-03T10:15:30+01:00</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td><code>ISO_ZONED_DATE_TIME</code></td>
+  	<td><code>2011-12-03T10:15:30+01:00[Europe/Paris]</code></td>
+  </tr>
+  <tr>
+  	<td><code>ISO_INSTANT</code></td>
+  	<td><code>2011-12-03T10:15:30Z</code></td>
+  </tr>
+  <tr>
+  	<td><code>ISO_ORDINAL_DATE</code></td>
+  	<td><code>2012-337</code></td>
+  </tr>
+  <tr>
+  	<td><code>ISO_WEEK_DATE</code></td>
+  	<td><code>2012-W48-6</code></td>
+  </tr>
+  <tr>
+  	<td>
+      <code>ISO_DATE</code><br />
+      <code>ISO_TIME</code><br />
+      <code>ISO_DATE_TIME</code><br />
+  	</td>
+  	<td>
+  	  <code>2011-12-03+01:00</code>; <code>2011-12-03</code><br />
+  	  <code>10:15:30+01:00</code>; <code>10:15:30</code><br />
+  	  <code>2011-12-03T10:15:30+01:00[Europe/Paris]</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td><code>RFC_1123_DATE_TIME</code></td>
+  	<td><code>Tue, 3 Jun 2008 11:05:30 GMT</code></td>
+  </tr>
+</table>
+<p>
+	通过调用<code>DateTimeFormatter</code>类的<code>format</code>方法即可对日期进行格式化：
+</p>
+<pre class="brush: java">
+String formatted = DateTimeFormatter.ISO_DATE_TIME.format(apollolllaunch);
+  // 1969-07-16T09:32:00-0500[America/New_York]
+</pre>
+<p>
+	标准格式主要用于机器可读的时间戳。为了产生人类可读的日期和时间，你需要使用语言环境相关的格式。
+	下表中列出了 Java8 提供的 4 种风格：
+</p>
+<table class="table">
+  <tr>
+  	<th>风格</th>
+  	<th>日期</th>
+  	<th>时间</th>
+  </tr>
+  <tr>
+  	<td><code>SHORT</code></td>
+  	<td><code>7/16/69</code></td>
+  	<td><code>9:32 AM</code></td>
+  </tr>
+  <tr>
+  	<td><code>MEDIUM</code></td>
+  	<td><code>Jul 16, 1969</code></td>
+  	<td><code>9:32:00 AM</code></td>
+  </tr>
+  <tr>
+  	<td><code>LONG</code></td>
+  	<td><code>July 16, 1969</code></td>
+  	<td><code>9:32:00 AM EDT</code></td>
+  </tr>
+  <tr>
+  	<td><code>FULL</code></td>
+  	<td><code>Wednesday, July 16, 1969</code></td>
+  	<td><code>9:32:00 AM EDT</code></td>
+  </tr>
+</table>
+<p>
+	你可以通过静态方法<code>ofLocalizedDate</code>、<code>ofLocalizedTime</code>和<code>ofLocalizedDateTime</code>来创建这些格式：
+</p>
+<pre class="brush: java">
+DateTimeFormatter formatter =
+    DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG);
+
+String formatted = formatter.format(apollolllaunch);
+    // July 16, 1969 9:32:00 AM EDT
+</pre>
+<p>
+	这些方法使用的都是默认的语言环境。通过使用<code>withLocale</code>方法可以更改为其他语言环境：
+</p>
+<pre class="brush: java">
+String formatted = formatter.withLocale(Locale.FRENCH).format(apollolllaunch);
+    // 16 juillet 1969 09:32:00 EDT
+</pre>
+<p>你可以通过调用<code>formatter.toFormat()</code>方法来获取一个等效的<code>java.util.DateFormat</code>对象。</p>
+<p>
+	最后，你可以通过指定的模式来自定义日期的格式。例如：
+</p>
+<pre class="brush: java">
+formatter = DateTimeFormatter.ofPattern("E yyyy-MM-dd HH:mm");
+</pre>
+<p>
+	其中不同的符号对应着不同的含义。下表中列出了不同符号的具体含义和实例，详情可查阅<code>DateTimeFormatter</code>的
+	<a href="http://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html#patterns">JavaDoc</a>。
+</p>
+<table class="table">
+  <tr>
+  	<th>含义</th>
+  	<th>符号</th>
+  	<th>示例</th>
+  </tr>
+  <tr>
+  	<td>纪元</td>
+  	<td>
+  	  <code>G</code><br />
+  	  <code>GGGG</code><br />
+  	  <code>GGGGG</code>
+  	</td>
+  	<td>
+  	  <code>AD</code><br />
+  	  <code>Anno Domini</code><br />
+  	  <code>A</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td>年份</td>
+  	<td>
+      <code>yy</code><br />
+  	  <code>yyyy</code>
+  	</td>
+  	<td>
+  	  <code>69</code><br />
+  	  <code>1969</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td>月份</td>
+    <td>
+      <code>M</code><br />
+      <code>MM</code><br />
+      <code>MMM</code><br />
+      <code>MMMM</code><br />
+      <code>MMMMM</code><br />
+    </td>
+    <td>
+      <code>7</code><br />
+      <code>07</code><br />
+      <code>Jul</code><br />
+      <code>July</code><br />
+      <code>J</code>
+    </td>
+  </tr>
+  <tr>
+  	<td>日份</td>
+  	<td>
+  	  <code>d</code><br />
+  	  <code>dd</code>
+  	</td>
+  	<td>
+  	  <code>6</code><br />
+  	  <code>06</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td>星期几</td>
+  	<td>
+  	  <code>e</code><br />
+  	  <code>E</code><br />
+  	  <code>EEEE</code><br />
+  	  <code>EEEEE</code>
+  	</td>
+  	<td>
+  	  <code>3</code><br />
+  	  <code>Wed</code><br />
+  	  <code>Wednesday</code><br />
+  	  <code>W</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td>24小时制时钟（$[0,23]$）</td>
+  	<td>
+  	  <code>H</code><br />
+  	  <code>HH</code>
+  	</td>
+  	<td>
+  	  <code>9</code><br />
+  	  <code>09</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td>12小时制时钟（$[0,11]$）</td>
+  	<td>
+  	  <code>K</code><br />
+  	  <code>KK</code>
+  	</td>
+  	<td>
+  	  <code>9</code><br />
+  	  <code>09</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td>AM/PM</td>
+  	<td><code>a</code></td>
+  	<td><code>AM</code></td>
+  </tr>
+  <tr>
+  	<td>分钟</td>
+  	<td><code>mm</code></td>
+  	<td><code>02</code></td>
+  </tr>
+  <tr>
+  	<td>秒钟</td>
+  	<td><code>ss</code></td>
+  	<td><code>00</code></td>
+  </tr>
+  <tr>
+  	<td>时区 ID</td>
+  	<td><code>VV</code></td>
+  	<td><code>America/New_York</code></td>
+  </tr>
+  <tr>
+  	<td>时区名称</td>
+  	<td>
+  	  <code>z</code><br />
+  	  <code>zzzz</code><br />
+  	</td>
+  	<td>
+  	  <code>EDT</code><br />
+  	  <code>Eastern Daylight Time</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td>时差</td>
+  	<td>
+  	  <code>x</code><br />
+  	  <code>xx</code><br />
+  	  <code>xxx</code><br />
+  	  <code>XXX</code>
+  	</td>
+  	<td>
+  	  <code>-04</code><br />
+  	  <code>-0400</code><br />
+  	  <code>-04:00</code><br />
+  	  <code>-Z4:ZZ</code>
+  	</td>
+  </tr>
+  <tr>
+  	<td>本地化的时差</td>
+  	<td>
+  	  <code>O</code><br />
+  	  <code>OOOO</code>
+  	</td>
+  	<td>
+  	  <code>GMT-4</code><br />
+  	  <code>GMT-04:00</code>
+  	</td>
+  </tr>
+</table>
+<p>
+	要从一个字符串中解析出日期时间，可以使用静态方法<code>parse</code>的各个重载方法。例如：
+</p>
+<pre class="brush: java">
+LocalDate churchsBirthday = LocalDate.parse("1903-06-14");
+ZonedDateTime apollolllaunch =
+    ZonedDateTime.parse("1969-07-16 03:32:00-0400",
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssxx"));
+</pre>
+<hr />
+<h2 class="jump" id="dealing-with-legacy-code">与遗留代码互操作</h2>
+<p>
+	尽管使用全新的 API 可以获得更好的开发体验，但兼容遗留代码总是不可避免的。因此，熟知新的日期时间类和旧的日期时间类之间的转换方法也是我们必须学习的。
+</p>
+<p>
+	总体来讲，转换规则可以归纳为下表：
+</p>
+<table class="table">
+  <tr>
+  	<th>类</th>
+  	<th>To 遗留类</th>
+  	<th>From 遗留类</th>
+  </tr>
+  <tr>
+  	<td>
+  		<code>java.time.Instant</code><br />
+  		<code>java.util.Date</code>
+  	</td>
+  	<td><code>Date.from(instant)</code></td>
+  	<td><code>date.toInstant()</code></td>
+  </tr>
+  <tr>
+  	<td>
+  		<code>java.time.Instant</code><br />
+  		<code>java.sql.Timestamp</code>
+  	</td>
+  	<td><code>Timestamp.from(instant)</code></td>
+  	<td><code>timestamp.toInstant()</code></td>
+  </tr>
+  <tr>
+  	<td>
+  		<code>java.time.Instant</code><br />
+  		<code>java.nio.file.attribute.FileTime</code>
+  	</td>
+  	<td><code>FileTime.from(instant)</code></td>
+  	<td><code>fileTime.toInstant()</code></td>
+  </tr>
+  <tr>
+  	<td>
+  		<code>java.time.ZonedDateTime</code><br />
+  		<code>java.util.GregorianCalendar</code>
+  	</td>
+  	<td><code>GregorianCalendar.from(zonedDateTime)</code></td>
+  	<td><code>cal.toZonedDateTime()</code></td>
+  </tr>
+  <tr>
+  	<td>
+  		<code>java.time.LocalDate</code><br />
+  		<code>java.sql.Time</code>
+  	</td>
+  	<td><code>Date.valueOf(localDate)</code></td>
+  	<td><code>date.toLocalDate()</code></td>
+  </tr>
+  <tr>
+  	<td>
+  		<code>java.time.LocalTime</code><br />
+        <code>java.sql.Time</code>
+  	</td>
+  	<td><code>Date.valueOf(localDate)</code></td>
+  	<td><code>date.toLocalTime()</code></td>
+  </tr>
+  <tr>
+  	<td>
+  		<code>java.time.LocalDateTime</code><br />
+  		<code>java.sql.Timestamp</code>
+  	</td>
+  	<td><code>Timestamp.valueOf(localDateTime)</code></td>
+  	<td><code>timestamp.toLocalDateTime()</code></td>
+  </tr>
+  <tr>
+  	<td>
+  		<code>java.time.ZoneId</code><br />
+  		<code>java.util.TimeZone</code>
+  	</td>
+  	<td><code>Timezone.getTimeZone(id)</code></td>
+  	<td><code>timeZone.toZoneId()</code></td>
+  </tr>
+  <tr>
+  	<td>
+  		<code>java.time.format.DateTimeFormatter</code><br />
+  		<code>java.text.DateFormat</code>
+  	</td>
+  	<td><code>formatter.toFormat()</code></td>
+  	<td>无</td>
+  </tr>
+</table>
