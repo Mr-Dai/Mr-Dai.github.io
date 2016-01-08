@@ -1,0 +1,422 @@
+---
+layout: posts_translated
+title: Java 集合框架教程
+author: Robert Peng
+category: Java
+org_title: "Java Collections Framework Tutorial"
+org_url: "http://docs.oracle.com/javase/tutorial/collections/index.html"
+---
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+
+<h2 class="jump" id="introduction">1 简介</h2>
+<p>
+	原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/intro/index.html">Introduction to Collections</a>
+</p>
+<p>
+	<!--
+	    A collection — sometimes called a container — is simply an object that groups multiple elements into a single unit.
+	    Collections are used to store, retrieve, manipulate, and communicate aggregate data.
+	    Typically, they represent data items that form a natural group, such as a poker hand (a collection of cards), a mail folder (a collection of letters),
+	    or a telephone directory (a mapping of names to phone numbers).
+	    If you have used the Java programming language — or just about any other programming language — you are already familiar with collections.
+	-->
+	集合（collection），有时又被叫做容器（container），用于将多个元素容纳到一个整体之中。集合用于存储、获取、修改以及聚合数据。
+	大多数时候，它们用于表示可被组合在一起的数据单位，例如一副手牌（扑克牌的集合）、一个信箱（信的集合）或者是一个电话簿（姓名到电话号码的映射）。
+	如果你有使用过 Java 或者其它编程语言，你应该已经很熟悉集合了。
+</p>
+<h3 class="jump" id="what-is-a-collections-framework">1.1 集合框架是什么？</h3>
+<p>
+	<!--
+        A collections framework is a unified architecture for representing and manipulating collections. All collections frameworks contain the following:
+    -->
+    集合框架（collections framework）是一种用于表示和操控集合的统一的代码结构。所有的集合框架都包括如下几个方面：
+</p>
+<ul>
+  	<li>
+   		<!-- 
+            Interfaces: These are abstract data types that represent collections. Interfaces allow collections to be manipulated independently of the details of their representation. 
+            In object-oriented languages, interfaces generally form a hierarchy.
+  		-->
+  		<b>接口</b>（Interface）：用于表示集合的抽象数据类型。接口的存在使得使用者可以在不去了解集合的实现的情况下操控集合。
+   		在面向对象语言中，接口们可相互结合，形成类型结构。
+   	</li>
+   	<li>
+   		<!--
+   		    Implementations: These are the concrete implementations of the collection interfaces. In essence, they are reusable data structures.
+   	    -->
+   	    <b>实现</b>（Implementation）：集合接口的实现。本质上，它们都是可复用的数据结构。
+   	</li>
+   	<li>
+   		<!--
+   		    Algorithms: These are the methods that perform useful computations, such as searching and sorting, on objects that implement collection interfaces.
+   		    The algorithms are said to be polymorphic: that is, the same method can be used on many different implementations of the appropriate collection interface.
+   		    In essence, algorithms are reusable functionality.
+   	    -->
+   	    <b>算法</b>（Algorithm）：对实现集合接口的对象进行计算的方法，比如查找和排序。算法通常被认为是多态（polymorphic）的：意思是说，同样的方法可以被用于某个集合接口的不同实现。
+   	    本质上，算法是可复用的功能逻辑。
+   	</li>
+</ul>
+<p>
+	<!--
+		Apart from the Java Collections Framework, the best-known examples of collections frameworks are the C++ Standard Template Library (STL) and Smalltalk's collection hierarchy.
+		Historically, collections frameworks have been quite complex, which gave them a reputation for having a steep learning curve.
+		We believe that the Java Collections Framework breaks with this tradition, as you will learn for yourself in this chapter.
+	-->
+	除了 Java 的集合框架，最著名的集合框架当属 C++ 的标准模板库（STL）和 Smalltalk 的集合层级（collection hirarchy）了。
+	从历史上看，集合框架们多半都十分复杂，使得大众们普遍认为集合框架有着相当陡峭的学习曲线。
+	我相信随着你的深入学习，你就会知道 Java 集合框架是如何打破这项“传统”的。
+</p>
+<h3 class="jump" id="benefits-of-the-java-collections-framework">1.2 使用 Java 集合框架的好处</h3>
+<p>
+	<!--
+	    The Java Collections Framework provides the following benefits:
+    -->
+    使用 Java 集合框架能为你带来如下几点好处：
+</p>
+<ul>
+	<li>
+		<!--
+			Reduces programming effort: By providing useful data structures and algorithms, the Collections Framework frees you to concentrate on the important parts of your program rather than on the low-level "plumbing" required to make it work.
+			By facilitating interoperability among unrelated APIs, the Java Collections Framework frees you from writing adapter objects or conversion code to connect APIs.
+		-->
+		<b>减少需要编写的代码</b>：Java 集合框架提供了大量有用的数据结构和算法，使得你可以更加专注于实现你的程序中其他更重要的部分，而不需要为了让你的程序运行起来而去烦心那些底层的东西。
+		Java 集合框架不断地在增进不相关的 API 之间的互操性，使得你不需要为了连接这些 API 而去编写适配或者转换的代码。
+	</li>
+	<li>
+		<!--
+	    	Increases program speed and quality: This Collections Framework provides high-performance, high-quality implementations of useful data structures and algorithms.
+	    	The various implementations of each interface are interchangeable, so programs can be easily tuned by switching collection implementations.
+	    	Because you're freed from the drudgery of writing your own data structures, you'll have more time to devote to improving programs' quality and performance.
+	    -->
+	    <b>提高编码速度和质量</b>：Java 集合框架提供了大量有用数据结构和算法的高效高质量实现。每个接口的实现类是可以随意更换的，这使得你可以通过调整你所使用的接口实现类来配置你的程序。
+	    由于你不再需要烦心如何编写你自己的数据结构，你可以花更多时间来提高你的程序的性能和质量。
+	</li>
+	<li>
+		<!--
+			Allows interoperability among unrelated APIs: The collection interfaces are the vernacular by which APIs pass collections back and forth.
+			If my network administration API furnishes a collection of node names and if your GUI toolkit expects a collection of column headings,
+			our APIs will interoperate seamlessly, even though they were written independently.
+	    -->
+	    <b>使不相关的 API 的相互操作成为可能</b>：集合接口是 API 之间相互传递集合所使用的方言（vernacular）。如果我的网络管理 API 可以提供一个结点名称的集合，而你的 GUI
+	    工具栏想要一个列标题的集合，我们的 API 完全可以无缝地相互操作，即使它们的实现是相互独立的。
+	</li>
+	<li>
+		<!--
+			Reduces effort to learn and to use new APIs: Many APIs naturally take collections on input and furnish them as output.
+			In the past, each such API had a small sub-API devoted to manipulating its collections. There was little consistency among these ad hoc collections sub-APIs,
+			so you had to learn each one from scratch, and it was easy to make mistakes when using them. With the advent of standard collection interfaces, the problem went away.
+		-->
+		<b>减少学习新 API 的麻烦</b>：很多 API 都会把集合作为它们的输入或者输出。在以前，每个这样的 API 都需要另在创建一个小的子 API 以供使用者操控它们的集合。
+		这些集合子 API 之间很难保持一致性，因此你每次都需要重新学习一个新的 API，而且这样做很容易使你误用它们。随着标准集合接口的出现，这样的问题彻底消失了。
+	</li>
+	<li>
+		<!--
+			Reduces effort to design new APIs: This is the flip side of the previous advantage. Designers and implementers don't have to reinvent the wheel each time
+			they create an API that relies on collections; instead, they can use standard collection interfaces.
+		-->
+		<b>减少了设计新 API 的麻烦</b>：这个更像是上一个好处的另外一面。设计者和实现者们不再需要在他们每次创建一个依赖集合的 API 时都重新发明轮子：
+		现在，他们直接使用标准的集合接口就可以了。
+	</li>
+	<li>
+		<!--
+			Fosters software reuse: New data structures that conform to the standard collection interfaces are by nature reusable.
+			The same goes for new algorithms that operate on objects that implement these interfaces.
+		-->
+		<b>提高了软件的可复用性</b>：符合标准集合接口的新数据结构自然都是可复用的，同样用于操作这些对象的算法也是可复用的。
+	</li>
+</ul>
+<hr />
+<h2 class="jump" id="interfaces">2 接口</h2>
+<p>
+	原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/interfaces/index.html">Interfaces</a>
+</p>
+<p>
+	<!--
+		The core collection interfaces encapsulate different types of collections, which are shown in the figure below.
+		These interfaces allow collections to be manipulated independently of the details of their representation.
+		Core collection interfaces are the foundation of the Java Collections Framework.
+		As you can see in the following figure, the core collection interfaces form a hierarchy.
+	-->
+	核心的集合接口们封装了各种类型的集合。这些接口使得用户可以在不清楚实现的情况下对集合进行操作。它们共同组成了 Java 集合框架的根基。
+	正如下图所示，这些接口相互之间存在着一定的层次关系。
+</p>
+<p class="center"><img src="http://docs.oracle.com/javase/tutorial/figures/collections/colls-coreInterfaces.gif" /></p>
+<p>
+	<!--
+		A Set is a special kind of Collection, a SortedSet is a special kind of Set, and so forth.
+		Note also that the hierarchy consists of two distinct trees — a Map is not a true Collection.
+	-->
+	<code>Set</code>是一种特殊的<code>Collection</code>，而<code>SortedSet</code>是一种特殊的<code>Set</code>，依此类推。注意这个类型层次由两个相互独立的部分组成：
+	<code>Map</code>并不是<code>Collection</code>。
+</p>
+<p>
+	<!--
+		Note that all the core collection interfaces are generic. For example, this is the declaration of the Collection interface.
+	-->
+	注意，所有的这些核心接口都是泛型的。例如，<code>Collection</code>接口的声明是这样的：
+</p>
+<pre class="brush: java">
+public interface Collection&lt;E&gt;...
+</pre>
+<p>
+	<!--
+		The <E> syntax tells you that the interface is generic. When you declare a Collection instance you can and should specify the type of object contained in the collection.
+		Specifying the type allows the compiler to verify (at compile-time) that the type of object you put into the collection is correct, thus reducing errors at runtime.
+		For information on generic types, see the Generics (Updated) lesson.
+	-->
+	从<code>&lt;E&gt;</code>即可看出，这个接口是泛型的。当你声明一个<code>Collection</code>实例时你应该给出这个集合元素的类型。给出集合元素的类型使得编译器可以（在编译时）
+	验证你放入集合中的对象类型是否正确，从而减少运行时错误的发生。有关泛型的更多信息，你可以看看<a href="http://docs.oracle.com/javase/tutorial/java/generics/index.html">这个</a>教程。
+</p>
+<p>
+	<!--
+		When you understand how to use these interfaces, you will know most of what there is to know about the Java Collections Framework.
+		This chapter discusses general guidelines for effective use of the interfaces, including when to use which interface.
+		You'll also learn programming idioms for each interface to help you get the most out of it.
+    -->
+    等你学会了如何使用这些接口，你就掌握了 Java 集合框架的大部分知识了。在这一章中，我们将会讨论有效使用这些接口的基本准则，包括在什么时候使用什么接口，
+    并在这个过程中学会每个接口的常用语法。
+</p>
+<p>
+	<!--
+		To keep the number of core collection interfaces manageable, the Java platform doesn't provide separate interfaces for each variant of each collection type.
+		(Such variants might include immutable, fixed-size, and append-only.) Instead, the modification operations in each interface are designated optional
+		— a given implementation may elect not to support all operations. If an unsupported operation is invoked, a collection throws an UnsupportedOperationException.
+		Implementations are responsible for documenting which of the optional operations they support.
+		All of the Java platform's general-purpose implementations support all of the optional operations.
+	-->
+	为了使得核心集合接口的数量不至于失控，Java 并不会为每种集合类型的变种提供独立的接口（变种包括不可变集合、定长集合、不可删减集合等）。
+	相对的，每个接口中的修改操作实际上都是可选的 —— 某个实现类完全可以不去支持所有操作。如果一个不支持的操作被调用，集合将抛出一个
+	<code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/UnsupportedOperationException.html">UnsupportedOperationException</a></code>。
+	每个实现类都应该给出详细的文档，说明它们支持哪些操作。Java 所提供的的所有普适的实现类都支持所有的操作。
+</p>
+<p>
+	<!--
+		The following list describes the core collection interfaces:
+    -->
+    下面的列表简要描述了每个核心集合接口：
+</p>
+<ul>
+	<li>
+		<!--
+			Collection — the root of the collection hierarchy. A collection represents a group of objects known as its elements.
+			The Collection interface is the least common denominator that all collections implement and is used to pass collections around and to manipulate them when maximum generality is desired.
+			Some types of collections allow duplicate elements, and others do not. Some are ordered and others are unordered.
+			The Java platform doesn't provide any direct implementations of this interface but provides implementations of more specific subinterfaces, such as Set and List.
+			Also see The Collection Interface section.
+		-->
+		<code>Collection</code>（集合）：集合层级的根类型。一个集合表示一组被称为它的元素的对象。
+		<code>Collection</code>接口是所有集合都实现的最不常见的记号，只有在用户传递和操控集合需要最大的概括性时才会使用。
+		有些集合允许包含重复的元素，有些则不允许。有些集合是有序的，有些则是无序的。
+		Java 并不提供任何直接实现这个接口的类，但提供了对其更为精确的子接口，如<code>Set</code>和<code>List</code>，的实现类。
+		详见 <a href="#collection" target="_self">Collection 接口</a>一节。
+	</li>
+	<li>
+		<!--
+			Set — a collection that cannot contain duplicate elements. This interface models the mathematical set abstraction and is used to represent sets,
+			such as the cards comprising a poker hand, the courses making up a student's schedule, or the processes running on a machine. See also The Set Interface section.
+		-->
+		<code>Set</code>（集）：不能包含重复元素的集合。这个接口代表着数学上的集抽象，并被用于代表各种各样的集，比如一副手牌、学生的课程、一台机器上的进程。
+		详见 <a href="#set" target="_self">Set 接口</a>一节。
+	</li>
+	<li>
+		<!--
+			List — an ordered collection (sometimes called a sequence). Lists can contain duplicate elements.
+			The user of a List generally has precise control over where in the list each element is inserted and can access elements by their integer index (position).
+			If you've used Vector, you're familiar with the general flavor of List. Also see The List Interface section.
+		-->
+		<code>List</code>（表）：有序的集合，有时又被叫做序列（sequence）。<code>List</code>可以包含重复的元素。
+		使用<code>List</code>的人可以清楚地知道插入表中的每个元素的位置，并可以通过它们的整型索引（位置值）直接访问它们。
+		如果你有使用过<code>Vector</code>，那你应该就已经很熟悉<code>List</code>的基本使用了。
+		详见 <a href="#list" target="_self">List 接口</a>一节。
+	</li>
+	<li>
+		<p>
+			<!--
+				Queue — a collection used to hold multiple elements prior to processing.
+				Besides basic Collection operations, a Queue provides additional insertion, extraction, and inspection operations.
+			-->
+			<code>Queue</code>（队列）：用于在处理前保存元素的集合。比起基本的<code>Collection</code>操作，<code>Queue</code>提供了更多的插入、取出和查询操作。
+		</p>
+		<p>
+			<!--
+				Queues typically, but do not necessarily, order elements in a FIFO (first-in, first-out) manner.
+				Among the exceptions are priority queues, which order elements according to a supplied comparator or the elements' natural ordering.
+				Whatever the ordering used, the head of the queue is the element that would be removed by a call to remove or poll.
+				In a FIFO queue, all new elements are inserted at the tail of the queue. Other kinds of queues may use different placement rules.
+				Every Queue implementation must specify its ordering properties. Also see The Queue Interface section.
+			-->
+			<code>Queue</code>，尽管并不一定，在多数情况下以 FIFO （先入先出）的形式组织元素。其中的特例包括了权重队列（priority queue），它根据元素的自然排序或给定的比较器来组织元素。
+			不管使用的是什么排序方式，在调用队列的<code>remove</code>或<code>poll</code>操作时返回的都是位于队列头部的元素。
+			在一个先入先出队列中，所有新元素都会被插入到队列的尾部。其他类型的队列可能会使用不一样的插入方式。每个<code>Queue</code>实现类都必须说明自己对元素的排序方式。
+			详见 <a href="#queue" target="_self">Queue 接口</a>一节。
+		</p>
+	</li>
+	<li>
+		<p>
+			<!--
+				Deque — a collection used to hold multiple elements prior to processing. Besides basic Collection operations, a Deque provides additional insertion, extraction, and inspection operations.
+			-->
+			<code>Deque</code>（双向队列）：用于在处理前保存元素的集合。比起基本的<code>Collection</code>操作，<code>Deque</code>提供了更多的插入、取出和查询操作。
+		</p>
+		<p>
+			<!--
+				Deques can be used both as FIFO (first-in, first-out) and LIFO (last-in, first-out). In a deque all new elements can be inserted, retrieved and removed at both ends.
+				Also see The Deque Interface section.
+			-->
+			双向队列可被用作 FIFO（先入先出）或 LIFO（后入先出）队列。元素可以从双向队列的两端插入、取出或移除。
+			详见 <a href="#deque" target="_self">Deque 接口</a>一节。
+		</p>
+	</li>
+	<li>
+		<!--
+			Map — an object that maps keys to values. A Map cannot contain duplicate keys; each key can map to at most one value.
+			If you've used Hashtable, you're already familiar with the basics of Map. Also see The Map Interface section.
+		-->
+		<code>Map</code>（映射）：将键映射到值的对象。一个<code>Map</code>不能包含重复的键，每个键都至多映射到一个值。
+		如果你有用过<code>Hashtable</code>，那你应该就已经很熟悉<code>Map</code>的基本使用了。
+		详见 <a href="#map" target="_self">Map 接口</a>一节。
+	</li>
+</ul>
+<p>
+	<!--
+		The last two core collection interfaces are merely sorted versions of Set and Map:
+	-->
+	最后两个核心集合接口则是<code>Set</code>和<code>Map</code>的有序版本：
+</p>
+<ul>
+	<li>
+		<!--
+			SortedSet — a Set that maintains its elements in ascending order. Several additional operations are provided to take advantage of the ordering.
+			Sorted sets are used for naturally ordered sets, such as word lists and membership rolls. Also see The SortedSet Interface section.
+		-->
+		<code>SortedSet</code>（有序集）：以升序维持元素顺序的集合。基于其有序的特性，该接口在<code>Set</code>的基础上提供了额外的操作。
+		有序集被用于表示自然有序的集，比如单词表和成员名册。详见 <a href="#sortedset" target="_self">SortedSet 接口</a>一节。
+	</li>
+	<li>
+		<!--
+			SortedMap — a Map that maintains its mappings in ascending key order. This is the Map analog of SortedSet.
+			Sorted maps are used for naturally ordered collections of key/value pairs, such as dictionaries and telephone directories. Also see The SortedMap Interface section.
+		-->
+		<code>SortedMap</code>（有序映射）：以升序维持键的顺序的映射，相当于<code>Map</code>版的<code>SortedSet</code>。有序映射用于表示自然有序的键值对，比如字典和电话簿。
+		详见 <a href="#sortedmap" target="_self">SortedMap 接口</a>一节。
+	</li>
+</ul>
+<p>
+	<!--
+		To understand how the sorted interfaces maintain the order of their elements, see the Object Ordering section.
+	-->
+	要想了解有序的接口如何维持元素的顺序，详见<a href="#order" target="_self">对象排序</a>一节。
+</p>
+<h3 class="jump" id="collection">2.1 Collection 接口</h3>
+<p>
+	原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/interfaces/collection.html">The Collection Interface</a>
+</p>
+<p>
+	<!--
+		A Collection represents a group of objects known as its elements. The Collection interface is used to pass around collections of objects where maximum generality is desired.
+		For example, by convention all general-purpose collection implementations have a constructor that takes a Collection argument.
+		This constructor, known as a conversion constructor, initializes the new collection to contain all of the elements in the specified collection, whatever the given collection's subinterface or implementation type.
+		In other words, it allows you to convert the collection's type.
+	-->
+	一个<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html">Collection</a></code>用于表示一组被称之为它的元素的对象。
+	<code>Collection</code>接口主要用于对象集合的传递，它可以提供最大的概括性。比如，从惯例上讲所有普适的集合实现都应该包含一个以一个<code>Collection</code>为参数的构造器。
+	这个构造器，或称为转换构造器，使用给定集合中的所有元素来初始化新的集合，这个过程不考虑给定集合所属的子接口或者它的具体实现。
+	也就是说，它允许你转换集合的类型。
+</p>
+<p>
+	<!--
+		Suppose, for example, that you have a Collection<String> c, which may be a List, a Set, or another kind of Collection.
+		This idiom creates a new ArrayList (an implementation of the List interface), initially containing all the elements in c.
+	-->
+	比如，假设你有一个<code>Collection&lt;String&gt; c</code>，它可能是一个<code>List</code>、一个<code>Set</code>或者是任何其他<code>Collection</code>。
+	下面的代码即可创建一个新的<code>ArrayList</code>（<code>List</code>接口的一个实现），其中包含<code>c</code>的所有元素：
+</p>
+<pre class="brush: java">
+List&lt;String&gt; list = new ArrayList&lt;String&gt;(c);
+</pre>
+<p>
+	<!--
+		Or — if you are using JDK 7 or later — you can use the diamond operator:
+	-->
+	或者，如果你使用的是 JDK7 或者更新的版本，你可以使用菱形运算符：
+</p>
+<pre class="brush: java">
+List&lt;String&gt; list = new ArrayList&lt;&gt;(c);
+</pre>
+<p>
+	<!--
+		The Collection interface contains methods that perform basic operations, such as int size(), boolean isEmpty(),
+		boolean contains(Object element), boolean add(E element), boolean remove(Object element), and Iterator<E> iterator().
+	-->
+	<code>Collection</code>接口包含了可用于执行基本操作的方法，比如<code>int size()</code>、<code>boolean isEmpty()</code>、
+	<code>boolean contains(Object element)</code>、<code>boolean add(E element)</code>、<code>boolean remove(Object element)</code>
+	和<code>Iterator&lt;E&gt; iterator()</code>。
+</p>
+<p>
+	<!--
+		It also contains methods that operate on entire collections, such as boolean containsAll(Collection<&#63;> c),
+		boolean addAll(Collection<&#63; extends E> c), boolean removeAll(Collection<&#63;> c), boolean retainAll(Collection<&#63;> c), and void clear().
+	-->
+	同时它也包含了可用于操作整个集合的方法，比如<code>boolean containsAll(Collection&lt;?&gt; c)</code>、<code>boolean addAll(Collection&lt;? extends E&gt; c)</code>、
+	<code>boolean removeAll(Collection&lt;?&gt; c)</code>、<code>boolean retainAll(Collection&lt;?&gt; c)</code>和<code>void clear()</code>。
+</p>
+<p>
+	<!--
+		Additional methods for array operations (such as Object[] toArray() and <T> T[] toArray(T[] a) exist as well.
+	-->
+	<code>Collection</code>还包含了供数组操作的方法，如<code>Object[] toArray()</code>和<code>&lt;T&gt; T[] toArray(T[] a)</code>。
+</p>
+<p>
+	<!--
+		In JDK 8 and later, the Collection interface also exposes methods Stream<E> stream() and Stream<E> parallelStream(),
+		for obtaining sequential or parallel streams from the underlying collection.
+		(See the lesson entitled Aggregate Operations for more information about using streams.)
+	-->
+	如果你使用的是 JDK8 或者更新的版本，<code>Collection</code>接口还提供了了<code>Stream &lt;E&gt; stream()</code>和<code>Stream&lt;E&gt; parallelStream()</code>方法，
+	用于获取集合实现类的顺序或并行流。详见<a href="#stream" target="_self">聚合操作</a>一章。
+</p>
+<p>
+	<!--
+		The Collection interface does about what you'd expect given that a Collection represents a group of objects.
+		It has methods that tell you how many elements are in the collection (size, isEmpty), methods that check whether a given object is in the collection (contains),
+		methods that add and remove an element from the collection (add, remove), and methods that provide an iterator over the collection (iterator).
+	-->
+	<code>Collection</code>接口提供了所有你能期望的一个对象集合所能提供的功能。它有可以告诉你它包含多少个元素的方法（<code>size</code>、<code>isEmpty</code>）、
+	检查某个给定对象是否包含在集合中的方法（<code>contains</code>）、从集合中增加或删除的方法（<code>add</code>、<code>remove</code>）还有提供集合遍历器的方法（<code>iterator</code>）。
+</p>
+<p>
+	<!--
+		The add method is defined generally enough so that it makes sense for collections that allow duplicates as well as those that don't.
+		It guarantees that the Collection will contain the specified element after the call completes, and returns true if the Collection changes as a result of the call.
+		Similarly, the remove method is designed to remove a single instance of the specified element from the Collection, assuming that it contains the element to start with,
+		and to return true if the Collection was modified as a result.
+	-->
+	<code>Collection</code>的<code>add</code>方法定义得十分普适，使得它对于是否支持重复元素的集合都十分合情合理。它保证<code>Collection</code>在方法执行完毕后必然包含给定的元素，
+	并在<code>Collection</code>因此次操作发生改变时返回<code>true</code>。同样，<code>remove</code>方法用于从<code>Collection</code>中移除一个给定的元素实例，
+	在执行前便假设集合中存在该元素，并在<code>Collection</code>因此次操作发生改变时返回<code>true</code>。
+</p>
+<h4 class="jump" id="traversing-collections">2.1.1 遍历集合</h4>
+<p>
+	<!--
+		There are three ways to traverse collections: (1) using aggregate operations (2) with the for-each construct and (3) by using Iterators.
+	-->
+	总体而言，遍历集合有三种方法：使用聚合运算、使用<code>for-each</code>结构、使用<code>Iterator</code>。
+</p>
+<h5>聚合运算</h5>
+<p>
+	<!--
+		In JDK 8 and later, the preferred method of iterating over a collection is to obtain a stream and perform aggregate operations on it.
+		Aggregate operations are often used in conjunction with lambda expressions to make programming more expressive, using less lines of code.
+		The following code sequentially iterates through a collection of shapes and prints out the red objects:
+	-->
+	在 JDK8 及更新的版本中，遍历一个集合最好的方式是获取一个流（stream）并对其使用聚合操作。聚合操作通常与 Lambda 表达式相结合，让你可以在更短的代码中表达更多的功能。
+	下述代码遍历了一个几何体的集合并输出其中是红色的几何体的名字：
+</p>
+<pre class="brush: java">
+myShapesCollection.stream()
+    .filter(e -> e.getColor() == Color.RED)
+    .forEach(e -> System.out.println(e.getName()));
+</pre>
+<p>
+	
+</p>
