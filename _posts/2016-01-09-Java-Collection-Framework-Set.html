@@ -1,45 +1,24 @@
 ---
 layout: posts
-title: Java Collections Framework源码阅读
+title: Java 集合框架源码解析：Set
 author: Robert Peng
 category: Java
 ---
 
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
 
-<h2 class="jump">写作背景</h2>
-
-<p>Java中有几个常用的容器类，包括ArrayList、LinkedList、HashMap等，此类容器类在Java开发中时常会用上，
-他们之中的一些小区别大部分也答得上来，但面试时问到某个容器类的具体实现时可能就哑口无言了。本文将从源码
-的角度去分析Java Collections Framework内的每一个类，深度剖析他们之间的关系。</p>
-<p>注：笔者阅读源码时使用的是Java 1.8的源代码以及Windows下强大的源代码阅读工具Source Insight</p>
-
 <h2 class="jump">概述</h2>
-<p>整个Java Collections Framework中常用类的关系结构可以总结为如下：</p>
-<pre>
-|-interface Collection
-  |-interface List
-    |-ArrayList
-    |-LinkedList
-    |-Vector
-  |-interface Set
-    |-HashSet
-    |-EnumSet
-    |-interface SortedSet
-      |-TreeSet
-|-interface Map
-  |-HashMap
-  |-HashTable
-  |-EnumMap
-  |-interface NavigableMap
-    |-TreeMap
-</pre>
-<p>注：上述关系只是直接或间接的关系，真正的Java类关系要比这复杂得多，后期我会将其以UML类图的形式上传。</p>
-<p>那么，常用Collection实现类便是这些，我们开始吧。</p>
+<p>
+    了解 Java 集合框架每个实现类的原理是每个 Java 程序员的必修课。本系列将按照<code>Set</code>、<code>List</code>、
+    <code>Map</code>、<code>Queue</code>、<code>Deque</code>的顺序，以 Java
+    的<a href="http://docs.oracle.com/javase/tutorial/collections/">官方教程</a>为指导，分接口的解析每个接口对应的实现类的原理。
+    本篇先从<code>Set</code>接口开始。
+</p>
 
-<h2 class="jump">set类之Set接口</h2>
-<p>首先我们将从最高级最复杂而代码最简单的set类开始讲起。</p>
-<p>那么直接开始看源码：</p>
+<h2 class="jump">Set 接口</h2>
+<p>
+    <code>Set</code>接口固然是我们开始的地方了。我们开始了解<code>Set</code>接口为我们提供的操作：
+</p>
 <pre class="brush: java">
 package java.util;
 
@@ -51,26 +30,31 @@ package java.util;
  */
 
 public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
-    // Query Operations
+    /* 查询操作 */
+
+    /** 返回集中元素的个数 */
     int size();
+    /** 返回集是否为空 */
     boolean isEmpty();
+    /** 返回集是否包含给定的对象 */
     boolean contains(Object o);
+    /** 返回可用于迭代整个集的迭代器 */
     Iterator&lt;E&gt; iterator();
     Object[] toArray();
     &lt;T&gt; T[] toArray(T[] a);
 
-    // Modification Operations
+    // 修改操作
     boolean add(E e);
     boolean remove(Object o);
 
-    // Bulk Operations
+    // 批量操作
     boolean containsAll(Collection&lt;?&gt; c);
     boolean addAll(Collection&lt;? extends E&gt; c);
     boolean retainAll(Collection&lt;?&gt; c);
     boolean removeAll(Collection&lt;?&gt; c);
     void clear();
 
-    // Comparison and hashing
+    // 比较与哈希
     boolean equals(Object o);
     int hashCode();
 
@@ -80,8 +64,10 @@ public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
     }
 }
 </pre>
-
-<p>并没有什么特别的函数，大部分函数的用处只要是用过Set实现类的读者应该都了解。唯一用得比较少的函数应该是spliterator()，这个我们将在以后讲解</p>
+<p>
+    并没有什么特别的函数，大部分函数的用处只要是用过<code>Set</code>的读者应该都了解。方法的具体功能可参考<code>Set</code>的
+    <a href="http://docs.oracle.com/javase/8/docs/api/java/util/Set.html">JavaDoc</a>。
+</p>
 
 <h2 class="jump">set类之HashSet实现类</h2>
 <p>我们直接通过阅读最简单的Set实现类HashSet来加深大家对Set的理解：</p>

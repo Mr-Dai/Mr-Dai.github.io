@@ -7,6 +7,7 @@ org_title: "Java Collections Framework Tutorial"
 org_url: "http://docs.oracle.com/javase/tutorial/collections/index.html"
 ---
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
 
 <h2 class="jump" id="introduction">1 简介</h2>
 <p>
@@ -665,6 +666,9 @@ Object[] a = c.toArray(new String[0]);
 </pre>
 <h3 class="jump" id="set">2.2 Set 接口</h3>
 <p>
+	原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/interfaces/set.html">The Set Interface</a>
+</p>
+<p>
 	<!--
 		A Set is a Collection that cannot contain duplicate elements. It models the mathematical set abstraction.
 		The Set interface contains only methods inherited from Collection and adds the restriction that duplicate elements are prohibited.
@@ -763,4 +767,554 @@ public static &lt;E&gt; Set&lt;E&gt; removeDups(Collection&lt;E&gt; c) {
 	<code>add</code>方法将给定的元素放入到<code>Set</code>中，并返回一个指示是否真的有放入该元素的布尔值。
 	类似地，<code>remove</code>方法将给定的元素从<code>Set</code>中移除，并返回一个指示是否真的有移除该元素的布尔值。
 	<code>iterator</code>方法返回一个迭代整个<code>Set</code>的<code>Iterator</code>。
+</p>
+<p>
+	<!--
+		The following program prints out all distinct words in its argument list. Two versions of this program are provided.
+		The first uses JDK 8 aggregate operations. The second uses the for-each construct.
+	-->
+	下面的<a href="http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/FindDups.java">程序</a>将会打印出参数列表中每个不同的单词。
+	这里我们提供了两种不同的实现，其中第一种使用了 JDK8 的聚合操作，而第二种使用了<code>for-each</code>结构。
+</p>
+<p>
+	<!--
+		Using JDK 8 Aggregate Operations:
+	-->
+	使用 JDK8 聚合操作：
+</p>
+<pre class="brush: java">
+import java.util.*;
+import java.util.stream.*;
+
+public class FindDups {
+    public static void main(String[] args) {
+        Set&lt;String&gt; distinctWords = Arrays.asList(args)
+        										.stream()
+												.collect(Collectors.toSet()); 
+        System.out.println(distinctWords.size() + " distinct words: " + distinctWords);
+    }
+}
+</pre>
+<p>
+	<!--
+		Using the for-each Construct:
+	-->
+	使用<code>for-each</code>结构：
+</p>
+<pre class="brush: java">
+import java.util.*;
+
+public class FindDups {
+    public static void main(String[] args) {
+        Set&lt;String&gt; s = new HashSet&lt;String&gt;();
+        for (String a : args)
+        	s.add(a);
+        System.out.println(s.size() + " distinct words: " + s);
+    }
+}
+</pre>
+<p>
+	<!--
+		Now run either version of the program.
+	-->
+	现在我们运行上述任意一个版本的程序：
+</p>
+<pre class="brush: bash">
+java FindDups i came i saw i left
+</pre>
+<p>
+	<!--
+		The following output is produced:
+	-->
+	程序将给出以下输出：
+</p>
+<pre>
+4 distinct words: [left, came, saw, i]
+</pre>
+<p>
+	<!--
+		Note that the code always refers to the Collection by its interface type (Set) rather than by its implementation type.
+		This is a strongly recommended programming practice because it gives you the flexibility to change implementations merely by changing the constructor.
+		If either of the variables used to store a collection or the parameters used to pass it around are declared to be of the Collection's implementation type
+		rather than its interface type, all such variables and parameters must be changed in order to change its implementation type.
+	-->
+	注意，上述代码所使用的对<code>Collection</code>对象的引用的类型都是其所属的接口类型（<code>Set</code>）而不是其具体的实现类型。
+	这是一种很好的编程风格，这样做的话当你需要改变集合的具体实现时，你只需要改一下你调用的构造器就可以了。
+	如果用于保存一个集合的变量或者是一个代表传入方法的集合的参数的类型被设定为了具体的<code>Collection</code>实现类型而不是其所属的接口类型，
+	当你需要修改具体的实现类时，所有的这些变量和参数的类型都需要一起改变。
+</p>
+<p>
+	<!--
+		Furthermore, there's no guarantee that the resulting program will work. If the program uses any nonstandard operations present in the original implementation type
+		but not in the new one, the program will fail. Referring to collections only by their interface prevents you from using any nonstandard operations.
+	-->
+	除此之外，这么做并不保证你写出来的程序就一定能正常工作。如果你的程序使用了某些实现类型提供而接口类型并没有提供的非标准操作，你的程序将无法运行。
+	只使用接口类型来引用集合也可以防止你使用任何非标准的操作。
+</p>
+<p>
+	<!--
+		The implementation type of the Set in the preceding example is HashSet, which makes no guarantees as to the order of the elements in the Set.
+		If you want the program to print the word list in alphabetical order, merely change the Set's implementation type from HashSet to TreeSet.
+		Making this trivial one-line change causes the command line in the previous example to generate the following output.
+	-->
+	上述代码中所使用的<code>Set</code>的实现类是<code>HashSet</code>，而<code>HashSet</code>并不会保证集中元素的迭代顺序。
+	如果你想要程序按字典序输出这些单词，你只需要把<code>Set</code>实现类从<code>HashSet</code>改成<code>TreeSet</code>就可以了。
+	在你进行了这项修改后，上述案例中的命令行将产生如下输出：
+</p>
+<pre class="brush: bash">
+java FindDups i came i saw i left
+</pre>
+<pre>
+4 distinct words: [came, i, left, saw]
+</pre>
+<h4 class="jump" id="set-interface-bulk-operations">2.2.2 Set 接口批量操作</h4>
+<p>
+	<!--
+		Bulk operations are particularly well suited to Sets; when applied, they perform standard set-algebraic operations.
+		Suppose s1 and s2 are sets. Here's what bulk operations do:
+	-->
+	实际上，批量操作特别适合<code>Set</code>：当调用时，它们执行的是标准的集合代数运算。
+	我们假设有集<code>s1</code>和<code>s2</code>。下述列表描述了批量操作们的行为：
+</p>
+<ul>
+	<li>
+		<!--
+			s1.containsAll(s2) — returns true if s2 is a subset of s1. (s2 is a subset of s1 if set s1 contains all of the elements in s2.)
+		-->
+		<code>s1.containsAll(s2)</code>：当<code>s2</code>是<code>s1</code>的<b>子集</b>时返回<code>true</code>。
+		（若集<code>s1</code>包含<code>s2</code>的所有元素，我们说<code>s2</code>是<code>s1</code>的一个子集。
+		译者注：$A \subseteq B = \forall x : x \in A \to x \in B$）
+	</li>
+	<li>
+		<!--
+			s1.addAll(s2) — transforms s1 into the union of s1 and s2. (The union of two sets is the set containing all of the elements contained in either set.)
+		-->
+		<code>s1.addAdd(s2)</code>：将<code>s1</code>变为<code>s1</code>和<code>s2</code>的<b>并集</b>。
+		（两个集的并集包含两个集的所有元素。译者注：$A \cup B = \{x : x \in A \vee x \in B\}$）
+	</li>
+	<li>
+		<!--
+			s1.retainAll(s2) — transforms s1 into the intersection of s1 and s2. (The intersection of two sets is the set containing only the elements common to both sets.)
+		-->
+		<code>s1.retainAll(s2)</code>：将<code>s1</code>变为<code>s1</code>和<code>s2</code>的<b>交集</b>。
+		（两个集的交集只包含同时属于两个集的元素。译者注：$A \cap B = \{x : x \in A \wedge x \in B\}$）
+	</li>
+	<li>
+		<!--
+			s1.removeAll(s2) — transforms s1 into the (asymmetric) set difference of s1 and s2.
+			(For example, the set difference of s1 minus s2 is the set containing all of the elements found in s1 but not in s2.)
+		-->
+		<code>s1.removeAll(s2)</code>：将<code>s1</code>变为<code>s1</code>和<code>s2</code>的（非对称）<b>差集</b>。
+		（比如，<code>s1 - s2</code>产生的差集包含那些属于<code>s1</code>但不属于<code>s2</code>的元素。
+		译者注：$A - B = \{x : x \in A \wedge x \not\in B\}$）。
+	</li>
+</ul>
+<p>
+	<!--
+		To calculate the union, intersection, or set difference of two sets nondestructively (without modifying either set),
+		the caller must copy one set before calling the appropriate bulk operation. The following are the resulting idioms.
+	-->
+	如果想在不修改两个集的情况下计算它们的并集、交集或差集，调用者需要在调用相应的批量操作之前先对其中一个集进行复制。
+	下述代码给出了这样做的常用写法：
+</p>
+<pre class="brush: java">
+Set&lt;Type&gt; union = new HashSet&lt;Type&gt;(s1);
+union.addAll(s2);
+
+Set&lt;Type&gt; intersection = new HashSet&lt;Type&gt;(s1);
+intersection.retainAll(s2);
+
+Set&lt;Type&gt; difference = new HashSet&lt;Type&gt;(s1);
+difference.removeAll(s2);
+</pre>
+<p>
+	<!--
+		The implementation type of the result Set in the preceding idioms is HashSet, which is, as already mentioned,
+		the best all-around Set implementation in the Java platform. However, any general-purpose Set implementation could be substituted.
+	-->
+	上面的代码中所使用的<code>Set</code>实现类是<code>HashSet</code>，而正如之前所提，它是 Java 提供的最好的普适<code>Set</code>实现类。
+	不过，将其替换为任何普适的<code>Set</code>实现类都是可以的。
+</p>
+<p>
+	<!--
+		Let's revisit the FindDups program. Suppose you want to know which words in the argument list occur only once and which occur more than once,
+		but you do not want any duplicates printed out repeatedly. This effect can be achieved by generating two sets — one containing every word in the argument list
+		and the other containing only the duplicates. The words that occur only once are the set difference of these two sets, which we know how to compute.
+		Here's how the resulting program looks.
+	-->
+	我们重新考虑刚才的<code>FindDups</code>程序。假设现在你想要知道参数列表中哪些单词只出现了一次，而哪些单词出现的次数又超过一次，但你也不想让这些重复的单词被重复输出。
+	我们可以通过创建两个集来完成这样的功能，一个保存参数列表中的所有单词，而另一个则保存那些重复过的单词。这样一来，只出现过一次的单词将组成这两个集的差集，
+	而我们也知道该怎么计算两个集的差集了。如此一来，这个程序应该会变成<a href="http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/FindDups2.java">这个样子</a>：
+</p>
+<pre class="brush: java">
+import java.util.*;
+
+public class FindDups2 {
+    public static void main(String[] args) {
+        Set&lt;String&gt; uniques = new HashSet&lt;String&gt;();
+        Set&lt;String&gt; dups    = new HashSet&lt;String&gt;();
+
+        for (String a : args)
+            if (!uniques.add(a))
+                dups.add(a);
+
+        // Destructive set-difference
+        uniques.removeAll(dups);
+
+        System.out.println("Unique words:    " + uniques);
+        System.out.println("Duplicate words: " + dups);
+    }
+}
+</pre>
+<p>
+	<!--
+		When run with the same argument list used earlier (i came i saw i left), the program yields the following output.
+	-->
+	我们继续使用之前的参数列表（<code>i came i saw i left</code>），这次程序的输出应该会是这个样子：
+</p>
+<pre>
+Unique words:    [left, saw, came]
+Duplicate words: [i]
+</pre>
+<p>
+	<!--
+		A less common set-algebraic operation is the symmetric set difference — the set of elements contained in either of two specified sets but not in both.
+		The following code calculates the symmetric set difference of two sets nondestructively.
+	-->
+	还有一个不那么常用的集合代数运算 —— 对称差集，只存在于其中一个集合的元素的集合。（译者注：$A \bigtriangleup B = \{ x : (x \in A) \oplus (x \in B) \}$）
+	下述代码可以在不修改两个集的情况下计算两个集的对称差集：
+</p>
+<pre class="brush: java">
+Set&lt;Type&gt; symmetricDiff = new HashSet&lt;Type&gt;(s1);
+symmetricDiff.addAll(s2);
+Set&lt;Type&gt; tmp = new HashSet&lt;Type&gt;(s1);
+tmp.retainAll(s2);
+symmetricDiff.removeAll(tmp);
+</pre>
+<h4 class="jump" id="set-interface-array-operations">2.2.3 Set 接口数组操作</h4>
+<p>
+	<!--
+		The array operations don't do anything special for Sets beyond what they do for any other Collection.
+		These operations are described in The Collection Interface section.
+	-->
+	比起<code>Collection</code>，<code>Set</code>提供的数组操作并无任何特别之处。
+	关于这些操作的详细描述可以参考 <a href="#collection-interface-array-operations" target="_self">Collection 接口</a>一节。
+</p>
+<hr />
+<h2 class="jump" id="aggregate-operations">3 聚合操作</h2>
+<!--
+<p>
+	原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/streams/index.html">Aggregate Operations</a>
+</p>
+<h3 class="jump" id="reduction">3.1 归约操作</h3>
+<p>
+	原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/streams/reduction.html">Reduction</a>
+</p>
+<h3 class="jump" id="parallelism">3.2 并行</h3>
+<p>
+	原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/streams/parallelism.html">Parallelism</a>
+</p>
+<hr />
+-->
+<h2 class="jump" id="implementations">4 实现</h2>
+<p>
+	原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/implementations/index.html">Implementations</a>
+</p>
+<p>
+	<!--
+		Implementations are the data objects used to store collections, which implement the interfaces described in the Interfaces section.
+		This lesson describes the following kinds of implementations:
+	-->
+	实现类是用于存储集合的数据对象，它们实现了在<a href="#interfaces" target="_self">接口</a>一章中阐述的接口类。
+	本章将讲述如下几种实现类：
+</p>
+<ul>
+	<li>
+		<!--
+			General-purpose implementations are the most commonly used implementations, designed for everyday use.
+			They are summarized in the table titled General-purpose-implementations.
+		-->
+		<b>普适实现类</b>（General-purpose implementation）：最常用的实现类，被设计用于多数的简单场景。
+	</li>
+	<li>
+		<!--
+			Special-purpose implementations are designed for use in special situations and display nonstandard performance characteristics, usage restrictions, or behavior.
+		-->
+		<b>特殊实现类</b>（Special-purpose implementation）：被设计用于某些特殊的场景，带有非标准的性能特征、使用限制或行为。
+	</li>
+	<li>
+		<!--
+			Concurrent implementations are designed to support high concurrency, typically at the expense of single-threaded performance.
+			These implementations are part of the java.util.concurrent package.
+		-->
+		<b>并发实现类</b>（Concurrent implementation）：被设计用于高并发场景，通常会牺牲其在单线程下的性能表现。这些实现类是<code>java.util.concurrent</code>包的一部分。
+	</li>
+	<li>
+		<!--
+			Wrapper implementations are used in combination with other types of implementations, often the general-purpose ones, to provide added or restricted functionality.
+		-->
+		<b>包装实现类</b>（Wrapper implementation）：用于与其他类型的实现类，尤其是普适实现类，相结合，以增加某些功能或限制某些功能的使用。
+	</li>
+	<li>
+		<!--
+			Convenience implementations are mini-implementations, typically made available via static factory methods,
+			that provide convenient, efficient alternatives to general-purpose implementations for special collections (for example, singleton sets).
+		-->
+		<b>便捷实现类</b>（Convenience implementation）：轻量级实现类，通常通过静态工厂方法来获取实例，可以在某些特殊的情况下作为普适实现类的高性能便捷替代品，比如单例集（singleton set）。
+	</li>
+	<li>
+		<!--
+			Abstract implementations are skeletal implementations that facilitate the construction of custom implementations —
+			described later in the Custom Collection Implementations section. An advanced topic, it's not particularly difficult, but relatively few people will need to do it.
+		-->
+		<b>抽象实现类</b>（Abstract implementation）：为创建自定义实现类提供便利的骨架实现类，将在<a href="#custom-implementations" target="_self">自定义集合实现类</a>一章的后半部分进行讲解。
+	</li>
+</ul>
+<p>
+	<!--
+		The general-purpose implementations are summarized in the following table.
+	-->
+	下表归纳了 Java 集合框架提供的所有普适实现类：
+</p>
+<table class="table">
+	<caption><strong>普适实现类</strong></caption>
+	<tr>
+		<th>接口</th>
+		<th>哈希表</th>
+		<th>变长数组</th>
+		<th>树</th>
+		<th>链表</th>
+		<th>哈希表 + 链表</th>
+	</tr>
+	<tr>
+		<td><code>Set</code></td>
+		<td><code>HashSet</code></td>
+		<td>&nbsp;</td>
+		<td><code>TreeSet</code></td>
+		<td>&nbsp;</td>
+		<td><code>LinkedHashSet</code></td>
+	</tr>
+	<tr>
+		<td><code>List</code></td>
+		<td>&nbsp;</td>
+		<td><code>ArrayList</code></td>
+		<td>&nbsp;</td>
+		<td><code>LinkedList</code></td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td><code>Queue</code></td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td><code>Deque</code></td>
+		<td>&nbsp;</td>
+		<td><code>ArrayDeque</code></td>
+		<td>&nbsp;</td>
+		<td><code>LinkedList</code></td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td><code>Map</code></td>
+		<td><code>HashMap</code></td>
+		<td>&nbsp;</td>
+		<td><code>TreeMap</code></td>
+		<td>&nbsp;</td>
+		<td><code>LinkedHashMap</code></td>
+	</tr>
+</table>
+<p>
+	<!--
+		As you can see from the table, the Java Collections Framework provides several general-purpose implementations of the Set, List, and Map interfaces.
+		In each case, one implementation — HashSet, ArrayList, and HashMap — is clearly the one to use for most applications, all other things being equal.
+		Note that the SortedSet and the SortedMap interfaces do not have rows in the table. Each of those interfaces has one implementation (TreeSet and TreeMap)
+		and is listed in the Set and the Map rows. There are two general-purpose Queue implementations — LinkedList, which is also a List implementation, and PriorityQueue,
+		which is omitted from the table. These two implementations provide very different semantics: LinkedList provides FIFO semantics,
+		while PriorityQueue orders its elements according to their values.
+	-->
+	正如你所见，Java 集合框架为<code>Set</code>、<code>List</code>、<code>Map</code>接口分别提供了多个普适实现类。对于这三个接口，<code>HashSet</code>、<code>ArrayList</code>
+	、<code>HashMap</code>显然是它们各自最常用的实现类，而其他实现类则互相之间差不了多少。注意，表中并未列出<code>SortedSet</code>和<code>SortedMap</code>接口。
+	这两个接口都各自有着一个实现类，分别是<code>TreeSet</code>和<code>TreeMap</code>，而且都已经在表中给出。实际上，<code>Queue</code>接口还有两个普适实现类：<code>LinkedList</code>，
+	同时也是<code>List</code>的实现类；<code>PriorityQueue</code>，但并未在表中给出。这两个实现类有着截然不同的行为：<code>LinkedList</code>表现为一个先入先出表，
+	而<code>PriorityQueue</code>则根据元素的值对元素进行排序。
+</p>
+<p>
+	<!--
+		Each of the general-purpose implementations provides all optional operations contained in its interface. All permit null elements, keys, and values.
+		None are synchronized (thread-safe). All have fail-fast iterators, which detect illegal concurrent modification during iteration and fail quickly
+		and cleanly rather than risking arbitrary, nondeterministic behavior at an undetermined time in the future. All are Serializable and all support a public clone method.
+	-->
+	所有这些普适实现类都提供了其所属接口中的所有可选操作。它们都支持<code>null</code>元素或键/值。它们都不是同步（线程安全）的。
+	它们所使用的都是快速失败迭代器（fail-fast iterator），这种迭代器会在迭代的过程中检测底层集合是否有发生变动，并在侦测到变动时快速利落地抛出错误，
+	以不至于在未来的某个时刻产生出某些不可预期的行为。它们都实现了<code>Serializable</code>接口并提供了<code>public</code>的<code>clone</code>方法。
+</p>
+<p>
+	<!--
+		The fact that these implementations are unsynchronized represents a break with the past: The legacy collections Vector and Hashtable are synchronized.
+		The present approach was taken because collections are frequently used when the synchronization is of no benefit.
+		Such uses include single-threaded use, read-only use, and use as part of a larger data object that does its own synchronization.
+		In general, it is good API design practice not to make users pay for a feature they don't use.
+		Furthermore, unnecessary synchronization can result in deadlock under certain circumstances.
+	-->
+	这些实现类不同步的特性可能和过去的一些设定出现断层：遗留的集合实现类<code>Vector</code>和<code>Hashtable</code>是同步的。
+	现在我们将这些实现类设计为不同步，是因为在很多使用场景下集合的同步并不能带来什么好处，比如单线程使用、只读使用、或者是将其作为一个更大的数据结构的一部分进行使用，
+	而这个数据结构自己也会处理同步问题。综合来看，使用户不至于为了自己用不上的功能埋单是更好的 API 设计理念。况且，多余的同步机制还可能在某些情况下导致死锁的出现。
+</p>
+<p>
+	<!--
+		If you need thread-safe collections, the synchronization wrappers, described in the Wrapper Implementations section,
+		allow any collection to be transformed into a synchronized collection. Thus, synchronization is optional for general-purpose implementations,
+		whereas it is mandatory for legacy implementations. Moreover, the java.util.concurrent package provides concurrent implementations of the BlockingQueue interface,
+		which extends Queue, and of the ConcurrentMap interface, which extends Map. These implementations offer much higher concurrency than mere synchronized implementations.
+	-->
+	如果你确实需要线程安全的集合，我们将在<a href="#wrapper-implementation">包装实现类</a>一节中讲述的同步包装类是不错的选择，它们可以将任何集合转化为一个同步的集合。
+	因此，对于普适实现类来说，线程同步是可选的功能，但对于那些遗留的实现类来说却是不可选的。除此之外，<code>java.util.concurrent</code>包中提供了很多的并发实现类，
+	它们有的实现了继承<code>Queue</code>的<code>BlockingQueue</code>接口，有的则实现了继承<code>Map</code>的<code>ConcurrentMap</code>接口。
+	这些实现类比起简单的同步实现类拥有更高的并发性能。
+</p>
+<p>
+	<!--
+		As a rule, you should be thinking about the interfaces, not the implementations. That is why there are no programming examples in this section.
+		For the most part, the choice of implementation affects only performance. The preferred style, as mentioned in the Interfaces section,
+		is to choose an implementation when a Collection is created and to immediately assign the new collection to a variable of the corresponding interface type
+		(or to pass the collection to a method expecting an argument of the interface type). In this way, the program does not become dependent on any added methods
+		in a given implementation, leaving the programmer free to change implementations anytime that it is warranted by performance concerns or behavioral details.
+	-->
+	有一条原则是需要你谨记的：你考虑的应该是接口，而不是具体的实现类。这也是为何在这章中不会有任何代码示例。在大多数时候，选择使用哪种实现类只会影响程序的性能表现。
+	正如在<a href="interfaces" target="_self">接口</a>一节中所提的那样，更好的做法是在创建<code>Collection</code>示例时选择具体的实现类，然后立刻把它赋予类型为其所属接口类的变量，
+	或者立刻把它传入到一个以其所属接口为参数的方法中。这样一来，你的程序便不会依赖于任何由具体实现类提供的特殊方法，
+	开发者在性能遇到瓶颈或者某些行为细节不符合预期的时候也可以很方便地更改所使用的实现类。
+</p>
+<p>
+	<!--
+		The sections that follow briefly discuss the implementations. The performance of the implementations is described using words such as constant-time,
+		log, linear, n log(n), and quadratic to refer to the asymptotic upper-bound on the time complexity of performing the operation.
+		All this is quite a mouthful, and it doesn't matter much if you don't know what it means. If you're interested in knowing more, refer to any good algorithms textbook.
+		One thing to keep in mind is that this sort of performance metric has its limitations. Sometimes, the nominally slower implementation may be faster.
+		When in doubt, measure the performance!
+	-->
+	接下来的几节中我们会简单的讨论一下这些实现类。
+	我们会用诸如“常数时间”、“对数时间”、“线性时间”、“n log(n)”、“平方时间”等名词来描述实现类的性能，它们指代的是具体执行某个操作时时间复杂度的上界。
+	这些东西要细说起来还是有得说的，不过就算你不是很懂它们的意思也不是很有关系。
+	如果你想要更加深入地了解它们，不妨查阅一些算法教科书。不过，要记住，这种衡量性能的方式有着它的局限，有些时候那些“名义上”更慢的实现类反而可能更快。
+	当你犹豫不决的时候，测量一下它们的性能吧！
+</p>
+<h3 class="jump" id="set-implementations">4.1 Set 实现</h3>
+<p>
+	原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/implementations/set.html">Set Implementations</a>
+</p>
+<p>
+	<code>Set</code>接口的实现类可以被分为普适实现类和特殊实现类。
+</p>
+<h4 class="jump" id="general-purpose-set-implementations">4.1.1 普适 Set 接口实现类</h4>
+<p>
+	<!--
+		There are three general-purpose Set implementations — HashSet, TreeSet, and LinkedHashSet. Which of these three to use is generally straightforward.
+		HashSet is much faster than TreeSet (constant-time versus log-time for most operations) but offers no ordering guarantees.
+		If you need to use the operations in the SortedSet interface, or if value-ordered iteration is required, use TreeSet; otherwise, use HashSet.
+		It's a fair bet that you'll end up using HashSet most of the time.
+	-->
+	<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Set.html">Set</a></code>接口的普适实现类有三种：
+	<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/HashSet.html">HashSet</a></code>、
+	<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/TreeSet.html">TreeSet</a></code>和<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashSet.html">LinkedHashSet</a></code>。
+	这三个实现类如何选择还是挺直观的。<code>HashSet</code>比<code>TreeSet</code>快得多（<code>HashSet</code>的大多数操作是常数时间的，而<code>TreeSet</code>的大多数操作是对数时间的），
+	但不能为元素提供一个确定的迭代顺序。如果你需要使用<code>SortedSet</code>接口中的方法，或者你希望在迭代时元素能基于其值有序，请使用<code>TreeSet</code>；否则，使用<code>HashSet</code>。
+	我猜你在绝大多数情况下都会使用<code>HashSet</code>。
+</p>
+<p>
+	<!--
+		LinkedHashSet is in some sense intermediate between HashSet and TreeSet. Implemented as a hash table with a linked list running through it,
+		it provides insertion-ordered iteration (least recently inserted to most recently) and runs nearly as fast as HashSet.
+		The LinkedHashSet implementation spares its clients from the unspecified, generally chaotic ordering provided by HashSet
+		without incurring the increased cost associated with TreeSet.
+	-->
+	从某种角度上讲，<code>LinkedHashSet</code>处于<code>HashSet</code>和<code>TreeSet</code>之间。它被实现为一张特殊的哈希表，由一个链表按照元素的插入顺序贯穿整张哈希表。
+	由此，它能在被迭代时按照元素的插入顺序返回元素（从最早插入的元素到最近插入的元素），而且它的性能几乎和<code>HashSet</code>一样快。
+	<code>LinkedHashSet</code>一方面使得用户不至于面对<code>HashSet</code>那种不确定的元素迭代顺序，另一方面又不会带来<code>TreeSet</code>那样的性能下降。
+</p>
+<p>
+	<!--
+		One thing worth keeping in mind about HashSet is that iteration is linear in the sum of the number of entries and the number of buckets (the capacity).
+		Thus, choosing an initial capacity that's too high can waste both space and time. On the other hand, choosing an initial capacity that's too low wastes time
+		by copying the data structure each time it's forced to increase its capacity. If you don't specify an initial capacity, the default is 16. In the past,
+		there was some advantage to choosing a prime number as the initial capacity. This is no longer true. Internally, the capacity is always rounded up to a power of two.
+		The initial capacity is specified by using the int constructor. The following line of code allocates a HashSet whose initial capacity is 64.
+	-->
+	有关<code>HashSet</code>，值得一提是，它的迭代性能同时与元素数量和桶的数量（或容量（capacity））呈线性关系。因此，如果你的初始容量设定过高，有可能会对空间和时间同时造成浪费。
+	另一方面，如果初始容量设定过低则容易浪费时间，因为每次需要强制提高容量时都需要对元素进行复制。如果你没有指定初始容量，默认的初始容量为<code>16</code>。
+	在以前，将初始容量设定为质数会更好，但现在已经不适用了。在内部实现里，容量会被向上取整到 2 的幂。
+	你可以通过<code>HashSet</code>的整型构造器来指定初始容量。下述代码创建了一个初始容量为<code>64</code>的<code>HashSet</code>：
+</p>
+<pre class="brush: java">
+Set&lt;String&gt; s = new HashSet&lt;String&gt;(64);
+</pre>
+<p>
+	<!--
+		The HashSet class has one other tuning parameter called the load factor. If you care a lot about the space consumption of your HashSet,
+		read the HashSet documentation for more information. Otherwise, just accept the default; it's almost always the right thing to do.
+	-->
+	<code>HashSet</code>还有另外一个配置参数：加载因子（load factor）。如果你很在意你的<code>HashSet</code>所占用的空间，你可以查阅一下<code>HashSet</code>的
+	<a href="https://docs.oracle.com/javase/8/docs/api/java/util/HashSet.html">JavaDoc</a>。不然的话，直接使用默认的加载因子吧，不会有错的。
+</p>
+<p>
+	<!--
+		If you accept the default load factor but want to specify an initial capacity, pick a number that's about twice the size to which you expect the set to grow.
+		If your guess is way off, you may waste a bit of space, time, or both, but it's unlikely to be a big problem.
+	-->
+	如果你想要使用默认的加载因子但想要自己给定一个初始容量，你可以估算一下你的集的元素数量大概会扩展到多少，并将其设定为这个数字的两倍。
+	如果你估算的数值和实际的数值天差地别，你可能会浪费一些空间，或者一些时间，或者两者都有，但这倒算不上是什么大问题。
+</p>
+<p>
+	<!--
+		LinkedHashSet has the same tuning parameters as HashSet, but iteration time is not affected by capacity. TreeSet has no tuning parameters.
+	-->
+	<code>LinkedHashSet</code>有着和<code>HashSet</code>相同的配置参数，但它的容量不会影响它的迭代效率。<code>TreeSet</code>没有任何配置参数。
+</p>
+<h4 class="jump" id="special-purpose-set-implementations">4.1.2 特殊 Set 接口实现类</h4>
+<p>
+	<!--
+		There are two special-purpose Set implementations — EnumSet and CopyOnWriteArraySet.
+	-->
+	<code>Set</code>接口的特殊实现类有两种：
+	<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/EnumSet.html">EnumSet</a></code>和<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CopyOnWriteArraySet.html">CopyOnWriteArraySet</a></code>。
+</p>
+<p>
+	<!--
+		EnumSet is a high-performance Set implementation for enum types. All of the members of an enum set must be of the same enum type.
+		Internally, it is represented by a bit-vector, typically a single long. Enum sets support iteration over ranges of enum types.
+		For example, given the enum declaration for the days of the week, you can iterate over the weekdays. The EnumSet class provides a static factory that makes it easy.
+	-->
+	<code>EnumSet</code>（枚举集）是一种十分高效的用于存储枚举类型的<code>Set</code>实现类。一个<code>EnumSet</code>对象的所有元素必须属于同一个枚举类型。
+	在内部实现上，<code>EnumSet</code>被表示为一个位向量（bit-vector），或者说一个<code>long</code>变量。<code>EnumSet</code>支持基于枚举对象范围的遍历。
+	比如，给定一个星期几的枚举类型，你可以只遍历工作日。<code>EnumSet</code>提供的一个静态工厂方法使得这么做十分方便：
+</p>
+<pre class="brush: java">
+for (Day d : EnumSet.range(Day.MONDAY, Day.FRIDAY))
+        System.out.println(d);
+</pre>
+<p>
+	<!--
+		Enum sets also provide a rich, typesafe replacement for traditional bit flags.
+	-->
+	除此之外，<code>EnumSet</code>还可以作为传统位标识（bit flag）的类型安全的有效替代：
+</p>
+<pre class="brush: java">
+EnumSet.of(Style.BOLD, Style.ITALIC)
+</pre>
+<p>
+	<!--
+		CopyOnWriteArraySet is a Set implementation backed up by a copy-on-write array. All mutative operations, such as add, set, and remove,
+		are implemented by making a new copy of the array; no locking is ever required. Even iteration may safely proceed concurrently with element insertion and deletion.
+		Unlike most Set implementations, the add, remove, and contains methods require time proportional to the size of the set.
+		This implementation is only appropriate for sets that are rarely modified but frequently iterated.
+		It is well suited to maintaining event-handler lists that must prevent duplicates.
+	-->
+	<code>CopyOnWriteArraySet</code>内部由一个复制写入数组（copy-on-write array）实现。所有的变化操作，如<code>add</code>、<code>set</code>、<code>remove</code>，
+	都会创建一个新的数组拷贝，因此它不需要任何加锁机制。即使它正在被遍历的时候，你也可以安全地插入或删除元素。
+	和其他<code>Set</code>实现类不同的是，<code>add</code>、<code>remove</code>和<code>contains</code>方法需要的时间和集的大小呈正比。
+	这个实现类只适用于那些很少被修改但需要频繁遍历的集，比如需要避免重复元素的事件处理器列表。
 </p>
