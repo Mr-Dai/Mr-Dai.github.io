@@ -372,7 +372,7 @@ List&lt;String&gt; list = new ArrayList&lt;&gt;(c);
 		for obtaining sequential or parallel streams from the underlying collection.
 		(See the lesson entitled Aggregate Operations for more information about using streams.)
 	-->
-	如果你使用的是 JDK8 或者更新的版本，<code>Collection</code>接口还提供了了<code>Stream &lt;E&gt; stream()</code>和<code>Stream&lt;E&gt; parallelStream()</code>方法，
+	如果你使用的是 JDK8 或者更新的版本，<code>Collection</code>接口还提供了<code>Stream &lt;E&gt; stream()</code>和<code>Stream&lt;E&gt; parallelStream()</code>方法，
 	用于获取集合实现类的顺序或并行流。详见<a href="#stream" target="_self">聚合操作</a>一章。
 </p>
 <p>
@@ -382,7 +382,7 @@ List&lt;String&gt; list = new ArrayList&lt;&gt;(c);
 		methods that add and remove an element from the collection (add, remove), and methods that provide an iterator over the collection (iterator).
 	-->
 	<code>Collection</code>接口提供了所有你能期望的一个对象集合所能提供的功能。它有可以告诉你它包含多少个元素的方法（<code>size</code>、<code>isEmpty</code>）、
-	检查某个给定对象是否包含在集合中的方法（<code>contains</code>）、从集合中增加或删除的方法（<code>add</code>、<code>remove</code>）还有提供集合遍历器的方法（<code>iterator</code>）。
+	检查某个给定对象是否包含在集合中的方法（<code>contains</code>）、从集合中增加或删除的方法（<code>add</code>、<code>remove</code>）还有提供集合迭代器的方法（<code>iterator</code>）。
 </p>
 <p>
 	<!--
@@ -418,5 +418,349 @@ myShapesCollection.stream()
     .forEach(e -> System.out.println(e.getName()));
 </pre>
 <p>
-	
+	<!--
+		Likewise, you could easily request a parallel stream, which might make sense if the collection is large enough and your computer has enough cores:
+	-->
+	同样，你也可以很方便地获取一个并行流，如果你的集合足够大、计算机核心足够多，使用它可能会是更好的选择：
+</p>
+<pre class="brush: java">
+myShapesCollection.parallelStream()
+	.filter(e -> e.getColor() == Color.RED)
+	.forEach(e -> System.out.println(e.getName()));
+</pre>
+<p>
+	<!--
+		There are many different ways to collect data with this API. For example, you might want to convert the elements of a Collection to String objects,
+		then join them, separated by commas:
+	-->
+	这套 API 有很多不同的方式来让你收集数据。比如，你可能想要把一个<code>Collection</code>中的元素转换为<code>String</code>对象并把它们连接起来，以逗号分隔：
+</p>
+<pre class="brush: java">
+ String joined = elements.stream()
+    .map(Object::toString)
+    .collect(Collectors.joining(", "));
+</pre>
+<p>
+	<!--
+		Or perhaps sum the salaries of all employees:
+	-->
+	或者把员工们的薪水加起来求个总和：
+</p>
+<pre class="brush: java">
+int total = employees.stream()
+	.collect(Collectors.summingInt(Employee::getSalary)));
+</pre>
+<p>
+	<!--
+		These are but a few examples of what you can do with streams and aggregate operations. For more information and examples, see the lesson entitled Aggregate Operations.
+	-->
+	上述只是一小部分流和聚合操作的例子，详见<a href="#stream" target="_self">聚合操作</a>一章。
+</p>
+<p>
+	<!--
+		The Collections framework has always provided a number of so-called "bulk operations" as part of its API. These include methods that operate on entire collections,
+		such as containsAll, addAll, removeAll, etc. Do not confuse those methods with the aggregate operations that were introduced in JDK 8.
+		The key difference between the new aggregate operations and the existing bulk operations (containsAll, addAll, etc.) is that the old versions are all mutative,
+		meaning that they all modify the underlying collection. In contrast, the new aggregate operations do not modify the underlying collection.
+		When using the new aggregate operations and lambda expressions, you must take care to avoid mutation so as not to introduce problems in the future,
+		should your code be run later from a parallel stream.
+	-->
+	Java 集合框架一直都将“批量操作”（bulk operation）API 作为其一部分。这些 API 包括那些可与对整个集合进行操作的方法，比如<code>containsAll</code>、<code>addAll</code>、
+	<code>removeAll</code>等。希望你不至于把它们和 JDK8 新引入的聚合操作弄混了。关键在于旧的批量操作方法（<code>containsAll</code>、<code>addAll</code>等）都是变化的（mutative），
+	它们会使得被作用的集合发生变化，而新的聚合操作不会修改被作用的集合。在使用新的聚合操作和 Lambda 表达式时，你应该注意不要引起集合本身的变化，
+	否则当你的代码在未来被用于处理并行流时可能会产生新的问题。
+</p>
+<h5>for-each 结构</h5>
+<p>
+	<!--
+		The for-each construct allows you to concisely traverse a collection or array using a for loop — see The for Statement.
+		The following code uses the for-each construct to print out each element of a collection on a separate line.
+	-->
+	<code>for-each</code>结构可以让你使用一个简洁的<code>for</code>循环来遍历集合或数组，详见<a href="http://docs.oracle.com/javase/tutorial/java/nutsandbolts/for.html"><code>for</code>语句</a>一章。
+	下述代码使用<code>for-each</code>结构来将一个集合中的每个元素输出到了独立的行中：
+</p>
+<pre class="brush: java">
+for (Object o : collection)
+    System.out.println(o);
+</pre>
+<h5>迭代器</h5>
+<p>
+	<!--
+		An Iterator is an object that enables you to traverse through a collection and to remove elements from the collection selectively, if desired.
+		You get an Iterator for a collection by calling its iterator method. The following is the Iterator interface.
+	-->
+	一个<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html">Iterator</a></code>（迭代器）可以让你遍历或是删除集合中的元素。
+	通过调用集合的<code>iterator</code>方法即可获取它的<code>Iterator</code>对象。下述代码即为<code>Iterator</code>接口：
+</p>
+<pre class="brush: java">
+public interface Iterator&lt;E&gt; {
+    boolean hasNext();
+    E next();
+    void remove(); // 可选
+}
+</pre>
+<p>
+	<!--
+		The hasNext method returns true if the iteration has more elements, and the next method returns the next element in the iteration.
+		The remove method removes the last element that was returned by next from the underlying Collection.
+		The remove method may be called only once per call to next and throws an exception if this rule is violated.
+	-->
+	当此次迭代还有剩余的元素时，<code>hasNext</code>方法返回<code>true</code>，且<code>next</code>方法将返回此次迭代的下一个元素。
+	<code>remove</code>方法将从底层的<code>Collection</code>中移除<code>next</code>方法上一次返回的元素。
+	在每次调用<code>next</code>方法后只能调用一次<code>remove</code>方法，否则<code>Iterator</code>将抛出一个错误。
+</p>
+<p>
+	<!--
+		Note that Iterator.remove is the only safe way to modify a collection during iteration; the behavior is unspecified if the underlying collection is modified
+		in any other way while the iteration is in progress.
+	-->
+	注意，<code>Iterator.remove</code>方法是在迭代时修改集合的唯一安全的方法，在迭代时通过任何其他方式修改底层的集合将会产生不可知的结果。
+
+</p>
+<p>
+	<!--
+		Use Iterator instead of the for-each construct when you need to:
+	-->
+	在你要做下面的事情的时候，你需要使用<code>Iterator</code>而不是<code>for-each</code>结构：
+</p>
+<ul>
+	<li>
+		<!--
+			Remove the current element. The for-each construct hides the iterator, so you cannot call remove. Therefore, the for-each construct is not usable for filtering.
+		-->
+		移除当前元素。<code>for-each</code>结构隐藏了它所使用的迭代器，所以你无法调用<code>remove</code>方法。因此<code>for-each</code>结构无法被用于过滤元素（filtering）。
+	</li>
+	<li>
+		<!--
+			Iterate over multiple collections in parallel.
+		-->
+		并行地迭代多个集合。
+	</li>
+</ul>
+<p>
+	<!--
+		The following method shows you how to use an Iterator to filter an arbitrary Collection — that is, traverse the collection removing specific elements.
+	-->
+	下述代码展示了如何使用<code>Iterator</code>来过滤任意<code>Collection</code>的元素，即遍历该集合并把特定的元素移除。
+</p>
+<pre class="brush: java">
+static void filter(Collection&lt;?&gt; c) {
+    for (Iterator&lt;?&gt; it = c.iterator(); it.hasNext(); )
+        if (!cond(it.next()))
+            it.remove();
+}
+</pre>
+<p>
+	<!--
+		This simple piece of code is polymorphic, which means that it works for any Collection regardless of implementation.
+		This example demonstrates how easy it is to write a polymorphic algorithm using the Java Collections Framework.
+	-->
+	这一小段代码是多态的，它可以被用于任何<code>Collection</code>而不必考虑具体的实现。
+	这段代码同样展示了使用 Java 集合框架编写多态的算法是多么方便。
+</p>
+<h3 class="jump" id="collection-interface-bulk-operations">2.1.2 Collection 接口批量操作</h3>
+<p>
+	<!--
+		Bulk operations perform an operation on an entire Collection. You could implement these shorthand operations using the basic operations,
+		though in most cases such implementations would be less efficient. The following are the bulk operations:
+	-->
+	批量操作用于对整个集合进行操作。你可以用基本的集合操作来实现这些用于速记的批量操作，尽管在大多数情况下这样的实现都是低效的。
+	下述方法均是批量操作：
+</p>
+<ul>
+	<li>
+		<!--
+			containsAll — returns true if the target Collection contains all of the elements in the specified Collection.
+		-->
+		<code>containsAll</code>：如果被调用的<code>Collection</code>包含给定<code>Collection</code>中的所有元素则返回<code>true</code>。
+	</li>
+	<li>
+		<!--
+			addAll — adds all of the elements in the specified Collection to the target Collection.
+		-->
+		<code>addAll</code>：将给定<code>Collection</code>中的所有元素放入到被调用的<code>Collection</code>中。
+	</li>
+	<li>
+		<!--
+			removeAll — removes from the target Collection all of its elements that are also contained in the specified Collection.
+		-->
+		<code>removeAll</code>：从被调用的<code>Collection</code>中移除所有同样属于给定<code>Collection</code>的元素。
+	</li>
+	<li>
+		<!--
+			retainAll — removes from the target Collection all its elements that are not also contained in the specified Collection.
+			That is, it retains only those elements in the target Collection that are also contained in the specified Collection.
+		-->
+		<code>retainAll</code>：从被调用的<code>Collection</code>中移除所有不属于给定<code>Collection</code>的元素。
+		也即是说，该方法执行完毕后，被调用的<code>Collection</code>只会保留那些同样属于给定<code>Collection</code>的元素。
+	</li>
+	<li>
+		<!--
+			clear — removes all elements from the Collection.
+		-->
+		<code>clear</code>：从<code>Collection</code>中移除所有元素。
+	</li>
+</ul>
+<p>
+	<!--
+		The addAll, removeAll, and retainAll methods all return true if the target Collection was modified in the process of executing the operation.
+	-->
+	其中，<code>addAll</code>、<code>removeAll</code>、<code>retainAll</code>方法均在被调用<code>Collection</code>发生改变时返回<code>true</code>。
+</p>
+<p>
+	<!--
+		As a simple example of the power of bulk operations, consider the following idiom to remove all instances of a specified element, e, from a Collection, c.
+	-->
+	为了展示批量操作的威力，我们不妨考虑下述常用写法，用以从<code>Collection c</code>中移除所有元素<code>e</code>的实例：
+</p>
+<pre class="brush: java">
+c.removeAll(Collections.singleton(e));
+</pre>
+<p>
+	<!--
+		More specifically, suppose you want to remove all of the null elements from a Collection.
+	-->
+	或者，考虑你想要从一个<code>Collection</code>中移除所有<code>null</code>元素：
+</p>
+<pre class="brush: java">
+c.removeAll(Collections.singleton(null));
+</pre>
+<p>
+	<!--
+		This idiom uses Collections.singleton, which is a static factory method that returns an immutable Set containing only the specified element.
+	-->
+	上述写法中使用了静态工厂方法<code>Collections.singleton</code>，它返回一个只包含给定元素的不可变<code>Set</code>。
+</p>
+<h3 class="jump" id="collection-interface-array-operations">2.1.3 Collection 接口数组操作</h3>
+<p>
+	<!--
+		The toArray methods are provided as a bridge between collections and older APIs that expect arrays on input.
+		The array operations allow the contents of a Collection to be translated into an array. The simple form with no arguments creates a new array of Object. 
+		The more complex form allows the caller to provide an array or to choose the runtime type of the output array.
+	-->
+	<code>Collection</code>的<code>toArray</code>方法是集合和使用数组作为输入的旧 API 之间的桥梁。数组操作使得一个<code>Collection</code>的内容物可以被转化为一个数组。
+	无参数的<code>toArray</code>方法将返回一个<code>Object</code>数组。而另一个更复杂的<code>toArray</code>方法允许调用者提供一个数组并选择结果数组的运行时类型。
+</p>
+<p>
+	<!--
+		For example, suppose that c is a Collection. The following snippet dumps the contents of c into a newly allocated array of Object
+		whose length is identical to the number of elements in c.
+	-->
+	比如，我们假设<code>c</code>是一个<code>Collection</code>。下述代码会将<code>c</code>的所有内容物放入到一个新创建的<code>Object</code>数组中，
+	数组的长度和<code>c</code>中的元素数量相同。
+</p>
+<pre class="brush: java">
+Object[] a = c.toArray();
+</pre>
+<p>
+	<!--
+		Suppose that c is known to contain only strings (perhaps because c is of type Collection<String>).
+		The following snippet dumps the contents of c into a newly allocated array of String whose length is identical to the number of elements in c.
+	-->
+	假设我们知道<code>c</code>中只包含字符串（也许是因为<code>c</code>的类型是<code>Collection&lt;String&gt;</code>）。
+	下述代码会将<code>c</code>的所有内容物放入到一个新创建的<code>String</code>数组中，数组的长度和<code>c</code>中的元素数量相同。
+</p>
+<pre class="brush: java">
+Object[] a = c.toArray(new String[0]);
+</pre>
+<h3 class="jump" id="set">2.2 Set 接口</h3>
+<p>
+	<!--
+		A Set is a Collection that cannot contain duplicate elements. It models the mathematical set abstraction.
+		The Set interface contains only methods inherited from Collection and adds the restriction that duplicate elements are prohibited.
+		Set also adds a stronger contract on the behavior of the equals and hashCode operations, allowing Set instances to be compared meaningfully
+		even if their implementation types differ. Two Set instances are equal if they contain the same elements.
+	-->
+	<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Set.html">Set</a></code>是一种不包含重复元素的
+	<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html">Collection</a></code>，它模拟的是数学上的集的抽象。
+	<code>Set</code>接口只包含了继承自<code>Collection</code>的方法和对重复元素的限制。<code>Set</code>接口还对<code>equals</code>和<code>hashCode</code>操作的行为进行了更严格定义，
+	使得即使是不同实现的<code>Set</code>实例也能进行有意义的比较。两个<code>Set</code>实例包含相同的元素，那么我们说它们是相等的（equal）。
+</p>
+<p>
+	<!--
+		The Java platform contains three general-purpose Set implementations: HashSet, TreeSet, and LinkedHashSet.
+		HashSet, which stores its elements in a hash table, is the best-performing implementation; however it makes no guarantees concerning the order of iteration.
+		TreeSet, which stores its elements in a red-black tree, orders its elements based on their values; it is substantially slower than HashSet.
+		LinkedHashSet, which is implemented as a hash table with a linked list running through it, orders its elements based on the order in which they were inserted into the set (insertion-order).
+		LinkedHashSet spares its clients from the unspecified, generally chaotic ordering provided by HashSet at a cost that is only slightly higher.
+	-->
+	Java 提供了三种普适的<code>Set</code>实现：<code>HashSet</code>、<code>TreeSet</code>和<code>LinkedHashSet</code>。
+	<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/HashSet.html">HashSet</a></code>作为最高效的<code>Set</code>实现，将元素存储在一张哈希表中。
+	然而在遍历其元素时，它无法给出确定的元素遍历顺序。
+	<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/TreeSet.html">TreeSet</a></code>则通过将元素存储在一棵红黑树中，
+	使得元素之间基于其值有序。但在性能上，<code>TreeSet</code>比<code>HashSet</code>慢得多。
+	<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashSet.html">LinkedHashSet</a></code>则是被实现为一张特殊的哈希表，该表维护着一个联系所有元素的链表，
+	而该链表维持着元素们插入的顺序。<code>LinkedHashSet</code>使得用户不再需要面对<code>HashSet</code>那种不确定的遍历顺序，而且它只比<code>HashSet</code>慢一点。
+</p>
+<p>
+	<!--
+		Here's a simple but useful Set idiom. Suppose you have a Collection, c, and you want to create another Collection containing the same elements
+		but with all duplicates eliminated. The following one-liner does the trick.
+	-->
+	下述代码即为<code>Set</code>的其中一种常用语法。假设你有一个<code>Collection c</code>，你想要创建一个新的<code>Collection</code>包含<code>c</code>中的所有元素，
+	但移除所有重复的元素：
+</p>
+<pre class="brush: java">
+Collection&lt;Type&gt; noDups = new HashSet&lt;Type&gt;(c);
+</pre>
+<p>
+	<!--
+		It works by creating a Set (which, by definition, cannot contain duplicates), initially containing all the elements in c.
+		It uses the standard conversion constructor described in the The Collection Interface section.
+	-->
+	上述代码创建了一个包含<code>c</code>中所有元素的<code>Set</code>（在定义上不包含重复的元素）。
+	上述代码还使用了我们在 <a href="#collection" target="_self">Collection 接口</a>一节中提到的转换构造器。
+</p>
+<p>
+	<!--
+		Or, if using JDK 8 or later, you could easily collect into a Set using aggregate operations:
+	-->
+	或者，如果你使用的是 JDK8 或更新的版本，你还可以轻易地使用聚合操作把元素收集到一个<code>Set</code>中：
+</p>
+<pre class="brush: java">
+c.stream().collect(Collectors.toSet());
+</pre>
+<p>
+	<!--
+		Here's a slightly longer example that accumulates a Collection of names into a TreeSet:
+	-->
+	下面的例子把一个<code>Collection</code>里的名称放入到了一个<code>TreeSet</code>中：
+</p>
+<pre class="brush: java">
+Set&lt;String&gt; set = people.stream()
+	.map(Person::getName)
+	.collect(Collectors.toCollection(TreeSet::new));
+</pre>
+<p>
+	<!--
+		And the following is a minor variant of the first idiom that preserves the order of the original collection while removing duplicate elements:
+	-->
+	下面则是第一个例子的小变形，保留了元素在原本的集合中的顺序并移除了重复的元素：
+</p>
+<pre class="brush: java">
+Collection&lt;Type&gt; noDups = new LinkedHashSet&lt;Type&gtl;(c);
+</pre>
+<p>
+	<!--
+		The following is a generic method that encapsulates the preceding idiom, returning a Set of the same generic type as the one passed.
+	-->
+	下面的泛型方法是对上面的例子的封装，它返回一个和传入<code>Collection</code>有着相同泛型参数的<code>Set</code>。
+</p>
+<pre class="brush: java">
+public static &lt;E&gt; Set&lt;E&gt; removeDups(Collection&lt;E&gt; c) {
+    return new LinkedHashSet&lt;E&gt;(c);
+}
+</pre>
+<h4 class="jump" id="set-interface-basic-operations">2.2.1 Set 接口基本操作</h4>
+<p>
+	<!--
+		The size operation returns the number of elements in the Set (its cardinality). The isEmpty method does exactly what you think it would.
+		The add method adds the specified element to the Set if it is not already present and returns a boolean indicating whether the element was added.
+		Similarly, the remove method removes the specified element from the Set if it is present and returns a boolean indicating whether the element was present.
+		The iterator method returns an Iterator over the Set.
+	-->
+	<code>size</code>方法返回<code>Set</code>中元素的个数，即集的势（cardinality）。<code>isEmpty</code>方法做的事情和你能猜到的它应该做的事完全一样（译者注：返回当前集是否为空）。
+	<code>add</code>方法将给定的元素放入到<code>Set</code>中，并返回一个指示是否真的有放入该元素的布尔值。
+	类似地，<code>remove</code>方法将给定的元素从<code>Set</code>中移除，并返回一个指示是否真的有移除该元素的布尔值。
+	<code>iterator</code>方法返回一个迭代整个<code>Set</code>的<code>Iterator</code>。
 </p>
