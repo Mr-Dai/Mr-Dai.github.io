@@ -9,8 +9,7 @@ category: Java
 
 ## 概述
 
-了解 Java 集合框架每个实现类的原理是每个 Java 程序员的必修课。本系列将按照`Set`、`List`、
-`Map`、`Queue`、`Deque`的顺序，以 Java
+了解 Java 集合框架每个实现类的原理是每个 Java 程序员的必修课。本系列将按照`Set`、`List`、`Map`、`Queue`、`Deque`的顺序，以 Java
 的[官方教程](http://docs.oracle.com/javase/tutorial/collections/)为指导，分接口的解析每个接口对应的实现类的原理。
 本篇先从`Set`接口及其常用实现类开始。
 
@@ -29,14 +28,16 @@ package java.util;
  */
 
 public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
-    /* 查询操作 */
 
     /** 返回集中元素的个数 */
     int size();
+
     /** 返回集是否为空 */
     boolean isEmpty();
+
     /** 返回集是否包含给定的对象 */
     boolean contains(Object o);
+
     /** 返回可用于迭代整个集的迭代器 */
     Iterator&lt;E&gt; iterator();
     Object[] toArray();
