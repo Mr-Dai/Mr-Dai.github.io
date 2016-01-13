@@ -1,0 +1,664 @@
+---
+layout: posts
+title: Spark Core 源码解析：Scheduler
+author: Robert Peng
+category: Spark
+published: false
+---
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
+<script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
+
+<h2 class="jump">前言</h2>
+<p>
+	在一般的Spark编程中，恐怕我们很少会去在意Scheduler这个东西。顾名思义，Scheduler所负责的是Spark Job以及Executor之间的调度，
+	大多数情况下我们都不会对Scheduler做出任何配置。但要真正理解Spark的分布式原理，最重要的便是要理解节点之间的交互协议，
+	而毫无疑问，Scheduler正是这个协议的其中一员。
+</p>
+<p>
+	Spark的Scheduler分为两种。第一种叫做<code>DAGScheduler</code>，其中DAG即有向无环图 —— Directed Acyclic Graph。
+	DAGScheduler接收由<code>SparkContext</code>发出的Job，根据传入的RDD的依赖关系生成各个stage，并把这些stage关系传给下一个Scheduler，
+	也就是<code>TaskScheduler</code>。TaskScheduler则负责对stage中的task进行调度，可以说真正的结点协调工作发生在TaskScheduler。
+</p>
+<hr />
+<h2 class="jump">SparkContext</h2>
+<p>
+	在<a href="/2015/08/24/Spark-Core-Source-1.html">上一篇文章</a>中我们了解到，RDD Action通过调用<code>SparkContext#runJob</code>来启动RDD操作流水线。
+	那么我们就先来看一下这个方法。
+</p>
+<h3>runJob</h3>
+<pre class="brush: scala">
+/**
+ * Run a function on a given set of partitions in an RDD and pass the results to the given
+ * handler function. This is the main entry point for all actions in Spark. The allowLocal
+ * flag specifies whether the scheduler can run the computation on the driver rather than
+ * shipping it out to the cluster, for short actions like first().
+ */
+def runJob[T, U: ClassTag](
+    rdd: RDD[T],							// 首先是待操作的rdd
+    func: (TaskContext, Iterator[T]) => U,  // 在每个Partition上应用的函数
+    partitions: Seq[Int],					// 要操作的Partition们
+    allowLocal: Boolean,
+    resultHandler: (Int, U) => Unit) {		// 如何处理每个Partition的结果
+  if (stopped.get()) {			// 检测该SparkContext是否已经关闭
+    throw new IllegalStateException("SparkContext has been shutdown")
+  }
+  val callSite = getCallSite	// 获取用户启动Job的调用点
+  val cleanedFunc = clean(func) // 清理用户传入的Scala Closure，准备序列化
+  logInfo("Starting job: " + callSite.shortForm)
+  if (conf.getBoolean("spark.logLineage", false)) {
+    logInfo("RDD's recursive dependencies:\n" + rdd.toDebugString)
+  }
+  dagScheduler.runJob(rdd, cleanedFunc, partitions, callSite, allowLocal,
+    resultHandler, localProperties.get)  // 通过DAGScheduler提起任务
+  progressBar.foreach(_.finishAll())	 // 等待任务完成
+  rdd.doCheckpoint()					 // 对RDD进行checkpoint
+}
+</pre>
+<p>
+	不难看出，<code>SparkContext#runJob</code>本身只是做了一些准备工作，真正的调度和任务提交工作交给了<code>DAGScheduler</code>。
+	我们先来看一下这个<code>DAGScheduler</code>是如何实例化的。
+</p>
+<h3>DAGScheduler</h3>
+<pre class="brush: scala">
+private[spark] def dagScheduler: DAGScheduler = _dagScheduler
+
+_dagScheduler = new DAGScheduler(this)
+</pre>
+<p>那我们就去看一下<code>DAGScheduler</code>的构造函数：</p>
+<pre class="brush: scala">
+class DAGScheduler(
+    private[scheduler] val sc: SparkContext,
+    private[scheduler] val taskScheduler: TaskScheduler,
+    listenerBus: LiveListenerBus,
+    mapOutputTracker: MapOutputTrackerMaster,
+    blockManagerMaster: BlockManagerMaster,
+    env: SparkEnv,
+    clock: Clock = new SystemClock())
+  extends Logging {
+  
+  def this(sc: SparkContext) = this(sc, sc.taskScheduler)
+  
+  def this(sc: SparkContext, taskScheduler: TaskScheduler) = {
+    this(
+      sc,
+      taskScheduler,
+      sc.listenerBus,
+      sc.env.mapOutputTracker.asInstanceOf[MapOutputTrackerMaster],
+      sc.env.blockManager.master,
+      sc.env)
+  }
+  
+  // ...
+
+}
+</pre>
+<p>
+	所以我们实际上并不着急着直接进入<code>DAGScheduler</code>，因为它还使用了<code>SparkContext</code>的其他变量，其中包括<code>TaskScheduler</code>、
+	<code>LiveListenerBus</code>、<code>SparkEnv</code>、<code>MapOutputTrackerMaster</code>和<code>BlockManagerMaster</code>。我们一个一个来。
+</p>
+<h3>TaskScheduler</h3>
+<pre class="brush: scala">
+private[spark] def taskScheduler: TaskScheduler = _taskScheduler
+
+val (sched, ts) = SparkContext.createTaskScheduler(this, master)
+_schedulerBackend = sched
+_taskScheduler = ts
+
+/**
+ * Create a task scheduler based on a given master URL.
+ * Return a 2-tuple of the scheduler backend and the task scheduler.
+ *
+ * 该函数会根据Master类型的不同返回不同的Scheduler
+ */
+private def createTaskScheduler(
+    sc: SparkContext,
+    master: String): (SchedulerBackend, TaskScheduler) = {
+
+	// ...
+	
+	master match {
+	  // ...
+	  // 这里我们以Spark Standalone Cluster为例
+	  case SPARK_REGEX(sparkUrl) =>
+        val scheduler = new TaskSchedulerImpl(sc)
+        val masterUrls = sparkUrl.split(",").map("spark://" + _)
+        val backend = new SparkDeploySchedulerBackend(scheduler, sc, masterUrls)
+        scheduler.initialize(backend) // 实例化了一个TaskScheduler以及一个backend
+        (backend, scheduler)
+	
+	}
+	
+	// ...
+	
+}
+</pre>
+<p>
+	至此，我们捕捉到了一个<code>TaskScheduler</code>实现类：<code>TaskSchedulerImpl</code>，以及它在Spark Standalone集群模式下的backend：
+	<code>SparkDeploySchedulerBackend</code>。我们留到以后再看看这两个类的具体功能。
+</p>
+<h3>LiveListenerBus</h3>
+<pre class="brush: scala">
+private[spark] val listenerBus = new LiveListenerBus
+
+/**
+ * Asynchronously passes SparkListenerEvents to registered SparkListeners.
+ *
+ * Until start() is called, all posted events are only buffered. Only after this listener bus
+ * has started will events be actually propagated to all attached listeners. This listener bus
+ * is stopped when it receives a SparkListenerShutdown event, which is posted using stop().
+ */
+private[spark] class LiveListenerBus
+  extends AsynchronousListenerBus[SparkListener, SparkListenerEvent]("SparkListenerBus")
+  with SparkListenerBus {
+
+  private val logDroppedEvent = new AtomicBoolean(false)
+
+  override def onDropEvent(event: SparkListenerEvent): Unit = {
+    if (logDroppedEvent.compareAndSet(false, true)) {
+      // Only log the following message once to avoid duplicated annoying logs.
+      logError("Dropping SparkListenerEvent because no remaining room in event queue. " +
+        "This likely means one of the SparkListeners is too slow and cannot keep up with " +
+        "the rate at which tasks are being started by the scheduler.")
+    }
+  }
+}
+
+</pre>
+<h3>SparkEnv</h3>
+<pre class="brush: scala">
+private[spark] def env: SparkEnv = _env
+_env = createSparkEnv(_conf, isLocal, listenerBus)
+
+private[spark] def createSparkEnv(
+    conf: SparkConf,
+    isLocal: Boolean,
+    listenerBus: LiveListenerBus): SparkEnv = {
+  SparkEnv.createDriverEnv(conf, isLocal, listenerBus)
+}
+</pre>
+<p>
+	而<code>MapOutputTrackerMaster</code>和<code>BlockManagerMaster</code>属于<code>SparkEnv</code>的成员，
+	我们保留到解析<code>SparkEnv</code>的时候再对他们进行解析。
+</p>
+<p>那么接下来我们就愉快地进入DAGScheduler。</p>
+<hr />
+<h2 class="jump">DAGScheduler</h2>
+<p>我们先从刚刚提到的<code>DAGScheduler#runJob</code>开始：</p>
+<pre class="brush: scala">
+def runJob[T, U](
+    rdd: RDD[T],
+    func: (TaskContext, Iterator[T]) => U,  // 应用在每个Partition上的函数，已clean
+    partitions: Seq[Int], // 需要操作的Partition
+    callSite: CallSite,   // 用户的调用点
+    allowLocal: Boolean,
+    resultHandler: (Int, U) => Unit,  // Partition计算结果的处理函数
+    properties: Properties): Unit = {
+  val start = System.nanoTime
+  // 提交任务
+  val waiter = submitJob(rdd, func, partitions, callSite, allowLocal, resultHandler, properties)
+  // 等待任务结束并处理结果
+  waiter.awaitResult() match {
+    case JobSucceeded =>
+      logInfo("Job %d finished: %s, took %f s".format
+        (waiter.jobId, callSite.shortForm, (System.nanoTime - start) / 1e9))
+    case JobFailed(exception: Exception) =>
+      logInfo("Job %d failed: %s, took %f s".format
+        (waiter.jobId, callSite.shortForm, (System.nanoTime - start) / 1e9))
+      throw exception
+  }
+}
+</pre>
+<p>嗯，要想run，你得先submit，十分make sense。</p>
+<pre class="brush: scala">
+/**
+ * Submit a job to the job scheduler and get a JobWaiter object back. The JobWaiter object
+ * can be used to block until the the job finishes executing or can be used to cancel the job.
+ */
+def submitJob[T, U](
+    rdd: RDD[T],
+    func: (TaskContext, Iterator[T]) => U,  // 应用在每个Partition上的函数，已clean
+    partitions: Seq[Int], // 需要操作的Partition
+    callSite: CallSite,   // 用户的调用点
+    allowLocal: Boolean,
+    resultHandler: (Int, U) => Unit,  // Partition计算结果的处理函数
+    properties: Properties): JobWaiter[U] = {
+  // 移除传入的Partition数组中非法的Partition
+  val maxPartitions = rdd.partitions.length
+  partitions.find(p => p >= maxPartitions || p < 0).foreach { p =>
+    throw new IllegalArgumentException(
+      "Attempting to access a non-existent partition: " + p + ". " +
+        "Total number of partitions: " + maxPartitions)
+  }
+
+  // 获取jobId
+  val jobId = nextJobId.getAndIncrement()
+  if (partitions.isEmpty) {
+    return new JobWaiter[U](this, jobId, 0, resultHandler)
+  }
+
+  assert(partitions.nonEmpty)
+  val func2 = func.asInstanceOf[(TaskContext, Iterator[_]) => _]
+  // 实例化一个JobWaiter
+  val waiter = new JobWaiter(this, jobId, partitions.size, resultHandler)
+  // 将提交信息上传至信息队列
+  eventProcessLoop.post(JobSubmitted(
+    jobId, rdd, func2, partitions.toArray, allowLocal, callSite, waiter,
+    SerializationUtils.clone(properties)))
+  waiter
+}
+</pre>
+<p>更加make sense了，这里我们看到一个<code>eventProcessLoop</code>，应该就是一个任务队列了。</p>
+<h3>DAGSchedulerEventProcessLoop</h3>
+<pre class="brush:scala">
+// inside DAGScheduler
+private[scheduler] val eventProcessLoop = new DAGSchedulerEventProcessLoop(this)
+
+// outside
+private[scheduler] class DAGSchedulerEventProcessLoop(dagScheduler: DAGScheduler)
+  extends EventLoop[DAGSchedulerEvent]("dag-scheduler-event-loop") with Logging {
+
+  /**
+   * The main event loop of the DAG scheduler.
+   */
+  override def onReceive(event: DAGSchedulerEvent): Unit = event match {
+    case JobSubmitted(jobId, rdd, func, partitions, allowLocal, callSite, listener, properties) =>
+      dagScheduler.handleJobSubmitted(jobId, rdd, func, partitions, allowLocal, callSite,
+        listener, properties)
+
+    case StageCancelled(stageId) =>
+      dagScheduler.handleStageCancellation(stageId)
+
+    case JobCancelled(jobId) =>
+      dagScheduler.handleJobCancellation(jobId)
+
+    case JobGroupCancelled(groupId) =>
+      dagScheduler.handleJobGroupCancelled(groupId)
+
+    case AllJobsCancelled =>
+      dagScheduler.doCancelAllJobs()
+
+    case ExecutorAdded(execId, host) =>
+      dagScheduler.handleExecutorAdded(execId, host)
+
+    case ExecutorLost(execId) =>
+      dagScheduler.handleExecutorLost(execId, fetchFailed = false)
+
+    case BeginEvent(task, taskInfo) =>
+      dagScheduler.handleBeginEvent(task, taskInfo)
+
+    case GettingResultEvent(taskInfo) =>
+      dagScheduler.handleGetTaskResult(taskInfo)
+
+    case completion @ CompletionEvent(task, reason, _, _, taskInfo, taskMetrics) =>
+      dagScheduler.handleTaskCompletion(completion)
+
+    case TaskSetFailed(taskSet, reason) =>
+      dagScheduler.handleTaskSetFailed(taskSet, reason)
+
+    case ResubmitFailedStages =>
+      dagScheduler.resubmitFailedStages()
+  }
+
+  override def onError(e: Throwable): Unit = {
+    logError("DAGSchedulerEventProcessLoop failed; shutting down SparkContext", e)
+    try {
+      dagScheduler.doCancelAllJobs()
+    } catch {
+      case t: Throwable => logError("DAGScheduler failed to cancel all jobs.", t)
+    }
+    dagScheduler.sc.stop()
+  }
+
+  override def onStop(): Unit = {
+    // Cancel any active jobs in postStop hook
+    dagScheduler.cleanUpAfterSchedulerStop()
+  }
+}
+</pre>
+<p>
+	我们看到，<code>DAGSchedulerEventProcessLoop</code>继承自<code>EventLoop[DAGSchedulerEvent]</code>，
+	并重载了<code>onReceive</code>方法，接受一个<code>DAGSchedulerEvent</code>并触发对应的动作。
+	毫无疑问方法内的<code>case</code>关键字指明的类就是不同的<code>DAGSchedulerEvent</code>。这些Event实际山只是一些case class，并没有什么好看的。
+	我们先来看一下这个<code>EventLoop</code>：
+</p>
+<p class="center"><img style="max-width: 100%" alt="" src="/img/SparkScheduler@1.jpg"></p>
+<pre class="brush: scala">
+/**
+ * An event loop to receive events from the caller and process all events in the event thread. It
+ * will start an exclusive event thread to process all events.
+ *
+ * Note: The event queue will grow indefinitely. So subclasses should make sure `onReceive` can
+ * handle events in time to avoid the potential OOM.
+ */
+private[spark] abstract class EventLoop[E](name: String) extends Logging {
+
+  private val eventQueue: BlockingQueue[E] = new LinkedBlockingDeque[E]()
+
+  private val stopped = new AtomicBoolean(false)
+
+  // 启动一个守护线程来不断处理队列中的信息
+  private val eventThread = new Thread(name) {
+    setDaemon(true)
+
+    override def run(): Unit = {
+      try {
+        while (!stopped.get) {
+          val event = eventQueue.take()
+          try {
+		    // 对每个信息调用onReceive方法进行处理
+            onReceive(event)
+          } catch {
+            case NonFatal(e) => {
+              try {
+                onError(e)
+              } catch {
+                case NonFatal(e) => logError("Unexpected error in " + name, e)
+              }
+            }
+          }
+        }
+      } catch {
+        case ie: InterruptedException => // exit even if eventQueue is not empty
+        case NonFatal(e) => logError("Unexpected error in " + name, e)
+      }
+    }
+
+  }
+
+  def start(): Unit = {
+    if (stopped.get) {
+      throw new IllegalStateException(name + " has already been stopped")
+    }
+    // Call onStart before starting the event thread to make sure it happens before onReceive
+    onStart()
+	// 启动守护线程
+    eventThread.start()
+  }
+
+  def stop(): Unit = {
+    if (stopped.compareAndSet(false, true)) {
+      eventThread.interrupt()
+      var onStopCalled = false
+      try {
+        eventThread.join()
+        // Call onStop after the event thread exits to make sure onReceive happens before onStop
+        onStopCalled = true
+        onStop()
+      } catch {
+        case ie: InterruptedException =>
+          Thread.currentThread().interrupt()
+          if (!onStopCalled) {
+            // ie is thrown from `eventThread.join()`. Otherwise, we should not call `onStop` since
+            // it's already called.
+            onStop()
+          }
+      }
+    } else {
+      // Keep quiet to allow calling `stop` multiple times.
+    }
+  }
+
+  /**
+   * Put the event into the event queue. The event thread will process it later.
+   */
+  def post(event: E): Unit = {
+    eventQueue.put(event)
+  }
+
+  /**
+   * Return if the event thread has already been started but not yet stopped.
+   */
+  def isActive: Boolean = eventThread.isAlive
+
+  /**
+   * Invoked when `start()` is called but before the event thread starts.
+   */
+  protected def onStart(): Unit = {}
+
+  /**
+   * Invoked when `stop()` is called and the event thread exits.
+   */
+  protected def onStop(): Unit = {}
+
+  /**
+   * Invoked in the event thread when polling events from the event queue.
+   *
+   * Note: Should avoid calling blocking actions in `onReceive`, or the event thread will be blocked
+   * and cannot process events in time. If you want to call some blocking actions, run them in
+   * another thread.
+   */
+  protected def onReceive(event: E): Unit
+
+  /**
+   * Invoked if `onReceive` throws any non fatal error. Any non fatal error thrown from `onError`
+   * will be ignored.
+   */
+  protected def onError(e: Throwable): Unit
+
+}
+</pre>
+<p>
+	可见，<code>EventLoop</code>负责管理一个事件队列，同时启动了一个不断处理队列中的事件的守护线程，但事件的处理方法由子类重载<code>onReceive</code>方法来实现。
+</p>
+<p class="center"><img style="max-width: 100%" alt="" src="/img/SparkScheduler@2.jpg"></p>
+<p>
+	回想起<code>DAGScheduler#submitJob</code>向队列中提交的是<code>JobSubmitted</code>事件。我们再看看那两段代码：
+</p>
+<pre class="brush: scala">
+class DAGScheduler {
+
+  // ...
+  
+  def submitJob[T, U](
+      rdd: RDD[T],
+      func: (TaskContext, Iterator[T]) => U,  // 应用在每个Partition上的函数，已clean
+      partitions: Seq[Int], // 需要操作的Partition
+      callSite: CallSite,   // 用户的调用点
+      allowLocal: Boolean,
+      resultHandler: (Int, U) => Unit,  // Partition计算结果的处理函数
+      properties: Properties): JobWaiter[U] = {
+	  
+	// ...
+
+    // 实例化一个JobWaiter
+    val waiter = new JobWaiter(this, jobId, partitions.size, resultHandler)
+    // 将提交信息上传至信息队列
+    eventProcessLoop.post(JobSubmitted(
+      jobId, rdd, func2, partitions.toArray, allowLocal, callSite, waiter,
+      SerializationUtils.clone(properties)))
+    waiter
+   }
+}
+// 可见，DAGScheduler依赖于DAGSchedulerEventProcessLoop的事件队列来管理各个线程各个用户提交给同一个SparkContext的任务
+
+private[scheduler] class DAGSchedulerEventProcessLoop(dagScheduler: DAGScheduler)
+  extends EventLoop[DAGSchedulerEvent]("dag-scheduler-event-loop") with Logging {
+  
+  override def onReceive(event: DAGSchedulerEvent): Unit = event match {
+    case JobSubmitted(jobId, rdd, func, partitions, allowLocal, callSite, listener, properties) =>
+      dagScheduler.handleJobSubmitted(jobId, rdd, func, partitions, allowLocal, callSite,
+        listener, properties)
+	  // 显然，EventLoop自身只能消化事件，并没有信息回传机制
+	  // 因此这里DAGSchedulerEventProcessLoop通过调用DAGScheduler告诉它，轮到这个任务了	
+	// ...
+  }
+
+  // ...
+}  
+</pre>
+<p>那么我们回到<code>DAGScheduler#handleJobSubmitted</code>：</p>
+<pre class="brush: scala">
+private[scheduler] def handleJobSubmitted(jobId: Int,
+    finalRDD: RDD[_],
+    func: (TaskContext, Iterator[_]) => _, // 应用在每个Partition上的函数，已clean
+    partitions: Array[Int],  // 待操作的Partition集
+    allowLocal: Boolean,
+    callSite: CallSite,
+    listener: JobListener,   // JobWaiter
+    properties: Properties) {
+    
+  var finalStage: ResultStage = null  // `stage`出现
+    
+  // ...
+	
+}
+</pre>
+<p>OK，看到个<code>ResultStage</code>就能猜到这里是要干什么了。我们不着急着往下看，我们先来看一下这个<code>ResultStage</code>。</p>
+<h3>Stage</h3>
+<pre class="brush: scala">
+/**
+ * The ResultStage represents the final stage in a job.
+ */
+private[spark] class ResultStage(
+    id: Int,
+    rdd: RDD[_],
+    numTasks: Int,
+    parents: List[Stage],
+    jobId: Int,
+    callSite: CallSite)
+  extends Stage(id, rdd, numTasks, parents, jobId, callSite) {
+
+  // The active job for this result stage. Will be empty if the job has already finished
+  // (e.g., because the job was cancelled).
+  var resultOfJob: Option[ActiveJob] = None
+
+  override def toString: String = "ResultStage " + id
+}
+
+/**
+ * A stage is a set of independent tasks all computing the same function that need to run as part
+ * of a Spark job, where all the tasks have the same shuffle dependencies. Each DAG of tasks run
+ * by the scheduler is split up into stages at the boundaries where shuffle occurs, and then the
+ * DAGScheduler runs these stages in topological order.
+ *
+ * 一个Spark Job由若干个Stage组成。由Scheduler生成的DAG会被分割为若干个Stage，它们将会在shuffle操作
+ * 发生的地方被分裂开来，而后DAGScheduler会按拓补顺序依次执行这些Stages。
+ *
+ * Each Stage can either be a shuffle map stage, in which case its tasks' results are input for
+ * another stage, or a result stage, in which case its tasks directly compute the action that
+ * initiated a job (e.g. count(), save(), etc). For shuffle map stages, we also track the nodes
+ * that each output partition is on.
+ *
+ * Stage一共分为两种。一种被称为shuffle map stage，它们的task的计算结果将作为其他stage的输入；
+ * 而另一种stage就是我们刚刚看到的result stage，它的task所计算的正是触发Spark Job的RDD Action。
+ *
+ * Each Stage also has a jobId, identifying the job that first submitted the stage.  When FIFO
+ * scheduling is used, this allows Stages from earlier jobs to be computed first or recovered
+ * faster on failure.
+ *
+ * The callSite provides a location in user code which relates to the stage. For a shuffle map
+ * stage, the callSite gives the user code that created the RDD being shuffled. For a result
+ * stage, the callSite gives the user code that executes the associated action (e.g. count()).
+ *
+ * A single stage can consist of multiple attempts. In that case, the latestInfo field will
+ * be updated for each attempt.
+ *
+ */
+private[spark] abstract class Stage(
+    val id: Int,
+    val rdd: RDD[_],
+    val numTasks: Int,
+    val parents: List[Stage],
+    val jobId: Int,
+    val callSite: CallSite)
+  extends Logging {
+
+  val numPartitions = rdd.partitions.size
+
+  /** Set of jobs that this stage belongs to. */
+  val jobIds = new HashSet[Int]
+
+  var pendingTasks = new HashSet[Task[_]]
+
+  private var nextAttemptId: Int = 0
+
+  val name = callSite.shortForm
+  val details = callSite.longForm
+
+  /** Pointer to the latest [StageInfo] object, set by DAGScheduler. */
+  var latestInfo: StageInfo = StageInfo.fromStage(this)
+
+  /** Return a new attempt id, starting with 0. */
+  def newAttemptId(): Int = {
+    val id = nextAttemptId
+    nextAttemptId += 1
+    id
+  }
+
+  def attemptId: Int = nextAttemptId
+
+  override final def hashCode(): Int = id
+  override final def equals(other: Any): Boolean = other match {
+    case stage: Stage => stage != null && stage.id == id
+    case _ => false
+  }
+}
+</pre>
+<p>
+	<code>Stage</code>类本身能提供的信息并不多，毕竟也能猜到它本身只是一组元信息。但这个类的注释却给了我们关于Stage的很多解释。
+	我们再看一下剩下的<code>ShuffleMapStage</code>：
+</p>
+<pre class="brush: scala">
+private[spark] class ShuffleMapStage(
+    id: Int,
+    rdd: RDD[_],
+    numTasks: Int,
+    parents: List[Stage],
+    jobId: Int,
+    callSite: CallSite,
+    val shuffleDep: ShuffleDependency[_, _, _])
+  extends Stage(id, rdd, numTasks, parents, jobId, callSite) {
+
+  override def toString: String = "ShuffleMapStage " + id
+
+  var numAvailableOutputs: Long = 0
+
+  def isAvailable: Boolean = numAvailableOutputs == numPartitions
+
+  // 顾名思义这就是output partition的位置了，但却是用一个MapStatus表示的
+  val outputLocs = Array.fill[List[MapStatus]](numPartitions)(Nil)
+
+  def addOutputLoc(partition: Int, status: MapStatus): Unit = {
+    val prevList = outputLocs(partition)
+    outputLocs(partition) = status :: prevList
+    if (prevList == Nil) {
+      numAvailableOutputs += 1
+    }
+  }
+
+  def removeOutputLoc(partition: Int, bmAddress: BlockManagerId): Unit = {
+    val prevList = outputLocs(partition)
+    val newList = prevList.filterNot(_.location == bmAddress)
+	// 从这里可以看出，关键的数据是MapStatus的localtion变量，这是个BlockManagerId
+    outputLocs(partition) = newList
+    if (prevList != Nil && newList == Nil) {
+      numAvailableOutputs -= 1
+    }
+  }
+
+  /**
+   * Removes all shuffle outputs associated with this executor. Note that this will also remove
+   * outputs which are served by an external shuffle server (if one exists), as they are still
+   * registered with this execId.
+   */
+  def removeOutputsOnExecutor(execId: String): Unit = {
+    var becameUnavailable = false
+    for (partition &lt;- 0 until numPartitions) {
+      val prevList = outputLocs(partition)
+      val newList = prevList.filterNot(_.location.executorId == execId)
+	  // 这里发现了BlockManagerId的executorId变量，看起来也是个蛮关键的数据
+      outputLocs(partition) = newList
+      if (prevList != Nil && newList == Nil) {
+        becameUnavailable = true
+        numAvailableOutputs -= 1
+      }
+    }
+    if (becameUnavailable) {
+      logInfo("%s is now unavailable on executor %s (%d/%d, %s)".format(
+        this, execId, numAvailableOutputs, numPartitions, isAvailable))
+    }
+  }
+}
+</pre>
+<p>正如<code>Stage</code>类的注释所言，<code>ShuffleMapStage</code>追踪着输出结果每个Partition的所在位置，所在的位置以一个<code>BlockManagerId</code>表示。</p>

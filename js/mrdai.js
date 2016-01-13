@@ -1,6 +1,6 @@
 // 生成文章页的跳转列表
 function branchJumpBinding() {
-	var jumpDest = $(".jump");
+	var jumpDest = $("#post_content h2,#post_content h3,#post_content h4,.jump");
 	var jumpList = $("#JumpList");
     // 若本页无跳转目标则隐藏跳转目录
     // 加入#right_wrapper li的个数判断是为了防止index页的#right_wrapper被隐藏

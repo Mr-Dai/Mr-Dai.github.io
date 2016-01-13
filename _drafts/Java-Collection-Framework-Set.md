@@ -7,18 +7,16 @@ category: Java
 
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushJava.js"></script>
 
-<h2 class="jump">概述</h2>
-<p>
-    了解 Java 集合框架每个实现类的原理是每个 Java 程序员的必修课。本系列将按照<code>Set</code>、<code>List</code>、
-    <code>Map</code>、<code>Queue</code>、<code>Deque</code>的顺序，以 Java
-    的<a href="http://docs.oracle.com/javase/tutorial/collections/">官方教程</a>为指导，分接口的解析每个接口对应的实现类的原理。
-    本篇先从<code>Set</code>接口开始。
-</p>
+## 概述
 
-<h2 class="jump">Set 接口</h2>
-<p>
-    <code>Set</code>接口固然是我们开始的地方了。我们开始了解<code>Set</code>接口为我们提供的操作：
-</p>
+了解 Java 集合框架每个实现类的原理是每个 Java 程序员的必修课。本系列将按照`Set`、`List`、`Map`、`Queue`、`Deque`的顺序，以 Java
+的[官方教程](http://docs.oracle.com/javase/tutorial/collections/)为指导，分接口的解析每个接口对应的实现类的原理。
+本篇先从`Set`接口及其常用实现类开始。
+
+## Set 接口
+
+`Set`接口固然是我们开始的地方了。我们开始了解`Set`接口为我们提供的操作：
+
 <pre class="brush: java">
 package java.util;
 
@@ -30,14 +28,16 @@ package java.util;
  */
 
 public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
-    /* 查询操作 */
 
     /** 返回集中元素的个数 */
     int size();
+
     /** 返回集是否为空 */
     boolean isEmpty();
+
     /** 返回集是否包含给定的对象 */
     boolean contains(Object o);
+
     /** 返回可用于迭代整个集的迭代器 */
     Iterator&lt;E&gt; iterator();
     Object[] toArray();
@@ -64,10 +64,10 @@ public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
     }
 }
 </pre>
-<p>
-    并没有什么特别的函数，大部分函数的用处只要是用过<code>Set</code>的读者应该都了解。方法的具体功能可参考<code>Set</code>的
-    <a href="http://docs.oracle.com/javase/8/docs/api/java/util/Set.html">JavaDoc</a>。
-</p>
+
+并没有什么特别的函数，大部分函数的用处只要是用过`Set`的读者应该都了解。方法的具体功能可参考`Set`的
+[JavaDoc](http://docs.oracle.com/javase/8/docs/api/java/util/Set.html)。
+
 
 <h2 class="jump">set类之HashSet实现类</h2>
 <p>我们直接通过阅读最简单的Set实现类HashSet来加深大家对Set的理解：</p>
