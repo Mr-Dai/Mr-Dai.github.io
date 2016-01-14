@@ -7,8 +7,14 @@ layout: default
     {% for post in site.posts %}
 		{% if post.categories[0] != "sticker" %}
     <li>
-        <p><a style="color: rgb(50, 93, 114); font-size:30px; font-weight:300" href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></p>
-        <p style="font-size:15px; margin-top: 0; color: #BBB"><em>By {{ post.author }}</em>, {{ post.date | date_to_string }}</p>
+        <p>
+        	<a style="color: rgb(50, 93, 114); font-size:30px; font-weight:300" href="{{ site.baseurl }}{{ post.url }}">
+        		{{ post.title }}
+        	</a>
+        </p>
+        <p style="font-size:15px; margin-top: 0; color: #BBB">
+        	<em>By {{ post.author }}</em>, {{ post.date | date_to_string }}
+        </p>
     </li>
 		{% endif %}
     {% endfor %}
