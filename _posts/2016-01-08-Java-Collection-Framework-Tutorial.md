@@ -10,16 +10,23 @@ org_url: "http://docs.oracle.com/javase/tutorial/collections/index.html"
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushBash.js"></script>
 
 [Collection]: http://docs.oracle.com/javase/8/docs/api/java/util/Collection.html
-[Set]: http://docs.oracle.com/javase/8/docs/api/java/util/Set.html
-[List]: http://docs.oracle.com/javase/8/docs/api/java/util/List.html
-[Map]: http://docs.oracle.com/javase/8/docs/api/java/util/Map.html
-[Queue]: http://docs.oracle.com/javase/8/docs/api/java/util/Queue.html
+
 [Iterator]: http://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html
+
+[Set]: http://docs.oracle.com/javase/8/docs/api/java/util/Set.html
 [HashSet]: http://docs.oracle.com/javase/8/docs/api/java/util/HashSet.html
 [TreeSet]: http://docs.oracle.com/javase/8/docs/api/java/util/TreeSet.html
 [LinkedHashSet]: http://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashSet.html
 [EnumSet]: http://docs.oracle.com/javase/8/docs/api/java/util/EnumSet.html
 [CopyOnWriteArraySet]: http://docs.oracle.com/javase/8/docs/api/java/util/CopyOnWriteArraySet.html
+
+[List]: http://docs.oracle.com/javase/8/docs/api/java/util/List.html
+[ArrayList]: http://docs.oracle.com/javase/8/docs/api/java/util/ArrayList.html
+[LinkedList]: http://docs.oracle.com/javase/8/docs/api/java/util/LinkedList.html
+
+[Map]: http://docs.oracle.com/javase/8/docs/api/java/util/Map.html
+
+[Queue]: http://docs.oracle.com/javase/8/docs/api/java/util/Queue.html
 
 <h2 id="introduction">1 简介</h2>
 
@@ -936,10 +943,114 @@ symmetricDiff.removeAll(tmp);
 比起`Collection`，`Set`提供的数组操作并无任何特别之处。
 关于这些操作的详细描述可以参考 <a href="#collection-interface-array-operations" target="_self">Collection 接口</a>一节。
 
+<h3 id="list">2.3 List 接口</h3>
+
+原文链接：[The List Interface](http://docs.oracle.com/javase/tutorial/collections/interfaces/list.html)
+
+<!--
+	A List is an ordered Collection (sometimes called a sequence). Lists may contain duplicate elements. In addition to the operations inherited from Collection, the List interface includes operations for the following:
+-->
+[List][]（表）是一种有序的`Collection`，有时又被称为 *序列* 。表可以包含重复的元素。除了继承自`Collection`的操作，`List`接口还包含以下操作：
+
+-	<!--
+		Positional access — manipulates elements based on their numerical position in the list. This includes methods such as get, set, add, addAll, and remove.
+	-->
+	**基于位置的访问**：基于元素的在表中的枚举位置对元素进行操作。这样的方法包括`get`、`set`、`addAll`和`remove`。
+-	<!--
+		Search — searches for a specified object in the list and returns its numerical position. Search methods include indexOf and lastIndexOf.
+	-->
+	**查找**：在表中查找某个给定的元素并返回其枚举位置。查找方法包括`indexOf`和`lastIndexOf`。
+-	<!--
+		Iteration — extends Iterator semantics to take advantage of the list's sequential nature. The listIterator methods provide this behavior.
+	-->
+	**迭代**：`List`扩展了`Iterator`的定义以利用列表有序的本质。`listIterator`方法提供了这样的功能。
+-	<!--
+		Range-view — The sublist method performs arbitrary range operations on the list.
+	-->
+	**范围视图**：`sublist`方法可对列表进行任意的范围操作。
+
+<!--
+	The Java platform contains two general-purpose List implementations. ArrayList, which is usually the better-performing implementation, and LinkedList which offers better performance under certain circumstances.
+-->
+Java 提供了两种普适的`List`实现类：[ArrayList][] 在多数情况下有着更好的性能，而 [LinkedList][] 则在少数特定情况下取胜。
+
+<h4 id="list-collection-operations">2.3.1 集合操作</h4>
+
+<!--
+	The operations inherited from Collection all do about what you'd expect them to do, assuming you're already familiar with them. If you're not familiar with them from Collection, now would be a good time to read The Collection Interface section. The remove operation always removes the first occurrence of the specified element from the list. The add and addAll operations always append the new element(s) to the end of the list. Thus, the following idiom concatenates one list to another.
+-->
+`List`接口继承自`Collection`的操作的行为和你所设想的完全一样，如果你已经很熟悉它们的话。如果你确实不熟悉这些来自`Collection`的方法，
+我们建议你现在去看一下 <a href="#collection">Collection 接口</a>一节。`remove`方法会把表中第一次出现的给定元素移除，
+而`add`和`addAll`方法则会把新的元素放到表的末端。因此，如下代码可将一个表拼接到另一个表的尾部：
+
+<pre class="brush: java">
+list1.addAll(list2);
+</pre>
+
+<!--
+	Here's a nondestructive form of this idiom, which produces a third List consisting of the second list appended to the first.
+-->
+如下代码则非破坏性地创建出了一个新的`List`，由原有的两个`List`首尾拼接而成：
+
+<pre class="brush: java">
+List&lt;Type> list3 = new ArrayList&lt;Type>(list1);
+list3.addAll(list2);
+</pre>
+
+<!--
+	Note that the idiom, in its nondestructive form, takes advantage of ArrayList's standard conversion constructor.
+-->
+注意，上述代码中使用了`ArrayList`提供的标准转换构造器。
+
+<!--
+	And here's an example (JDK 8 and later) that aggregates some names into a List:
+-->
+对于 JDK8 或更新的版本，可以使用如下代码将人的姓名收集到一个`List`中：
+
+<pre class="brush: java">
+List&lt;String> list = people.stream()
+	.map(Person::getName)
+	.collect(Collectors.toList());
+</pre>
+
+<!--
+	Like the Set interface, List strengthens the requirements on the equals and hashCode methods so that two List objects can be compared for logical equality without regard to their implementation classes. Two List objects are equal if they contain the same elements in the same order.
+-->
+正如`Set`接口，`List`也加强了对`equals`和`hashCode`方法的定义，以在不考虑实现类的情况下两个`List`对象能够相互比较。
+如果两个`List`对象以相同的顺序包含相同的元素，我们说它们是相等（equal）的。
+
+<h4 id="positional-access-and-search-operations">2.3.2 基于位置访问与查找操作</h4>
+
+<!--
+	The basic positional access operations are get, set, add and remove. (The set and remove operations return the old value that is being overwritten or removed.) Other operations (indexOf and lastIndexOf) return the first or last index of the specified element in the list.
+-->
+基本的基于位置访问的操作包括`get`、`set`、`add`和`remove`，其中`set`和`remove`操作将返回被覆盖或移除的旧元素。
+`indexOf`和`lastIndexOf`操作则分别返回给定元素在表中第一次和最后一次出现的位置。
+
+<!--
+	The addAll operation inserts all the elements of the specified Collection starting at the specified position. The elements are inserted in the order they are returned by the specified Collection's iterator. This call is the positional access analog of Collection's addAll operation.
+-->
+`addAll`操作在给定的位置插入给定`Collection`的所有元素。这些元素将按照给定`Collection`的迭代器返回的顺序被插入。
+该方法在`Collection`的`addAll`基础上加入了基于位置访问的特性。
+
+<!--
+	Here's a little method to swap two indexed values in a List.
+-->
+如下示例互换了`List`中两个元素的位置：
+
+<pre class="brush: java">
+public static &lt;E> void swap(List&lt;E> a, int i, int j) {
+    E tmp = a.get(i);
+    a.set(i, a.get(j));
+    a.set(j, tmp);
+}
+</pre>
+
 ---
 
-<h2 id="aggregate-operations">3 聚合操作</h2>
 <!--
+<h2 id="aggregate-operations">3 聚合操作</h2>
+
 
 	原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/streams/index.html">Aggregate Operations</a>
 
