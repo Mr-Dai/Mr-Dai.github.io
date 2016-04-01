@@ -1,5 +1,5 @@
 #left_wrapper {
-	width: 70%;
+	width: 80%;
 	min-width: 500px;
 	padding-top: 0px;
 	padding-right: 20px;
@@ -7,6 +7,8 @@
 }
 
 #right_wrapper {
+	width: 20%;
+	min-width: 0;
 	border-left: solid 1px rgb(221, 221, 221);
 }
 
@@ -20,7 +22,7 @@ h3 {
 }
 
 h4 {
-	font-size: 20px;
+	font-size: 18px;
 }
 
 h5 {
@@ -28,6 +30,8 @@ h5 {
 }
 
 p {
+	margin-top: 10px;
+	margin-bottom: 25px;
 	text-align: justify;
 }
 
@@ -58,7 +62,7 @@ div .copyright {
 	margin: 0;
 }
 
-td code {
+code {
 	padding: 0;
 	color: black;
 	font-size: 105%;

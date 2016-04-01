@@ -1,6 +1,6 @@
 // 生成文章页的跳转列表
 function branchJumpBinding() {
-	var jumpDest = $("#post_content h2,#post_content h3,#post_content h4,.jump");
+	var jumpDest = $("#post_content h2,.jump");
 	var jumpList = $("#JumpList");
     // 若本页无跳转目标则隐藏跳转目录
     // 加入#right_wrapper li的个数判断是为了防止index页的#right_wrapper被隐藏
@@ -15,7 +15,7 @@ function branchJumpBinding() {
 function aAttributeSetting() {
 	var aList = $("#left_wrapper a")
 	$.each(aList, function(n, value) {
-		if (value.target == "")
+		if (value.target == "" && value.href.split("#")[0] != window.location.href.split("#")[0])
 			value.target = "_blank";
 	});
 }

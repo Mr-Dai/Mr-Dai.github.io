@@ -34,7 +34,7 @@ Bindings of different kinds have a precedence defined on them:
 <!--
 There are two different name spaces, one for types and one for terms. The same name may designate a type and a term, depending on the context where the name is used.
 -->
-Scala 包含两种不同的命名空间，一种用于[类型](http://www.scala-lang.org/files/archive/spec/2.11/03-types.html#types)，而另一种用于[项](http://www.scala-lang.org/files/archive/spec/2.11/06-expressions.html#expressions)（term）。相同的名称可被同时用于一个类型和一个项，具体取决于该名称所处位置的上下文。
+Scala 包含两种不同的命名空间，一种用于[类型](/scala/2016/04/01/Scala-Specification-3.html#types)，而另一种用于[项](http://www.scala-lang.org/files/archive/spec/2.11/06-expressions.html#expressions)（term）。相同的名称可被同时用于一个类型和一个项，具体取决于该名称所处位置的上下文。
 
 <!--
 A binding has a scope in which the entity defined by a single name can be accessed using a simple name.
@@ -66,7 +66,7 @@ entity introduced by that binding. In that case, the type of x is the type of th
 A reference to a qualified (type- or term-) identifier e.x refers to the member of the type T of e which has the name x in the same namespace as the identifier.
 It is an error if T is not a value type. The type of e.x is the member type of the referenced entity in T.
 -->
-对一个限定的（类型或项）标识符 $e.x$ 的引用指代了属于 $e$ 的类型 $T$ 在该命名空间下同被称为 $x$ 的成员。如果 $T$ 不是一个[值类型](http://www.scala-lang.org/files/archive/spec/2.11/03-types.html#value-types)则会发生错误。$e.x$ 的类型与 $T$ 中被指代实体的类型相同。
+对一个限定的（类型或项）标识符 $e.x$ 的引用指代了属于 $e$ 的类型 $T$ 在该命名空间下同被称为 $x$ 的成员。如果 $T$ 不是一个[值类型](/scala/2016/04/01/Scala-Specification-3.html#value-types)则会发生错误。$e.x$ 的类型与 $T$ 中被指代实体的类型相同。
 
 ---
 
