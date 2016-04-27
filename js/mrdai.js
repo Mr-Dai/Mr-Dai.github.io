@@ -4,11 +4,15 @@ function branchJumpBinding() {
 	var jumpList = $("#JumpList");
     // 若本页无跳转目标则隐藏跳转目录
     // 加入#right_wrapper li的个数判断是为了防止index页的#right_wrapper被隐藏
-    $.each(jumpDest, function(n, value) {
-		if (value.id == "")
-			value.id = "index_" + (n+1);
-        jumpList.append("<li><a href='#"+value.id+"'>"+value.innerHTML+"</a></li>");
-    });
+    if (jumpDest.length == 0)
+    	jumpList.hide();
+    else {
+    	$.each(jumpDest, function(n, value) {
+			if (value.id == "")
+				value.id = "index_" + (n+1);
+        	jumpList.append("<li><a href='#"+value.id+"'>"+value.innerHTML+"</a></li>");
+    	});
+	}
 }
 
 // 将文章内容内的每个链接都设定为在新标签页中打开
