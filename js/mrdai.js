@@ -15,6 +15,25 @@ function branchJumpBinding() {
 	}
 }
 
+// 生成 JavaDoc 跳转
+function javaDocBinding() {
+    var nameDestMap = {
+    	"java": "http://docs.oracle.com/javase/8/docs/api",
+    	"scala": "http://www.scala-lang.org/api/current"
+    }
+
+	var jumpCode = $("code .api");
+
+	$.each(jumpCode, function(n, value) {
+        var className = value.innerHTML.split("\\.");
+        var destUrl = nameDestMap[className[0]];
+        for (name in className)
+        	destUrl = destUrl + "/" + name;
+        destUrl = destUrl + ".html";
+        value.innerHTML = "<a href='" + destUrl + "'>" + value.innerHTML + "</a>";
+	});
+}
+
 // 将文章内容内的每个链接都设定为在新标签页中打开
 function aAttributeSetting() {
 	var aList = $("#left_wrapper a")
@@ -78,7 +97,7 @@ function browserRedirect() {
 } 
 
 $(document).ready(function(){
-//	browserRedirect();
+    javaDocBinding()
 	branchJumpBinding();
 	aAttributeSetting();
 	$("#post_list_container ul li").last().css("border-bottom-width", "0");
