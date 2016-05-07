@@ -49,8 +49,9 @@ Java IO 中的字节输入输出流对应的类均属于 `InputStream` 和 `Outp
   </tr>
   <tr>
   	<td>
-      <code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/ByteArrayInputStream.html">ByteArrayInputStream</code></a>、<br>
-      <code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/ByteArrayOutputStream.html">ByteArrayOutputStream</a></code></td>
+      <code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/ByteArrayInputStream.html">ByteArrayInputStream</a></code>、<br />
+      <code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/ByteArrayOutputStream.html">ByteArrayOutputStream</a></code>
+    </td>
   	<td>
   		<code>ByteArrayInputStream</code> 用于从构建时指定的 <code>byte[]</code> 中读取 <code>byte</code> 数据，
   		可被视为将指定的 <code>byte[]</code> 转换为 <code>InputStream</code>。
@@ -149,7 +150,7 @@ Java IO 中的字节输入输出流对应的类均属于 `InputStream` 和 `Outp
   </tr>
   <tr>
   	<td>
-      <code><a href="http://docs.oracle.com/javase/8/docs/api/java/util/zip/DeflaterInputStream.html">DeflaterInputStream</code></a>、<br>
+      <code><a href="http://docs.oracle.com/javase/8/docs/api/java/util/zip/DeflaterInputStream.html">DeflaterInputStream</a></code>、<br>
       <code><a href="http://docs.oracle.com/javase/8/docs/api/java/util/zip/InflaterOutputStream.html">InflaterOutputStream</a></code>
     </td>
   	<td>
@@ -214,7 +215,7 @@ Java IO 中的字节输入输出流对应的类均属于 `InputStream` 和 `Outp
   </tr>
 </table>
 
-<code>FilterInputStream</code> 的直接子类还包括了已经 `@Deprecated` 的 <code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/LineNumberInputStream.html">LineNumberInputStream</a></code> 以及来自 `javax.swing` 包的 <code><a href="http://docs.oracle.com/javase/8/docs/api/javax/swing/ProgressMonitorInputStream.html">ProgressMonitorInputStream</a></code>。
+`FilterInputStream` 的直接子类还包括了已经 `@Deprecated` 的 <code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/LineNumberInputStream.html">LineNumberInputStream</a></code> 以及来自 `javax.swing` 包的 <code><a href="http://docs.oracle.com/javase/8/docs/api/javax/swing/ProgressMonitorInputStream.html">ProgressMonitorInputStream</a></code>。
 
 `InputStream`、`OutputStream` 及其子类均属于字节流类，输入输出以字节为单位。除了 `InputStream` 和 `OutputStream`，Java IO 还提供了 `Reader` 和 `Writer`
 作为字符流类，以字符为单位进行输入输出。
