@@ -372,7 +372,7 @@ Java IO 中的字节输入输出流对应的类均属于 `InputStream` 和 `Outp
   </tr>
 </table>
 
-## 类详解
+<h2>类详解</h2>
 
 <h3 id="InputStream">InputStream</h3>
 
@@ -511,7 +511,7 @@ Java IO 中的字节输入输出流对应的类均属于 `InputStream` 和 `Outp
   <dt>直接父类</dt>
   <dd><code>InputStream</code></dd>
   <dt>实现接口</dt>
-  <dd>Closeable</dd>
+  <dd><code>Closeable</code></dd>
 </dl>
 
 <code><a href="http://docs.oracle.com/javase/8/docs/api/java/io/FileInputStream.html">FileInputStream</a></code>：用于读入文件内容的 <code>InputStream</code>，
