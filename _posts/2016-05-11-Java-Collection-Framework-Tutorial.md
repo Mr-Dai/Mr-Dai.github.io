@@ -50,14 +50,14 @@ org_url: "http://docs.oracle.com/javase/tutorial/collections/index.html"
 <!--
     A collections framework is a unified architecture for representing and manipulating collections. All collections frameworks contain the following:
 -->
-集合框架（collections framework）是一种用于表示和操控集合的统一的代码结构。所有的集合框架都包括如下几个方面：
+集合框架（collections framework）是一种用于表示和操控集合的统一的代码架构。所有的集合框架都包括如下几个方面：
 
 -	<!-- 
 		Interfaces: These are abstract data types that represent collections. Interfaces allow collections to be manipulated independently of the details of their representation. 
 		In object-oriented languages, interfaces generally form a hierarchy.
 	-->
   	**接口**（Interface）：用于表示集合的抽象数据类型。接口的存在使得使用者可以在不去了解集合的实现的情况下操控集合。
-   	在面向对象语言中，接口们可相互结合，形成类型结构。
+   	在面向对象语言中，接口们可形成层级架构。
    
 -	<!--
 		Implementations: These are the concrete implementations of the collection interfaces. In essence, they are reusable data structures.
@@ -757,7 +757,7 @@ public class FindDups {
 <!--
 	Using the for-each Construct:
 -->
-使用`for-each`结构：
+使用 `for-each` 语句：
 
 <pre class="brush: java">
 import java.util.*;
@@ -1457,11 +1457,532 @@ JDK 中还包含了返回一个集合而不是一个单一值的归约操作。�
 
 #### Stream.reduce 方法
 
+<!--
+	The Stream.reduce method is a general-purpose reduction operation. Consider the following pipeline, which calculates the sum of the male members' ages in the collection roster. It uses the Stream.sum reduction operation:
+-->
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#reduce-T-java.util.function.BinaryOperator-">Stream.reduce</a></code> 方法是一个普适的归约操作。考虑如下流水线，它计算了集合 `roster` 中所有用户的年龄总和。该流水线使用了 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html#sum--">Stream.sum</a></code> 归约操作：
 
+<pre class="brush: java">
+Integer totalAge = roster.stream().mapToInt(Person::getAge).sum();
+</pre>
+
+<!--
+	Compare this with the following pipeline, which uses the Stream.reduce operation to calculate the same value:
+-->
+我们可以将其与以下流水线相对比，该流水线使用 `Stream.reduce` 操作计算相同的值：
+
+<pre class="brush: java">
+Integer totalAgeReduce =
+    roster.stream().map(Person::getAge)
+                   .reduce(0, (a, b) -> a + b);
+</pre>
+
+<!--
+	The reduce operation in this example takes two arguments:
+-->
+示例中的 `reduce` 操作接受两个参数：
+
+- `identity`：单位元（Identity Element）即是归约操作的起始值，也是当流为空时的默认结果值。在示例中，单位元为 `0`，它是年龄求和操作的起始值，也是当集合 `roster` 为空时应该返回的默认值。
+- `accumulator`：累积函数（Accumulator Function）接受两个参数：归约操作的部分结果（在示例中表示为已经处理的整型数的总和）以及流中的下一个元素（在示例中表示为一个整型数）。它返回一个新的部分结果。在示例中，累积函数是一个将两个整型参数进行相加并返回结果的 Lambda 表达式 `(a, b) -> a + b`。
+
+<!--
+	The reduce operation always returns a new value. However, the accumulator function also returns a new value every time it processes an element of a stream. Suppose that you want to reduce the elements of a stream to a more complex object, such as a collection. This might hinder the performance of your application. If your reduce operation involves adding elements to a collection, then every time your accumulator function processes an element, it creates a new collection that includes the element, which is inefficient. It would be more efficient for you to update an existing collection instead. You can do this with the Stream.collect method, which the next section describes.
+-->
+`reduce` 操作总是会返回一个新的值。然而，累积函数在每次处理流中的一个元素后同样会返回一个新的值。假设你将要将流中的元素规约到一个更为复杂的对象中，例如一个集合，这样的话有可能会降低你的程序的性能。如果你的 `reduce` 操作需要向集合中添加元素，那么你的累积函数每次处理新的元素时都会产生一个新的包含该元素的集合，而这样是低效的。
+如果你能够直接更新已有的集合那就高效得多了。你可以使用 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#collect-java.util.function.Supplier-java.util.function.BiConsumer-java.util.function.BiConsumer-">Stream.collect</a></code> 方法来达到该目的。
+
+#### Stream.collect 方法
+
+<!--
+	Unlike the reduce method, which always creates a new value when it processes an element, the collect method modifies, or mutates, an existing value.
+-->
+和 `reduce` 方法不同，与其在每次处理新的元素时都产生一个新的值，`collect` 方法将对已有的值直接进行修改。
+
+<!--
+	Consider how to find the average of values in a stream. You require two pieces of data: the total number of values and the sum of those values. However, like the reduce method and all other reduction methods, the collect method returns only one value. You can create a new data type that contains member variables that keep track of the total number of values and the sum of those values, such as the following class, Averager:
+-->
+考虑如何为流中的值计算平均值。要这么做，你需要两个数据：流中的元素个数以及元素的总和。然而，和 `reduce` 或其他归约方法类似，`collect` 方法也只会返回一个值。
+为此，你可以创建一种新的数据类型来记录元素的个数和总和，如下 `Averager` 类所示：
+
+<pre class="brush: java">
+class Averager implements IntConsumer {
+    private int total = 0;
+    private int count = 0;
+        
+    public double average() {
+        return count > 0 ? ((double) total)/count : 0;
+    }
+        
+    public void accept(int i) { total += i; count++; }
+    public void combine(Averager other) {
+        total += other.total;
+        count += other.count;
+    }
+}
+</pre>
+
+<!--
+	The following pipeline uses the Averager class and the collect method to calculate the average age of all male members:
+-->
+如下流水线使用了 `Averager` 类和 `collect` 方法来计算所有男性用户的平均年龄：
+
+<pre class="brush: java">
+Averager averageCollect = roster.stream()
+    .filter(p -> p.getGender() == Person.Sex.MALE)
+    .map(Person::getAge)
+    .collect(Averager::new, Averager::accept, Averager::combine);
+                   
+System.out.println("Average age of male members: " +
+    averageCollect.average());
+</pre>
+
+<!--
+	The collect operation in this example takes three arguments:
+-->
+示例中的 `collect` 操作接受了三个参数：
+
+- `supplier`：工厂函数，负责创建新的实例。对 `collect` 操作而言，它被用于创建结果容器的新实例。在示例中，它被用于创建 `Averager` 类的新实例。
+- `accumulator`：累积函数用于将一个流元素放入到结果容器中。在示例中，累积函数通过对 `count` 变量进行自增以及增加 `total` 变量的值的形式修改了 `Averager` 结果容器。
+- `combiner`：合并函数（Combiner Function）接受两个结果容器并合并为一个合并容器。在示例中，合并函数通过对两个 `Averager` 的 `count` 变量和 `total` 变量相加来完成合并。
+
+值得注意的是：
+
+- 与 `reduce` 操作中的单位元不同的是，`collect` 的 `supplier` 是一个 Lambda 表达式（或方法引用），而不是一个值。
+- 累积函数和合并函数不返回任何值。
+- 你可以将 `collect` 操作用于并行流。详情请查阅[并行](#parallelism)一节。（如果你将 `collect` 操作用于一个并行流，那么每次合并函数产生一个新的对象时都会创建出一个新的线程。因此，你不需要担心线程同步的问题。）
+
+<!--
+	Although the JDK provides you with the average operation to calculate the average value of elements in a stream, you can use the collect operation and a custom class if you need to calculate several values from the elements of a stream.
+-->
+尽管 JDK 确实提供了 `average` 操作用于计算流元素的平均值，你也可以在需要为流的元素同时计算几个值时使用 `collect` 操作和一个自定义类。
+
+<!--
+	The collect operation is best suited for collections. The following example puts the names of the male members in a collection with the collect operation:
+-->
+`collect` 操作十分适合用于集合。以下的例子使用了 `collect` 操作来将男性用户的名称放置到了一个集合中：
+
+<pre class="brush: java">
+List&lt;String> namesOfMaleMembersCollect =
+	roster.stream().filter(p -> p.getGender() == Person.Sex.MALE)
+                   .map(p -> p.getName())
+                   .collect(Collectors.toList());
+</pre>
+
+<!--
+	This version of the collect operation takes one parameter of type Collector. This class encapsulates the functions used as arguments in the collect operation that requires three arguments (supplier, accumulator, and combiner functions).
+-->
+这个版本的 `collect` 操作接受一个类型为 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html">Collector</a></code> 的参数。
+该类封装了 `collect` 操作所需的三种参数（`supplier`、累积函数和合并函数）。
+
+<!--
+	The Collectors class contains many useful reduction operations, such as accumulating elements into collections and summarizing elements according to various criteria. These reduction operations return instances of the class Collector, so you can use them as a parameter for the collect operation.
+-->
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html">Collectors</a></code> 类中包含很多有用的归约操作，
+例如将元素放入到集合中或根据各种条件来对元素进行统计。这些归约操作返回的都是 `Collector` 类的实例，因此你可以将它们用作 `collect` 操作的参数。
+
+<!--
+	This example uses the Collectors.toList operation, which accumulates the stream elements into a new instance of List. As with most operations in the Collectors class, the toList operator returns an instance of Collector, not a collection.
+-->
+示例使用了 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#toList--">Collectors.toList</a></code> 操作，
+能够将流元素放置到一个新的 `List` 实例中。和 `Collectors` 类的大多数方法相同，`toList` 方法返回的是 `Collector` 的实例，而不是一个集合。
+
+<!--
+	The following example groups members of the collection roster by gender:
+-->
+如下示例将集合 `roster` 中的用户根据性别进行分组：
+
+<pre class="brush: java">
+Map&lt;Person.Sex, List&lt;Person>> byGender =
+    roster.stream().collect(Collectors.groupingBy(Person::getGender));
+</pre>
+
+<!--
+	The groupingBy operation returns a map whose keys are the values that result from applying the lambda expression specified as its parameter (which is called a classification function). In this example, the returned map contains two keys, Person.Sex.MALE and Person.Sex.FEMALE. The keys' corresponding values are instances of List that contain the stream elements that, when processed by the classification function, correspond to the key value. For example, the value that corresponds to key Person.Sex.MALE is an instance of List that contains all male members.
+-->
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#groupingBy-java.util.function.Function-">groupingBy</a></code>
+操作返回的映射的键通过调用其参数给定的 Lambda 表达式所得，其又被称为分类函数（Classification Function）。在示例中，返回的映射包含两种键，`Person.Sex.MALE` 和
+`Person.Sex.FEMALE`。这些键对应的值为 `List` 实例，其中包含了所有对应的流元素。例如，键 `Person.Sex.MALE` 对应的值即为一个包含所有男性用户的 `List` 实例。
+
+<!--
+	The following example retrieves the names of each member in the collection roster and groups them by gender:
+-->
+如下示例获取了集合 `roster` 中所有用户的名称并按性别分类：
+
+<pre class="brush: java">
+Map&lt;Person.Sex, List&lt;String>> namesByGender =
+    roster.stream().collect(
+            Collectors.groupingBy(
+                Person::getGender,                      
+                Collectors.mapping(
+                    Person::getName,
+                    Collectors.toList())));
+</pre>
+
+<!--
+	The groupingBy operation in this example takes two parameters, a classification function and an instance of Collector. The Collector parameter is called a downstream collector. This is a collector that the Java runtime applies to the results of another collector. Consequently, this groupingBy operation enables you to apply a collect method to the List values created by the groupingBy operator. This example applies the collector mapping, which applies the mapping function Person::getName to each element of the stream. Consequently, the resulting stream consists of only the names of members. A pipeline that contains one or more downstream collectors, like this example, is called a multilevel reduction.
+-->
+示例中所使用的 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#groupingBy-java.util.function.Function-java.util.stream.Collector-">groupingBy</a></code> 操作接受两个参数，一个分类函数和一个 `Collector` 实例。该 `Collector` 实例被称为**下游收集器**（Downstream Collector）。
+Java 运行时将将该收集器应用于另一个收集器的结果。因此，该 `groupingBy` 操作使得你可以将 `collect` 方法应用于 `groupingBy` 操作返回的 `List` 值。
+示例中使用了 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#mapping-java.util.function.Function-java.util.stream.Collector-java.util.stream.Collector-">mapping</a></code> 收集器，并将映射函数 `Person::getName` 应用于每一个流元素。由此，结果流中只包含用户的名称。
+像示例中这样包含一个或多个下游收集器的流水线被称为**多级归约**（Multilevel Reduction）。
+
+<!--
+	The following example retrieves the total age of members of each gender:
+-->
+如下示例返回每种性别的用户的年龄总和：
+
+<pre class="brush: java">
+Map&lt;Person.Sex, Integer> totalAgeByGender =
+    roster.stream().collect(
+            Collectors.groupingBy(
+                Person::getGender,                      
+                Collectors.reducing(
+                    0,
+                    Person::getAge,
+                    Integer::sum)));
+</pre>
+
+其中 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#reducing-U-java.util.function.Function-java.util.function.BinaryOperator-">reducing</a></code> 操作接受三个参数：
+
+- `identity`：正如 `Stream.reduce` 操作，该单位元为归约操作的起始值，也是当流为空时的默认返回值。在示例中，单位元为 `0`，其正是年龄求和操作的起始值，也是当不存在用户时的默认返回值。
+- `mapper`：`reducing` 操作将会将该映射函数应用于每一个流元素。在示例中，映射函数用于获取每个用户的年龄。
+- `operation`：操作函数被用于归约映射后的值。在示例中，操作函数被用于将 `Integer` 值进行相加。
+
+<!--
+	The following example retrieves the average age of members of each gender:
+-->
+如下示例返回每种性别的用户的平均年龄：
+
+<pre class="brush: java">
+Map&lt;Person.Sex, Double> averageAgeByGender =
+    roster.stream().collect(
+        Collectors.groupingBy(
+            Person::getGender,                      
+            Collectors.averagingInt(Person::getAge)));
+</pre>
 
 <h3 id="parallelism">3.2 并行</h3>
 
-原文链接：<a href="http://docs.oracle.com/javase/tutorial/collections/streams/parallelism.html">Parallelism</a>
+原文链接：[Parallelism](http://docs.oracle.com/javase/tutorial/collections/streams/parallelism.html)
+
+<!--
+	Parallel computing involves dividing a problem into subproblems, solving those problems simultaneously (in parallel, with each subproblem running in a separate thread), and then combining the results of the solutions to the subproblems. Java SE provides the fork/join framework, which enables you to more easily implement parallel computing in your applications. However, with this framework, you must specify how the problems are subdivided (partitioned). With aggregate operations, the Java runtime performs this partitioning and combining of solutions for you.
+-->
+并行计算的过程需要将一个问题分解为若干个子问题，并同时解决这些子问题（并发执行，每个子问题使用一个独立的线程），而后合并这些子问题的结果。
+Java SE 提供了 [fork/join 框架](http://docs.oracle.com/javase/tutorial/essential/concurrency/forkjoin.html)使得你可以能容易地为自己的程序实现并发计算。
+然而，即使有了这个框架，你仍然需要声明如何对问题进行分解。使用聚合操作可以使 Java 运行时为你进行问题分解和结果合并。
+
+<!--
+	One difficulty in implementing parallelism in applications that use collections is that collections are not thread-safe, which means that multiple threads cannot manipulate a collection without introducing thread interference or memory consistency errors. The Collections Framework provides synchronization wrappers, which add automatic synchronization to an arbitrary collection, making it thread-safe. However, synchronization introduces thread contention. You want to avoid thread contention because it prevents threads from running in parallel. Aggregate operations and parallel streams enable you to implement parallelism with non-thread-safe collections provided that you do not modify the collection while you are operating on it.
+-->
+在为应用程序实现并行使用集合时，首先会遇到的问题在于该集合有可能不是线程安全的，也就是说线程们对该集合进行操作时很可能导致[线程冲突](http://docs.oracle.com/javase/tutorial/essential/concurrency/interfere.html)或[内存一致性错误](http://docs.oracle.com/javase/tutorial/essential/concurrency/memconsist.html)。
+Java 集合框架本身提供了[同步包装类](http://docs.oracle.com/javase/tutorial/collections/implementations/wrapper.html)，它们能为给定的集合自动添加上同步机制，使其变得线程安全。
+然而，同步机制却会导致[线程竞争](http://docs.oracle.com/javase/tutorial/essential/concurrency/sync.html#thread_contention)。你不想自己的程序发生线程竞争现象，因为它会导致线程无法真正地并行执行。
+只要你确保你在操作的过程中不会对集合进行修改，聚合操作和并行流就可以为你的非线程安全的集合实现并行。
+
+<!--
+	Note that parallelism is not automatically faster than performing operations serially, although it can be if you have enough data and processor cores. While aggregate operations enable you to more easily implement parallelism, it is still your responsibility to determine if your application is suitable for parallelism.
+-->
+注意，并发执行并不一定就比顺序执行操作更快，但如果你有足够多的数据和处理核心，并发执行往往能更快。尽管聚合操作可以使你更方便地实现并发，你仍需要考虑你的应用程序是否适合使用并发。
+
+<!--
+	You can find the code excerpts described in this section in the example ParallelismExamples.
+-->
+本节中的代码片段均可在示例
+<code><a href="http://docs.oracle.com/javase/tutorial/collections/streams/examples/ParallelismExamples.java">ParallelismExamples</a></code>
+中找到。
+
+#### 并行执行流操作
+
+<!--
+	You can execute streams in serial or in parallel. When a stream executes in parallel, the Java runtime partitions the stream into multiple substreams. Aggregate operations iterate over and process these substreams in parallel and then combine the results.
+-->
+流操作可以被顺序或并行地执行。当你决定并行地执行流操作时，Java 运行时将会将该流分解为若干个子流。聚合操作将并行地迭代并处理这些子流，最后合并它们的结果。
+
+<!--
+	When you create a stream, it is always a serial stream unless otherwise specified. To create a parallel stream, invoke the operation Collection.parallelStream. Alternatively, invoke the operation BaseStream.parallel. For example, the following statement calculates the average age of all male members in parallel:
+-->
+当你创建流时，除非额外声明，否则你创建的均为顺序流。通过调用
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html#parallelStream--">Collection.parallelStream</a></code>
+方法即可创建一个并行流。除此之外，你还可以使用流操作
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/BaseStream.html#parallel--">BaseStream.parallel</a></code>。
+例如，如下语句并行地计算所有男性用户的平均年龄：
+
+<pre class="brush: java">
+double average =
+    roster.parallelStream()
+          .filter(p -> p.getGender() == Person.Sex.MALE)
+          .mapToInt(Person::getAge)
+          .average()
+          .getAsDouble();
+</pre>
+
+#### 并行归约
+
+<!--
+	Consider again the following example (which is described in the section Reduction) that groups members by gender. This example invokes the collect operation, which reduces the collection roster into a Map:
+-->
+我们再来考虑下面这个来自[归约操作](#reduction)一节的根据性别对用户进行分类的代码示例。示例代码调用了 `collect` 操作以将 `roster` 集合规约到一个 `Map` 中：
+
+<pre class="brush: java">
+Map&lt;Person.Sex, List&lt;Person>> byGender =
+    roster.stream().collect(Collectors.groupingBy(Person::getGender));
+</pre>
+
+<!--
+	The following is the parallel equivalent:
+-->
+如下代码则并行地执行相同的操作：
+
+<pre class="brush: java">
+ConcurrentMap&lt;Person.Sex, List&lt;Person>> byGender =
+    roster.parallelStream().collect(Collectors.groupingByConcurrent(Person::getGender));
+</pre>
+
+这样的操作被称为**并行归约**（Concurrent Reduction）。当如下所有条件对于一个包含 `collect` 操作的流水线均为真时，Java 运行时将执行并行归约：
+
+- 该流为并行流。
+- `collector` 操作所使用的收集器参数包含特性 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.Characteristics.html#CONCURRENT">Collector.Characteristics.CONCURRENT</a></code>。通过调用 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.Characteristics.html">Collector.characteristics</a></code> 方法即可获取收集器的特性。
+- 该流是无序的，或者所使用的收集器包含特性 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.Characteristics.html#UNORDERED">Collector.Characteristics.UNORDERED</a></code>。调用 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/BaseStream.html#unordered--">BaseStream.unordered</a></code> 方法即可确保流是无序的。
+
+<!--
+	Note: This example returns an instance of ConcurrentMap instead of Map and invokes the groupingByConcurrent operation instead of groupingBy. (See the section Concurrent Collections for more information about ConcurrentMap.) Unlike the operation groupingByConcurrent, the operation groupingBy performs poorly with parallel streams. (This is because it operates by merging two maps by key, which is computationally expensive.) Similarly, the operation Collectors.toConcurrentMap performs better with parallel streams than the operation Collectors.toMap.
+-->
+**注意**：示例代码返回的是
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ConcurrentMap.html">ConcurrentMap</a></code>
+的实例而不是 `Map` 的实例，最后调用的是
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#groupingByConcurrent-java.util.function.Function-">groupingByConcurrent</a></code>
+方法而不是 `groupingBy` 方法（有关 `ConcurrentMap` 的更多信息可查阅[并发集合](http://docs.oracle.com/javase/tutorial/essential/concurrency/collections.html)一节）。
+和 `groupingByConcurrent` 方法不同，`groupingBy` 方法被应用于并行流时的执行效率很低（这是因为它在执行的过程中会让两个映射基于键合并，而这个操作十分耗时）。
+同样，<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#toConcurrentMap-java.util.function.Function-java.util.function.Function-">Collectors.toConcurrentMap</a></code> 在并行流中执行的效率也比 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#toMap-java.util.function.Function-java.util.function.Function-">Collectors.toMap</a></code> 更好。
+
+#### 执行顺序
+
+<!--
+	The order in which a pipeline processes the elements of a stream depends on whether the stream is executed in serial or in parallel, the source of the stream, and intermediate operations. For example, consider the following example that prints the elements of an instance of ArrayList with the forEach operation several times:
+-->
+流水线处理流中元素的顺序取决于该流是顺序执行还是并发执行、流的数据来源以及中间操作。例如，考虑如下使用 `forEach` 操作打印 `ArrayList` 中的元素的示例：
+
+<pre class="brush: java">
+Integer[] intArray = {1, 2, 3, 4, 5, 6, 7, 8 };
+List&lt;Integer> listOfIntegers =
+    new ArrayList&lt;>(Arrays.asList(intArray));
+
+System.out.println("listOfIntegers:");
+listOfIntegers
+    .stream()
+    .forEach(e -> System.out.print(e + " "));
+System.out.println("");
+
+System.out.println("listOfIntegers sorted in reverse order:");
+Comparator&lt;Integer> normal = Integer::compare;
+Comparator&lt;Integer> reversed = normal.reversed(); 
+Collections.sort(listOfIntegers, reversed);  
+listOfIntegers
+    .stream()
+    .forEach(e -> System.out.print(e + " "));
+System.out.println("");
+     
+System.out.println("Parallel stream");
+listOfIntegers
+    .parallelStream()
+    .forEach(e -> System.out.print(e + " "));
+System.out.println("");
+    
+System.out.println("Another parallel stream:");
+listOfIntegers
+    .parallelStream()
+    .forEach(e -> System.out.print(e + " "));
+System.out.println("");
+     
+System.out.println("With forEachOrdered:");
+listOfIntegers
+    .parallelStream()
+    .forEachOrdered(e -> System.out.print(e + " "));
+System.out.println("");
+</pre>
+
+<!--
+	This example consists of five pipelines. It prints output similar to the following:
+-->
+示例代码包含了五个流水线。其输入与如下类似：
+
+<pre>
+listOfIntegers:
+1 2 3 4 5 6 7 8
+listOfIntegers sorted in reverse order:
+8 7 6 5 4 3 2 1
+Parallel stream:
+3 4 1 6 2 5 7 8
+Another parallel stream:
+6 3 1 5 7 8 4 2
+With forEachOrdered:
+8 7 6 5 4 3 2 1
+</pre>
+
+<!--
+	This example does the following:
+-->
+示例代码做了如下几件事：
+
+- 第一个流水线根据元素被添加的顺序打印了列表 `listOfIntegers` 中的元素。
+- 第二个流水线在列表 `listOfIntegers` 在被方法 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html#sort-java.util.List-">Collections.sort</a></code> 排序后打印其所有元素。
+- 第三和第四个流水线似乎在以随机的顺序打印元素。我们之前说过，在处理流的元素时，流操作使用了内部迭代机制。因此，当你并发执行流操作时，如无另外声明，Java 编译器和运行时将自行决定流元素的处理顺序以最大化地利用并行计算。
+- 第五个流水线使用了 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#forEachOrdered-java.util.function.Consumer-">forEachOrdered</a></code> 方法，它将根据流的数据来源给定的顺序来处理流元素，而不考虑该流是否正被并行执行。
+  注意，在并行流中使用类似 `forEachOrdered` 这样的方法将使得你无法享受并发带来的好处。
+
+#### 副作用
+
+<!--
+	A method or an expression has a side effect if, in addition to returning or producing a value, it also modifies the state of the computer. Examples include mutable reductions (operations that use the collect operation; see the section Reduction for more information) as well as invoking the System.out.println method for debugging. The JDK handles certain side effects in pipelines well. In particular, the collect method is designed to perform the most common stream operations that have side effects in a parallel-safe manner. Operations like forEach and peek are designed for side effects; a lambda expression that returns void, such as one that invokes System.out.println, can do nothing but have side effects. Even so, you should use the forEach and peek operations with care; if you use one of these operations with a parallel stream, then the Java runtime may invoke the lambda expression that you specified as its parameter concurrently from multiple threads. In addition, never pass as parameters lambda expressions that have side effects in operations such as filter and map. The following sections discuss interference and stateful lambda expressions, both of which can be sources of side effects and can return inconsistent or unpredictable results, especially in parallel streams. However, the concept of laziness is discussed first, because it has a direct effect on interference.
+-->
+如果一个方法或表达式除了产生或返回一个值以外还改变了计算机的状态，那么我们说它有副作用（Side Effect）。
+类似的例子包括可变归约（使用 `collect` 操作的操作，详见[归约操作](#reduction)一节）或是通过调用 `System.out.println` 来进行调试。
+JDK 能很好地处理流水线中的某些副作用。比如，`collect` 方法可被用于执行那些有着线程安全的副作用的流操作。
+像 `forEach` 和 `peek` 这样的操作本身就是为了产生副作用；返回 `void` 的 Lambda 表达式，如调用 `System.out.println` 的 Lambda 表达式，除了产生负作用以外也什么都不会做。
+即便如此，在你使用 `forEach` 和 `peek` 操作时仍要小心：如果你在并行流中使用了这些操作，Java 运行时可能从多个线程并发地调用你在参数中给定的 Lambda 表达式。
+除此之外，你不应该将任何带有副作用的 Lambda 表达式作为参数传递到像 `filter` 和 `map` 这样的操作中。
+在这一节中，我们将讨论冲突和有状态 Lambda 表达式。它们是副作用的主要来源，同时也可能导致不可预期或不一致的结果，尤其是用在并行流中时。
+不过，我们会首先讨论懒求值的概念，因其对冲突有着直接的作用。
+
+##### 懒求值
+
+<!--
+	All intermediate operations are lazy. An expression, method, or algorithm is lazy if its value is evaluated only when it is required. (An algorithm is eager if it is evaluated or processed immediately.) Intermediate operations are lazy because they do not start processing the contents of the stream until the terminal operation commences. Processing streams lazily enables the Java compiler and runtime to optimize how they process streams. For example, in a pipeline such as the filter-mapToInt-average example described in the section Aggregate Operations, the average operation could obtain the first several integers from the stream created by the mapToInt operation, which obtains elements from the filter operation. The average operation would repeat this process until it had obtained all required elements from the stream, and then it would calculate the average.
+-->
+所有中间操作都是懒求值的（lazy）。如果一个表达式、方法或算法只有在需要时才会开始计算其结果值，那么我们说它是懒求值的。中间操作是懒求值的，因为在终止操作开始前它们都不会对流的元素进行处理。懒惰地处理流元素使得 Java 编译器和运行时可以对它们处理流的方式进行优化。
+例如，考虑流水线 `filter-mapToInt-average`，`average` 操作可以从 `mapToInt` 操作创建的流中获取整型数值，而 `mapToInt` 操作则从 `filter` 操作 获取元素。
+`average` 操作将不断重复这个过程直到从流中获取到所需的所有元素，然后再计算平均值。
+
+##### 冲突
+
+流操作使用的 Lambda 表达式不应产生任何冲突。当流水线在处理流时，流的数据来源发生了修改就会产生冲突。例如，考虑如下代码。
+如下代码尝试将 `List listOfStrings` 中的字符串进行拼接，但却会抛出一个 `ConcurrentModificationException`：
+
+<pre class="brush: java">
+try {
+    List&lt;String> listOfStrings =
+        new ArrayList&lt;>(Arrays.asList("one", "two"));
+         
+    // This will fail as the peek operation will attempt to add the
+    // string "three" to the source after the terminal operation has
+    // commenced. 
+             
+    String concatenatedString = listOfStrings
+        .stream()
+        
+        // Don't do this! Interference occurs here.
+        .peek(s -> listOfStrings.add("three"))
+        
+        .reduce((a, b) -> a + " " + b)
+        .get();
+                 
+    System.out.println("Concatenated string: " + concatenatedString);
+         
+} catch (Exception e) {
+    System.out.println("Exception caught: " + e.toString());
+}
+</pre>
+
+<!--
+	This example concatenates the strings contained in listOfStrings into an Optional<String> value with the reduce operation, which is a terminal operation. However, the pipeline here invokes the intermediate operation peek, which attempts to add a new element to listOfStrings. Remember, all intermediate operations are lazy. This means that the pipeline in this example begins execution when the operation get is invoked, and ends execution when the get operation completes. The argument of the peek operation attempts to modify the stream source during the execution of the pipeline, which causes the Java runtime to throw a ConcurrentModificationException.
+-->
+示例代码使用终止操作 `reduce` 将 `listOfStrings` 中的字符串进行拼接并放入到了一个 `Optional<String>` 中。
+然而，这个流水线使用了中间操作 `peek`，试图向 `listOfStrings` 中添加新的元素。
+之前我们提到，所有的中间操作都是懒求值的。这意味着例子中的流水线只有在 `get` 操作被调用时才开始执行，并在 `get` 操作完成时结束执行。
+`peek` 操作的参数企图在流水线执行的过程中修改流的数据来源，导致 Java 运行时抛出了一个 `ConcurrentModificationException`。
+
+##### 有状态 Lambda 表达式
+
+<!--
+	Avoid using stateful lambda expressions as parameters in stream operations. A stateful lambda expression is one whose result depends on any state that might change during the execution of a pipeline. The following example adds elements from the List listOfIntegers to a new List instance with the map intermediate operation. It does this twice, first with a serial stream and then with a parallel stream:
+-->
+我们不应使用任何**有状态的 Lambda 表达式**（Stateful Lambda Expression）作为流操作的参数。
+如果一个 Lambda 表达式的结果取决于一个可能在流水线执行过程中发生改变的状态值，那么我们说它是有状态的。
+如下示例代码通过中间操作 `map` 将列表 `listOfIntegers` 中的元素添加到一个新的 `List` 中。
+这个操作分别被顺序和并行地执行了一次。
+
+<pre class="brush: java">
+List&lt;Integer> serialStorage = new ArrayList&lt;>();
+     
+System.out.println("Serial stream:");
+listOfIntegers
+    .stream()
+    
+    // Don't do this! It uses a stateful lambda expression.
+    .map(e -> { serialStorage.add(e); return e; })
+    
+    .forEachOrdered(e -> System.out.print(e + " "));
+System.out.println("");
+     
+serialStorage
+    .stream()
+    .forEachOrdered(e -> System.out.print(e + " "));
+System.out.println("");
+
+System.out.println("Parallel stream:");
+List&lt;Integer> parallelStorage = Collections.synchronizedList(
+    new ArrayList&lt;>());
+listOfIntegers
+    .parallelStream()
+    
+    // Don't do this! It uses a stateful lambda expression.
+    .map(e -> { parallelStorage.add(e); return e; })
+    
+    .forEachOrdered(e -> System.out.print(e + " "));
+System.out.println("");
+     
+parallelStorage
+    .stream()
+    .forEachOrdered(e -> System.out.print(e + " "));
+System.out.println("");
+</pre>
+
+<!--
+	The lambda expression e -> { parallelStorage.add(e); return e; } is a stateful lambda expression. Its result can vary every time the code is run. This example prints the following:
+-->
+Lambda 表达式 `e -> { parallelStorage.add(e); return e; }` 是有状态的。它的结果在每次运行时都有可能不同。示例代码输出如下：
+
+<pre>
+Serial stream:
+8 7 6 5 4 3 2 1
+8 7 6 5 4 3 2 1
+Parallel stream:
+8 7 6 5 4 3 2 1
+1 3 6 2 4 5 8 7
+</pre>
+
+<!--
+	The operation forEachOrdered processes elements in the order specified by the stream, regardless of whether the stream is executed in serial or parallel. However, when a stream is executed in parallel, the map operation processes elements of the stream specified by the Java runtime and compiler. Consequently, the order in which the lambda expression e -> { parallelStorage.add(e); return e; } adds elements to the List parallelStorage can vary every time the code is run. For deterministic and predictable results, ensure that lambda expression parameters in stream operations are not stateful.
+-->
+`forEachOrdered` 操作将根据流的顺序处理元素，其处理的顺序与流是否被并行执行无关。
+然而，当流被并行执行时，`map` 操作将按照 Java 编译器和运行时给定的顺序来处理流中的元素。
+因此，Lambda 表达式 `e -> { parallelStorage.add(e); return e; }` 添加元素至列表 `parallelStorage` 中的顺序在每次代码执行时都有可能不同。
+如果想要获得确定且可预期的结果，我们需要确保流操作所使用的 Lambda 表达式参数是无状态的。
+
+<!--
+	Note: This example invokes the method synchronizedList so that the List parallelStorage is thread-safe. Remember that collections are not thread-safe. This means that multiple threads should not access a particular collection at the same time. Suppose that you do not invoke the method synchronizedList when creating parallelStorage:
+-->
+**注意**：该示例调用了
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html#synchronizedList-java.util.List-">synchronizedList</a></code>
+方法，因此列表 `parallelStorage` 是线程安全的。我们之前说过，集合不是线程安全的，这意味着复数线程不应同时访问同一个集合。
+假设你在创建 `parallelStorage` 时没有使用 `synchronizedList` 方法：
+
+<pre class="brush: java">
+List&lt;Integer> parallelStorage = new ArrayList&lt;>();
+</pre>
+
+<!--
+	The example behaves erratically because multiple threads access and modify parallelStorage without a mechanism like synchronization to schedule when a particular thread may access the List instance. Consequently, the example could print output similar to the following:
+-->
+这样，示例代码就会开始产生不正常的结果了，因为多个线程同时尝试访问和修改 `parallelStorage`，而又没有像线程同步这样的机制来计划哪个线程应该访问这个 `List` 实例。
+由此，示例代码可能会输出类似下面这样的结果：
+
+<pre>
+Parallel stream:
+8 7 6 5 4 3 2 1
+null 3 5 4 7 8 1 2
+</pre>
 
 ---
 
@@ -1637,7 +2158,7 @@ JDK 中还包含了返回一个集合而不是一个单一值的归约操作。�
 
 `Set` 接口的实现类可以被分为普适实现类和特殊实现类。
 
-<h4 class="jump" id="general-purpose-set-implementations">4.1.1 普适 Set 接口实现类</h4>
+<h4 id="general-purpose-set-implementations">4.1.1 普适 Set 接口实现类</h4>
 
 <!--
 	There are three general-purpose Set implementations — HashSet, TreeSet, and LinkedHashSet. Which of these three to use is generally straightforward.
