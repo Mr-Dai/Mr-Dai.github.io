@@ -375,7 +375,7 @@ List&lt;String&gt; list = new ArrayList&lt;&gt;(c);
 并在 `Collection` 因此次操作发生改变时返回 `true`。同样，`remove` 方法用于从 `Collection` 中移除一个给定的元素实例，
 在执行前便假设集合中存在该元素，并在 `Collection `因此次操作发生改变时返回 `true`。
 
-<h4 id="traversing-collections">2.1.1 遍历集合</h4>
+#### 遍历集合
 
 <!--
 	There are three ways to traverse collections: (1) using aggregate operations (2) with the for-each construct and (3) by using Iterators.
@@ -533,7 +533,7 @@ static void filter(Collection&lt;?&gt; c) {
 这一小段代码是多态的，它可以被用于任何 `Collection` 而不必考虑具体的实现。
 这段代码同样展示了使用 Java 集合框架编写多态的算法是多么方便。
 
-<h3 id="collection-interface-bulk-operations">2.1.2 Collection 接口批量操作</h3>
+#### Collection 接口批量操作
 
 <!--
 	Bulk operations perform an operation on an entire Collection. You could implement these shorthand operations using the basic operations,
@@ -715,7 +715,7 @@ public static &lt;E&gt; Set&lt;E&gt; removeDups(Collection&lt;E&gt; c) {
 }
 </pre>
 
-<h4 id="set-interface-basic-operations">2.2.1 Set 接口基本操作</h4>
+#### Set 接口基本操作
 
 <!--
 	The size operation returns the number of elements in the Set (its cardinality). The isEmpty method does exactly what you think it would.
@@ -825,7 +825,7 @@ java FindDups i came i saw i left
 4 distinct words: [came, i, left, saw]
 </pre>
 
-<h4 id="set-interface-bulk-operations">2.2.2 Set 接口批量操作</h4>
+#### Set 接口批量操作
 
 <!--
 	Bulk operations are particularly well suited to Sets; when applied, they perform standard set-algebraic operations.
@@ -841,16 +841,16 @@ java FindDups i came i saw i left
 -	<!--
 		s1.addAll(s2) — transforms s1 into the union of s1 and s2. (The union of two sets is the set containing all of the elements contained in either set.)
 	-->
-	`s1.addAdd(s2)`：将 `s1` 变为 `s1` 和 `s2` 的**并集**。（两个集的并集包含两个集的所有元素。译者注：$A \cup B = \{x : x \in A \vee x \in B\}$）
+	`s1.addAdd(s2)`：将 `s1` 变为 `s1` 和 `s2` 的**并集**。（两个集的并集包含两个集的所有元素。译者注：$A \cup B = \lbrace x | x \in A \vee x \in B \rbrace$）
 -	<!--
 		s1.retainAll(s2) — transforms s1 into the intersection of s1 and s2. (The intersection of two sets is the set containing only the elements common to both sets.)
 	-->
-	`s1.retainAll(s2)`：将 `s1` 变为 `s1` 和 `s2` 的**交集**。（两个集的交集只包含同时属于两个集的元素。译者注：$A \cap B = \{x : x \in A \wedge x \in B\}$）
+	`s1.retainAll(s2)`：将 `s1` 变为 `s1` 和 `s2` 的**交集**。（两个集的交集只包含同时属于两个集的元素。译者注：$A \cap B = \lbrace x | x \in A \wedge x \in B \rbrace$）
 -	<!--
 		s1.removeAll(s2) — transforms s1 into the (asymmetric) set difference of s1 and s2.
 		(For example, the set difference of s1 minus s2 is the set containing all of the elements found in s1 but not in s2.)
 	-->
-	`s1.removeAll(s2)`：将 `s1` 变为 `s1` 和 `s2` 的（非对称）**差集**。（比如，`s1 - s2` 产生的差集包含那些属于 `s1` 但不属于 `s2` 的元素。译者注：$A - B = \{x : x \in A \wedge x \not\in B\}$）。
+	`s1.removeAll(s2)`：将 `s1` 变为 `s1` 和 `s2` 的（非对称）**差集**。（比如，`s1 - s2` 产生的差集包含那些属于 `s1` 但不属于 `s2` 的元素。译者注：$A - B = \lbrace x | x \in A \wedge x \not\in B \rbrace$）。
 
 <!--
 	To calculate the union, intersection, or set difference of two sets nondestructively (without modifying either set),
@@ -933,7 +933,7 @@ tmp.retainAll(s2);
 symmetricDiff.removeAll(tmp);
 </pre>
 
-<h4 id="set-interface-array-operations">2.2.3 Set 接口数组操作</h4>
+#### Set 接口数组操作
 
 <!--
 	The array operations don't do anything special for Sets beyond what they do for any other Collection.
@@ -973,7 +973,7 @@ symmetricDiff.removeAll(tmp);
 -->
 Java 提供了两种普适的`List`实现类：[ArrayList][] 在多数情况下有着更好的性能，而 [LinkedList][] 则在少数特定情况下取胜。
 
-<h4 id="list-collection-operations">2.3.1 集合操作</h4>
+#### 集合操作
 
 <!--
 	The operations inherited from Collection all do about what you'd expect them to do, assuming you're already familiar with them. If you're not familiar with them from Collection, now would be a good time to read The Collection Interface section. The remove operation always removes the first occurrence of the specified element from the list. The add and addAll operations always append the new element(s) to the end of the list. Thus, the following idiom concatenates one list to another.
@@ -1018,7 +1018,7 @@ List&lt;String> list = people.stream()
 正如 `Set` 接口，`List` 也加强了对 `equals` 和 `hashCode` 方法的定义，以在不考虑实现类的情况下两个 `List` 对象能够相互比较。
 如果两个 `List` 对象以相同的顺序包含相同的元素，我们说它们是相等（equal）的。
 
-<h4 id="positional-access-and-search-operations">2.3.2 基于位置访问与查找操作</h4>
+#### 基于位置访问与查找操作
 
 <!--
 	The basic positional access operations are get, set, add and remove. (The set and remove operations return the old value that is being overwritten or removed.) Other operations (indexOf and lastIndexOf) return the first or last index of the specified element in the list.
@@ -1284,6 +1284,498 @@ Note that the Deque interface can be used both as last-in-first-out stacks and f
 这两个方法的返回类型为 `boolean`，它们会在 `Deque` 包含该给定元素时返回 `true`。
 
 ---
+
+<h3 id="map">2.6 Map 接口</h3>
+
+<!--
+	A Map is an object that maps keys to values. A map cannot contain duplicate keys: Each key can map to at most one value. It models the mathematical function abstraction. The Map interface includes methods for basic operations (such as put, get, remove, containsKey, containsValue, size, and empty), bulk operations (such as putAll and clear), and collection views (such as keySet, entrySet, and values).
+-->
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Map.html">Map</a></code> 为将键映射到值的对象。一个映射不能包含重复的键：每个键至多被映射到一个值。
+它模拟的是数学上的函数的抽象。`Map` 接口包括了用于进行基本操作的方法（如 `put`、`get`、`remove`、`containsKey`、`containsValue`、`size` 和 `empty`）、
+用于进行批量操作的方法（如 `putAll` 和 `clear`）以及用于产生集合视图的方法（如 `keySet`、`entrySet` 和 `values`）。
+
+<!--
+	The Java platform contains three general-purpose Map implementations: HashMap, TreeMap, and LinkedHashMap. Their behavior and performance are precisely analogous to HashSet, TreeSet, and LinkedHashSet, as described in The Set Interface section.
+-->
+Java 为 `Map` 提供了三个普适实现类：
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html">HashMap</a></code>、
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/TreeMap.html">TreeMap</a></code> 和
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashMap.html">LinkedHashMap</a></code>。
+它们的行为和性能与 [Set 接口](#set)一节中讨论的 `HashSet`、`TreeSet` 和 `LinkedHashSet` 完全一致。
+
+<!--
+	The remainder of this page discusses the Map interface in detail. But first, here are some more examples of collecting to Maps using JDK 8 aggregate operations. Modeling real-world objects is a common task in object-oriented programming, so it is reasonable to think that some programs might, for example, group employees by department:
+-->
+本节接下来的内容将对 `Map` 节接口进行详细介绍。不过，首先我们要先看一下如下几个使用 JDK 8 提供的聚合操作将流元素收集到 `Map` 中的示例代码。
+对于面向对象编程而言，模拟现实生活中的物件是十分常见的，因此我们不妨假设有一个程序需要将员工按部门进行分组：
+
+<pre class="brush: java">
+// 将员工按部门进行分组
+Map&lt;Department, List&lt;Employee>> byDept = employees.stream()
+    .collect(Collectors.groupingBy(Employee::getDepartment));
+</pre>
+
+<!--
+	Or compute the sum of all salaries by department:
+-->
+或是计算各部门的工资总和：
+
+<pre class="brush: java">
+// 计算各部门的工资总和
+Map&lt;Department, Integer> totalByDept = employees.stream()
+    .collect(Collectors.groupingBy(Employee::getDepartment,
+        Collectors.summingInt(Employee::getSalary)));
+</pre>
+
+<!--
+	Or perhaps group students by passing or failing grades:
+-->
+或是将学生按合格和不合格进行分组：
+
+<pre class="brush: java">
+// 将学生按合格和不合格进行分组
+Map&lt;Boolean, List&lt;Student>> passingFailing = students.stream()
+    .collect(Collectors.partitioningBy(s -> s.getGrade()>= PASS_THRESHOLD)); 
+</pre>
+
+<!--
+	You could also group people by city:
+-->
+你还可以将人们根据城市进行分组：
+
+<pre class="brush: java">
+// 按城市分组
+Map&lt;String, List&lt;Person>> peopleByCity
+         = personStream.collect(Collectors.groupingBy(Person::getCity));
+</pre>
+
+<!--
+	Or even cascade two collectors to classify people by state and city:
+-->
+或是将两个收集器进行级联以将人们根据城市和州进行分组：
+
+<pre class="brush: java">
+// 级联收集器
+Map&lt;String, Map&lt;String, List&lt;Person>>> peopleByStateAndCity =
+    personStream.collect(Collectors.groupingBy(Person::getState,
+    Collectors.groupingBy(Person::getCity)))
+</pre>
+
+<!--
+	Again, these are but a few examples of how to use the new JDK 8 APIs. For in-depth coverage of lambda expressions and aggregate operations see the lesson entitled Aggregate Operations.
+-->
+这些只是几个使用 JDK 8 的 API 的简单示例。Lambda 表达式和聚合操作将会在[聚合操作](#stream)一节中详细介绍。
+
+#### Map 接口基本操作
+
+<!--
+	The basic operations of Map (put, get, containsKey, containsValue, size, and isEmpty) behave exactly like their counterparts in Hashtable. The following program generates a frequency table of the words found in its argument list. The frequency table maps each word to the number of times it occurs in the argument list.
+-->
+`Map` 接口的基本操作（`put`、`get`、`containsKey`、`containsValue`、`size` 和 `isEmpty`）和它们在 `Hashtable` 中对应的方法表现完全一致。
+[下面这个程序](http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/Freq.java)将会为出现在命令行参数列表中的单词生成一个频率表。
+该频率表会将单词映射到其在参数列表中出现的次数。
+
+<pre class="brush: java">
+import java.util.*;
+
+public class Freq {
+    public static void main(String[] args) {
+        Map&lt;String, Integer> m = new HashMap&lt;String, Integer>();
+
+        // 初始化频率表
+        for (String a : args) {
+            Integer freq = m.get(a);
+            m.put(a, (freq == null) ? 1 : freq + 1);
+        }
+
+        System.out.println(m.size() + " distinct words:");
+        System.out.println(m);
+    }
+}
+</pre>
+
+<!--
+	The only tricky thing about this program is the second argument of the put statement. That argument is a conditional expression that has the effect of setting the frequency to one if the word has never been seen before or one more than its current value if the word has already been seen. Try running this program with the command:
+-->
+这个程序唯一一个有趣的地方在于 `put` 语句的第二个参数。该参数是一个条件表达式：在之前没遇到过这个单词时它能将频率设定为 1，也能在遇到这个单词的情况下将频率增加。
+尝试在命令行中运行此程序：
+
+<pre>
+java Freq if it is to be it is up to me to delegate
+</pre>
+
+程序将产生如下输出：
+
+<pre>
+8 distinct words:
+{to=3, delegate=1, be=1, it=2, up=1, if=1, me=1, is=2}
+</pre>
+
+<!--
+	Suppose you'd prefer to see the frequency table in alphabetical order. All you have to do is change the implementation type of the Map from HashMap to TreeMap. Making this four-character change causes the program to generate the following output from the same command line.
+-->
+假设你想要让频率表按字典序排序。你只需要将 `Map` 的实现类从 `HashMap` 变为 `TreeMap` 就可以了。
+在改了这四个字母以后，相同的命令将是程序产生如下输出：
+
+<pre>
+8 distinct words:
+{be=1, delegate=1, if=1, is=2, it=2, me=1, to=3, up=1}
+</pre>
+
+<!--
+	Similarly, you could make the program print the frequency table in the order the words first appear on the command line simply by changing the implementation type of the map to LinkedHashMap. Doing so results in the following output.
+-->
+类似地，你还可以让程序将频率表按照单词第一次出现在命令行中的顺序进行打印，只需要将实现类改为 `LinkedHashMap` 即可。这样一来，程序将产生如下输出：
+
+<pre>
+8 distinct words:
+{if=1, it=2, is=2, to=3, be=1, up=1, me=1, delegate=1}
+</pre>
+
+<!--
+	This flexibility provides a potent illustration of the power of an interface-based framework.
+-->
+上述示例的变化弹性展示了使用基于接口的框架的好处。
+
+<!--
+	Like the Set and List interfaces, Map strengthens the requirements on the equals and hashCode methods so that two Map objects can be compared for logical equality without regard to their implementation types. Two Map instances are equal if they represent the same key-value mappings.
+-->
+与 `Set` 和 `List` 接口相同，`Map` 接口同样对 `equals` 方法和 `hashCode` 方法进行了改进，这样两个 `Map` 即可以被进行逻辑等价判断而不必在意它们各自的实现类型。
+如果两个 `Map` 实例代表相同的键值映射，那么它们就是相等的。
+
+<!--
+	By convention, all general-purpose Map implementations provide constructors that take a Map object and initialize the new Map to contain all the key-value mappings in the specified Map. This standard Map conversion constructor is entirely analogous to the standard Collection constructor: It allows the caller to create a Map of a desired implementation type that initially contains all of the mappings in another Map, regardless of the other Map's implementation type. For example, suppose you have a Map, named m. The following one-liner creates a new HashMap initially containing all of the same key-value mappings as m.
+-->
+按照惯例，所有 `Map` 的普适实现类都必须实现一个接受一个 `Map` 对象的构造器，而该构造器能将给定 `Map` 中的所有键值映射放入到新创建的 `Map` 中。
+这个标准 `Map` 转换构造器和 `Collection` 的标准构造器类似：它使得使用者能够创建一个拥有特定实现类型且包含另一个 `Map` 中所有映射的 `Map`。
+例如，假设你有一个名为 `m` 的 `Map`。如下这一行代码将创建一个与 `m` 拥有相同映射的 `HashMap`：
+
+<pre class="brush: java">
+Map&lt;K, V> copy = new HashMap&lt;K, V>(m);
+</pre>
+
+#### Map 接口批量操作
+
+<!--
+	The clear operation does exactly what you would think it could do: It removes all the mappings from the Map. The putAll operation is the Map analogue of the Collection interface's addAll operation. In addition to its obvious use of dumping one Map into another, it has a second, more subtle use. Suppose a Map is used to represent a collection of attribute-value pairs; the putAll operation, in combination with the Map conversion constructor, provides a neat way to implement attribute map creation with default values. The following is a static factory method that demonstrates this technique.
+-->
+`clear` 方法的行为和你料想的完全一致：它能从 `Map` 中移除所有映射。`putAll` 方法相当于 `Map` 版本的 `Collection.addAll` 方法。
+除了这个如此明显的将一个 `Map` 丢到另一个 `Map` 的方法之外，还有另外一种更巧妙的做法。假设有一个 `Map` 被来表示属性值对的集合。
+`putAll` 方法加上 `Map` 的转换构造器可以很方便地创建一个带有默认属性值的属性映射。下面这个静态工厂方法便展示了这项技巧：
+
+<pre class="brush: java">
+static &lt;K, V> Map&lt;K, V> newAttributeMap(Map&lt;K, V>defaults, Map&lt;K, V> overrides) {
+    Map&lt;K, V> result = new HashMap&lt;K, V>(defaults);
+    result.putAll(overrides);
+    return result;
+}
+</pre>
+
+#### 集合视图
+
+<!--
+	The Collection view methods allow a Map to be viewed as a Collection in these three ways:
+-->
+`Map` 的集合视图方法允许 `Map` 以如下三种方式被视作一个 `Collection`：
+
+- `keySet`：`Map` 中的键组成的 `Set`。
+- `values`：`Map` 中的值组成的 `Collection`。这个 `Collection` 并不是一个 `Set`，因为 `Map` 中的多个键可以映射至相同的值。
+- `entrySet`：`Map` 中的键值对组成的 `Set`。`Map` 接口还提供了一个叫做 `Map.Entry` 的嵌套接口，它就是这个 `Set` 的元素类型。
+
+<!--
+	The Collection views provide the only means to iterate over a Map. This example illustrates the standard idiom for iterating over the keys in a Map with a for-each construct:
+-->
+`Map` 的集合视图**只是**用来提供迭代 `Map` 的方法。如下示例展示了如何使用 `for-each` 语句来迭代 `Map` 中的所有键：
+
+<pre class="brush: java">
+for (KeyType key : m.keySet())
+    System.out.println(key);
+</pre>
+
+<!--
+	and with an iterator:
+-->
+而如下示例则使用了一个迭代器：
+
+<pre class="brush: java">
+// 根据键的某些属性来过滤一个 Map
+for (Iterator&lt;Type> it = m.keySet().iterator(); it.hasNext(); )
+    if (it.next().isBogus())
+        it.remove();
+</pre>
+
+<!--
+	The idiom for iterating over values is analogous. Following is the idiom for iterating over key-value pairs.
+-->
+迭代值的方式也是类似的。如下示例迭代了 `Map` 中的键值对：
+
+<pre class="brush: java">
+for (Map.Entry&lt;KeyType, ValType> e : m.entrySet())
+    System.out.println(e.getKey() + ": " + e.getValue());
+</pre>
+
+<!--
+	At first, many people worry that these idioms may be slow because the Map has to create a new Collection instance each time a Collection view operation is called. Rest easy: There's no reason that a Map cannot always return the same object each time it is asked for a given Collection view. This is precisely what all the Map implementations in java.util do.
+-->
+一开始，很多人都会担心这种代码写法的性能不好，因为每次 `Map` 的集合视图方法被调用时都需要创建一个新的 `Collection` 示例。
+不用担心，`Map` 没有理由不能每次都返回相同的`Collection` 对象啊。而事实上，`java.util` 包中的 `Map` 实现类确实也是这么做的。
+
+<!--
+	With all three Collection views, calling an Iterator's remove operation removes the associated entry from the backing Map, assuming that the backing Map supports element removal to begin with. This is illustrated by the preceding filtering idiom.
+-->
+假如所使用的 `Map` 支持的话，调用集合视图的 `Iterator` 的 `remove` 方法可以从 `Map` 中移除对应的键值对。
+
+<!--
+	With the entrySet view, it is also possible to change the value associated with a key by calling a Map.Entry's setValue method during iteration (again, assuming the Map supports value modification to begin with). Note that these are the only safe ways to modify a Map during iteration; the behavior is unspecified if the underlying Map is modified in any other way while the iteration is in progress.
+-->
+使用 `entrySet` 视图可以通过调用 `Map.Entry` 的 `setValue` 方法在迭代的过程中更改某个映射的值（假设该 `Map` 支持这样的值修改操作）。注意这是唯一一种在迭代中安全修改 `Map` 的方式，如果在迭代中 `Map` 经过其他方式被修改可能会产生不可预知的结果。
+
+<!--
+	The Collection views support element removal in all its many forms — remove, removeAll, retainAll, and clear operations, as well as the Iterator.remove operation. (Yet again, this assumes that the backing Map supports element removal.)
+-->
+所有的集合视图均完整支持所有形式的元素删除操作，包括 `remove`、`removeAll`、`retainAll` 和 `clear` 方法，以及对应的 `Iterator.remove` 方法。
+
+<!--
+	The Collection views do not support element addition under any circumstances. It would make no sense for the keySet and values views, and it's unnecessary for the entrySet view, because the backing Map's put and putAll methods provide the same functionality.
+-->
+在任何情况下，集合视图均不支持元素添加操作。这样的操作对 `keySet` 和 `values` 视图来说毫无意义，对 `entrySet` 视图来讲也没有必要，因为 `Map` 的 `put` 和 `putAll` 已经提供了这样的功能了。
+
+#### 集合视图的炫酷用法：映射代数
+
+<!--
+	When applied to the Collection views, bulk operations (containsAll, removeAll, and retainAll) are surprisingly potent tools. For starters, suppose you want to know whether one Map is a submap of another — that is, whether the first Map contains all the key-value mappings in the second. The following idiom does the trick.
+-->
+当应用在集合视图上时，如 `containsAll`、`removeAll` 和 `retainAll` 的批量操作便变得十分有用了。比如，假设你想知道一个 `Map` 是否是另一个 `Map` 的子映射，
+即第一个 `Map` 是否包含第二个 `Map` 的所有键值对。如下代码就能做到这一点：
+
+<pre class="brush: java">
+if (m1.entrySet().containsAll(m2.entrySet())) {
+    ...
+}
+</pre>
+
+<!--
+	Along similar lines, suppose you want to know whether two Map objects contain mappings for all of the same keys.
+-->
+又比如，假设你想知道两个 `Map` 对象是否均包含的相同键的映射：
+
+<pre class="brush: java">
+if (m1.keySet().equals(m2.keySet())) {
+    ...
+}
+</pre>
+
+<!--
+	Suppose you have a Map that represents a collection of attribute-value pairs, and two Sets representing required attributes and permissible attributes. (The permissible attributes include the required attributes.) The following snippet determines whether the attribute map conforms to these constraints and prints a detailed error message if it doesn't.
+-->
+假设你有一个表示属性值对集合的 `Map`，以及两个分别用来表示必需属性和可用属性的 `Set`（可用属性包括必需属性）。
+如下代码将判断给定的属性映射是否满足这些约束并在不满足时打印出详细的错误信息：
+
+<pre class="brush: java">
+static &lt;K, V> boolean validate(Map&lt;K, V> attrMap, Set&lt;K> requiredAttrs, Set&lt;K>permittedAttrs) {
+    boolean valid = true;
+    Set&lt;K> attrs = attrMap.keySet();
+
+    if (!attrs.containsAll(requiredAttrs)) {
+        Set&lt;K> missing = new HashSet&lt;K>(requiredAttrs);
+        missing.removeAll(attrs);
+        System.out.println("Missing attributes: " + missing);
+        valid = false;
+    }
+    if (!permittedAttrs.containsAll(attrs)) {
+        Set&lt;K> illegal = new HashSet&lt;K>(attrs);
+        illegal.removeAll(permittedAttrs);
+        System.out.println("Illegal attributes: " + illegal);
+        valid = false;
+    }
+    return valid;
+}
+</pre>
+
+<!--
+	Suppose you want to know all the keys common to two Map objects.
+-->
+假设你想要知道两个 `Map` 对象的公有键：
+
+<pre class="brush: java">
+Set&lt;KeyType>commonKeys = new HashSet&lt;KeyType>(m1.keySet());
+commonKeys.retainAll(m2.keySet());
+</pre>
+
+<!--
+	A similar idiom gets you the common values.
+-->
+使用类似的方法也可以帮助你得出两个 `Map` 对象的公有值。
+
+<!--
+	All the idioms presented thus far have been nondestructive; that is, they don't modify the backing Map. Here are a few that do. Suppose you want to remove all of the key-value pairs that one Map has in common with another.
+-->
+以上所有的代码示例都是非破坏性的，也就是说，它们不会修改原有的 `Map`。下面这些就不是了。假设你想要从一个 `Map` 中移除另一个 `Map` 包含的所有键值对：
+
+<pre class="brush: java">
+m1.entrySet().removeAll(m2.entrySet());
+</pre>
+
+<!--
+	Suppose you want to remove from one Map all of the keys that have mappings in another.
+-->
+假设你想要从一个 `Map` 中移除另一个 `Map` 包含的所有键：
+
+<pre class="brush: java">
+m1.keySet().removeAll(m2.keySet());
+</pre>
+
+<!--
+	What happens when you start mixing keys and values in the same bulk operation? Suppose you have a Map, managers, that maps each employee in a company to the employee's manager. We'll be deliberately vague about the types of the key and the value objects. It doesn't matter, as long as they're the same. Now suppose you want to know who all the "individual contributors" (or nonmanagers) are. The following snippet tells you exactly what you want to know.
+-->
+如果你在同一个批量操作中将键与值混在一起会怎么样呢？假设你有一个叫做 `managers` 的 `Map`，它将公司中的雇员映射到他们的经理。
+这里我们故意模糊键与值的类型，但实际上这并不重要，你只要知道它们是一样的就可以了（译者注：经理也是雇员）。
+现在假设你想知道谁不是经理。如下代码就能做到这一点：
+
+<pre class="brush: java">
+Set&lt;Employee> individualContributors = new HashSet&lt;Employee>(managers.keySet());
+individualContributors.removeAll(managers.values());
+</pre>
+
+<!--
+	Suppose you want to fire all the employees who report directly to some manager, Simon.
+-->
+假设你想要开除一个叫做 Simon 的经理的所有直接下属：
+
+<pre class="brush: java">
+Employee simon = ... ;
+managers.values().removeAll(Collections.singleton(simon));
+</pre>
+
+<!--
+	Note that this idiom makes use of Collections.singleton, a static factory method that returns an immutable Set with the single, specified element.
+-->
+注意该示例使用了 `Collections.singleton` 方法，这是一个可以为给定的单一元素返回一个不可变的 `Set` 的静态工厂方法。
+
+<!--
+	Once you've done this, you may have a bunch of employees whose managers no longer work for the company (if any of Simon's direct-reports were themselves managers). The following code will tell you which employees have managers who no longer works for the company.
+-->
+之后，你可能就会发现你的一些雇员的经理已经不在公司里了（如果 Simon 的直接下属也是经理）。下列代码会告诉你哪些雇员的经理已经离开了公司：
+
+<pre class="brush: java">
+Map&lt;Employee, Employee> m = new HashMap&lt;Employee, Employee>(managers);
+m.values().removeAll(managers.keySet());
+Set&lt;Employee> slackers = m.keySet();
+</pre>
+
+<!--
+	This example is a bit tricky. First, it makes a temporary copy of the Map, and it removes from the temporary copy all entries whose (manager) value is a key in the original Map. Remember that the original Map has an entry for each employee. Thus, the remaining entries in the temporary Map comprise all the entries from the original Map whose (manager) values are no longer employees. The keys in the temporary copy, then, represent precisely the employees that we're looking for.
+-->
+这个示例比较复杂。首先，它创建了原有 `Map` 的一个临时拷贝，然后从临时拷贝将值（经理）同时为原 `Map` 的键的键值对移除。注意，在原本的 `Map` 中，每个雇员都有一个键值对。
+因此，临时 `Map` 中剩余的键值对为原 `Map` 中所有值（经理）已不是该公司雇员的键值对。如此一来，临时拷贝中的键正好表示我们要找的雇员。
+
+<!--
+	There are many more idioms like the ones contained in this section, but it would be impractical and tedious to list them all. Once you get the hang of it, it's not that difficult to come up with the right one when you need it.
+-->
+在这一节中我们给出了许多类似的示例代码，但将这些代码全部列出是不现实的。只要你能掌握这些基本的示例，在你需要的时候写出正确的代码就不是那么难了。
+
+#### 多重映射
+
+<!--
+	A multimap is like a Map but it can map each key to multiple values. The Java Collections Framework doesn't include an interface for multimaps because they aren't used all that commonly. It's a fairly simple matter to use a Map whose values are List instances as a multimap. This technique is demonstrated in the next code example, which reads a word list containing one word per line (all lowercase) and prints out all the anagram groups that meet a size criterion. An anagram group is a bunch of words, all of which contain exactly the same letters but in a different order. The program takes two arguments on the command line: (1) the name of the dictionary file and (2) the minimum size of anagram group to print out. Anagram groups containing fewer words than the specified minimum are not printed.
+-->
+**多重映射**（Multimap）和 `Map` 类似，但它能将每个键映射到多个值。Java 集合框架中并不提供多重映射的相关接口，因为它们也不是那么常使用到。
+一个值为 `List` 实例的 `Map` 即可被简单地视作一个多重映射。下面的代码示例就展示了这种做法。该代码示例将会读入一个每行只有一个小写单词的单词列表，
+并输出所有满足一定大小条件的变形词组。一个变形词组（Anagram Group）由若干个单词组成，这些单词都包含相同的字母但各自的顺序不同。
+示例程序从命令行中接受两个参数：字典文件的名称以及输出变形词组的最小大小。大小小于给定最小值的变形词组将不会被输出。
+
+<!--
+	There is a standard trick for finding anagram groups: For each word in the dictionary, alphabetize the letters in the word (that is, reorder the word's letters into alphabetical order) and put an entry into a multimap, mapping the alphabetized word to the original word. For example, the word bad causes an entry mapping abd into bad to be put into the multimap. A moment's reflection will show that all the words to which any given key maps form an anagram group. It's a simple matter to iterate over the keys in the multimap, printing out each anagram group that meets the size constraint.
+-->
+要找到这些变形词组实际上是有标准的做法的：对于字典中的每个单词，首先对单词中的字母按字母顺序进行排序，再将一个从排序后的单词映射到原单词的键值对放入到一个多重映射中。
+例如，单词 `bad` 将会产生一个从 `abd` 映射到 `bad` 的键值对并被放入到多重映射中。稍微想一下就能知道，最后某个给定的单词所映射到的单词们即刚好能组成一个变形词组。
+迭代多重映射中的键并输出符合大小约束的变形词组就不是什么难事了。
+
+<!--
+	The following program is a straightforward implementation of this technique.
+-->
+[下面的程序](http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/Anagrams.java)直观地实现了这一功能：
+
+<pre class="brush: java">
+import java.util.*;
+import java.io.*;
+
+public class Anagrams {
+    public static void main(String[] args) {
+        int minGroupSize = Integer.parseInt(args[1]);
+
+        // Read words from file and put into a simulated multimap
+        Map&lt;String, List&lt;String>> m = new HashMap&lt;String, List&lt;String>>();
+
+        try {
+            Scanner s = new Scanner(new File(args[0]));
+            while (s.hasNext()) {
+                String word = s.next();
+                String alpha = alphabetize(word);
+                List&lt;String> l = m.get(alpha);
+                if (l == null)
+                    m.put(alpha, l=new ArrayList&lt;String>());
+                l.add(word);
+            }
+        } catch (IOException e) {
+            System.err.println(e);
+            System.exit(1);
+        }
+
+        // Print all permutation groups above size threshold
+        for (List&lt;String> l : m.values())
+            if (l.size() >= minGroupSize)
+                System.out.println(l.size() + ": " + l);
+    }
+
+    private static String alphabetize(String s) {
+        char[] a = s.toCharArray();
+        Arrays.sort(a);
+        return new String(a);
+    }
+}
+</pre>
+
+<!--
+	Running this program on a 173,000-word dictionary file with a minimum anagram group size of eight produces the following output.
+-->
+给定一个包含 `173,000` 个单词的字典文件以及输出变形词组的最小大小为 `8`，那么程序将产生如下输出：
+
+<pre>
+9: [estrin, inerts, insert, inters, niters, nitres, sinter,
+     triens, trines]
+8: [lapse, leaps, pales, peals, pleas, salep, sepal, spale]
+8: [aspers, parses, passer, prases, repass, spares, sparse,
+     spears]
+10: [least, setal, slate, stale, steal, stela, taels, tales,
+      teals, tesla]
+8: [enters, nester, renest, rentes, resent, tenser, ternes,
+     treens]
+8: [arles, earls, lares, laser, lears, rales, reals, seral]
+8: [earings, erasing, gainers, reagins, regains, reginas,
+     searing, seringa]
+8: [peris, piers, pries, prise, ripes, speir, spier, spire]
+12: [apers, apres, asper, pares, parse, pears, prase, presa,
+      rapes, reaps, spare, spear]
+11: [alerts, alters, artels, estral, laster, ratels, salter,
+      slater, staler, stelar, talers]
+9: [capers, crapes, escarp, pacers, parsec, recaps, scrape,
+     secpar, spacer]
+9: [palest, palets, pastel, petals, plates, pleats, septal,
+     staple, tepals]
+9: [anestri, antsier, nastier, ratines, retains, retinas,
+     retsina, stainer, stearin]
+8: [ates, east, eats, etas, sate, seat, seta, teas]
+8: [carets, cartes, caster, caters, crates, reacts, recast,
+     traces]
+</pre>
+
+<!--
+	Many of these words seem a bit bogus, but that's not the program's fault; they're in the dictionary file. Here's the dictionary file we used. It was derived from the Public Domain ENABLE benchmark reference word list.
+-->
+这里面有些单词看起来像是伪造的，但这并不是程序的错，它们确实存在于字典文件中。
+这个就是我们使用的[字典文件](http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/dictionary.txt)，
+它是根据公用基准测试单词列表生成的。
 
 <h2 id="stream">3 聚合操作</h2>
 
