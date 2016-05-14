@@ -1099,7 +1099,7 @@ public interface Queue&lt;E> extends Collection&lt;E> {
 <!--
 	Queues typically, but not necessarily, order elements in a FIFO (first-in-first-out) manner. Among the exceptions are priority queues, which order elements according to their values — see the Object Ordering section for details). Whatever ordering is used, the head of the queue is the element that would be removed by a call to remove or poll. In a FIFO queue, all new elements are inserted at the tail of the queue. Other kinds of queues may use different placement rules. Every Queue implementation must specify its ordering properties.
 -->
-大多数的队列都会以 FIFO（先进先出）的方式对元素进行排序。其中，优先队列（priority queue）则根据元素的值进行排序 -- 详情请查阅[对象排序](#object-ordering)一节。
+大多数的队列都会以 FIFO（先进先出）的方式对元素进行排序。其中，优先队列（priority queue）则根据元素的值进行排序 -- 详情请查阅[对象排序](#order)一节。
 无论队列使用的是何种排序方式，对 `remove` 或 `poll` 方法的调用均会移除位于队列首位的元素。对于 FIFO 队列而言，所有的新元素都会被添加到队列的尾部，
 但其他队列可能选择不同的插入方式。每个 `Queue` 实现类都必须声明其排序元素的方式。
 
@@ -1485,7 +1485,7 @@ static &lt;K, V> Map&lt;K, V> newAttributeMap(Map&lt;K, V>defaults, Map&lt;K, V>
 <!--
 	The Collection views provide the only means to iterate over a Map. This example illustrates the standard idiom for iterating over the keys in a Map with a for-each construct:
 -->
-`Map` 的集合视图**只是**用来提供迭代 `Map` 的方法。如下示例展示了如何使用 `for-each` 语句来迭代 `Map` 中的所有键：
+`Map` 的集合视图**只是**为了提供迭代 `Map` 的方法。如下示例展示了如何使用 `for-each` 语句来迭代 `Map` 中的所有键：
 
 <pre class="brush: java">
 for (KeyType key : m.keySet())
@@ -1776,6 +1776,559 @@ public class Anagrams {
 这里面有些单词看起来像是伪造的，但这并不是程序的错，它们确实存在于字典文件中。
 这个就是我们使用的[字典文件](http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/dictionary.txt)，
 它是根据公用基准测试单词列表生成的。
+
+---
+
+<h3 id="order">2.7 元素排序</h3>
+
+列表 `l` 可这样进行排序：
+
+<pre class="brush: java">
+Collections.sort(l);
+</pre>
+
+<!--
+	If the List consists of String elements, it will be sorted into alphabetical order. If it consists of Date elements, it will be sorted into chronological order. How does this happen? String and Date both implement the Comparable interface. Comparable implementations provide a natural ordering for a class, which allows objects of that class to be sorted automatically. The following table summarizes some of the more important Java platform classes that implement Comparable.
+-->
+如果这个 `List` 包含的元素为 `String`，那么它们将会按字典序排序。如果包含的是 `Date` 元素，那么它们会按时间先后排序。为什么会这样呢？
+`String` 和 `Date` 均实现了 `Comparable` 接口。`Comparable` 接口的实现类均会为该类提供一种**自然顺序**（Natural Ordering），这就使得该类的对象可以被自动排序。
+下表总结了 Java 中比较重要的 `Comparable` 实现类：
+
+<table class="table">
+	<caption align="top"><b><code>Comparable</code> 实现类</b></caption>
+	<tr>
+		<th>类</th>
+		<th>自然顺序</th>
+	</tr>
+	<tr>
+		<td><code>Byte</code></td>
+		<td>有符号数字</td>
+	</tr>
+	<tr>
+		<td><code>Character</code></td>
+		<td>无符号数字</td>
+	</tr>
+	<tr>
+		<td><code>Long</code></td>
+		<td>有符号数字</td>
+	</tr>
+	<tr>
+		<td><code>Integer</code></td>
+		<td>有符号数字</td>
+	</tr>
+	<tr>
+		<td><code>Short</code></td>
+		<td>有符号数字</td>
+	</tr>
+	<tr>
+		<td><code>Double</code></td>
+		<td>有符号数字</td>
+	</tr>
+	<tr>
+		<td><code>Float</code></td>
+		<td>有符号数字</td>
+	</tr>
+	<tr>
+		<td><code>BigInteger</code></td>
+		<td>有符号数字</td>
+	</tr>
+	<tr>
+		<td><code>BigDecimal</code></td>
+		<td>有符号数字</td>
+	</tr>
+	<tr>
+		<td><code>Boolean</code></td>
+		<td><code>Boolean.FALSE &lt; Boolean.TRUE</code></td>
+	</tr>
+	<tr>
+		<td><code>File</code></td>
+		<td>根据系统的字典序对路径名排序</td>
+	</tr>
+	<tr>
+		<td><code>String</code></td>
+		<td>字典序</td>
+	</tr>
+	<tr>
+		<td><code>Date</code></td>
+		<td>时间序</td>
+	</tr>
+	<tr>
+		<td><code>CollationKey</code></td>
+		<td>根据所选方言（）进行字典排序</td>
+	</tr>
+</table>
+
+<!--
+	If you try to sort a list, the elements of which do not implement Comparable, Collections.sort(list) will throw a ClassCastException. Similarly, Collections.sort(list, comparator) will throw a ClassCastException if you try to sort a list whose elements cannot be compared to one another using the comparator. Elements that can be compared to one another are called mutually comparable. Although elements of different types may be mutually comparable, none of the classes listed here permit interclass comparison.
+-->
+如果你尝试对一个元素没有实现 `Comparable` 的列表进行排序，`Collections.sort(list)` 将抛出一个 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/ClassCastException.html">ClassCastException</a></code>。
+同样，如果给定的比较器不能用于比较列表中的元素时，`Collections.sort(list, comparator)` 也会抛出一个 `ClassCastException`。
+尽管不同类型的元素可能可以相互比较，但上面给出的这些类都不支持跨类比较。
+
+<!--
+	This is all you really need to know about the Comparable interface if you just want to sort lists of comparable elements or to create sorted collections of them. The next section will be of interest to you if you want to implement your own Comparable type.
+-->
+如果你只是想为 `Comparable` 元素组成的列表进行排序或者创建一个由它们组成的有序集合，那么你已经足够了解 `Comparable` 接口了。
+在下一节里我们将讨论如何实现你自己的 `Comparable` 类型。
+
+#### 实现自己的 Comparable 类型
+
+<!--
+	The Comparable interface consists of the following method.
+-->
+
+`Comparable` 接口包含如下方法：
+
+<pre class="brush: java">
+public interface Comparable&lt;T> {
+    public int compareTo(T o);
+}
+</pre>
+
+<!--
+	The compareTo method compares the receiving object with the specified object and returns a negative integer, 0, or a positive integer depending on whether the receiving object is less than, equal to, or greater than the specified object. If the specified object cannot be compared to the receiving object, the method throws a ClassCastException.
+-->
+`compareTo` 方法将比较被调用的对象和参数传入的对象，并在参数传入的对象小于、等于或大于被调用的对象的时候返回负数、0 或正数。
+如果被调用的对象无法与参数传入的对象相比较，方法将抛出 `ClassCastException`。
+
+<!--
+	The following class representing a person's name implements Comparable.
+-->
+[下面这个表示一个人的名称的类](http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/Name.java)实现了 `Comparable` 接口：
+
+<pre class="brush: java">
+import java.util.*;
+
+public class Name implements Comparable&lt;Name> {
+    private final String firstName, lastName;
+
+    public Name(String firstName, String lastName) {
+        if (firstName == null || lastName == null)
+            throw new NullPointerException();
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    public String firstName() { return firstName; }
+    public String lastName()  { return lastName;  }
+
+    public boolean equals(Object o) {
+        if (!(o instanceof Name))
+            return false;
+        Name n = (Name) o;
+        return n.firstName.equals(firstName) && n.lastName.equals(lastName);
+    }
+
+    public int hashCode() {
+        return 31*firstName.hashCode() + lastName.hashCode();
+    }
+
+    public String toString() {
+	return firstName + " " + lastName;
+    }
+
+    public int compareTo(Name n) {
+        int lastCmp = lastName.compareTo(n.lastName);
+        return (lastCmp != 0 ? lastCmp : firstName.compareTo(n.firstName));
+    }
+}
+</pre>
+
+<!--
+	To keep the preceding example short, the class is somewhat limited: It doesn't support middle names, it demands both a first and a last name, and it is not internationalized in any way. Nonetheless, it illustrates the following important points:
+-->
+为保持简短，这个类还是存在一定限制的：它并不支持中名（Middle Name），只需要传入名和姓，而且也不支持任何形式的国际化。
+不管怎么说，这个示例还是展示了如下几点：
+
+- `Name` 对象是不可变的。在其他因素保持不变时，不可变类型是一个不错的选择，尤其是这些对象可能被用作 `Set` 的元素或是 `Map` 的键时。
+  如果对象在这些集合中的时候被修改的话，这些集合本身的特性就会被打破。
+- 构造器对传入参数执行了 `null` 值检查。这么做确保了所有的 `Name` 对象都是良构的，也确保了其他方法不会抛出 `NullPointerException`。
+- 重新定义了 `hashCode` 方法。对于重新定义了 `equals` 方法的类来说这是必须的。（相等的对象应拥有相同的哈希码。）
+- 若给定的对象为 `null` 或类型不符时，`equals` 方法返回 `false`，而在这种情况下 `compareTo` 方法则会抛出一个运行时异常。
+  这些行为都是两个方法在各自的文档中所声明且必须遵循的。
+- `toString` 方法被重新定义以将 `Name` 对象以更可读的形式输出。这是很不错的做法，尤其是对那些会被放入到集合中的对象来说。
+  各种不同的集合类型的 `toString` 方法均依赖于它们的元素、键或值的 `toString` 方法。
+
+<!--
+	Since this section is about element ordering, let's talk a bit more about Name's compareTo method. It implements the standard name-ordering algorithm, where last names take precedence over first names. This is exactly what you want in a natural ordering. It would be very confusing indeed if the natural ordering were unnatural!
+-->
+既然这一节是有关元素顺序的，我们就来多聊聊 `Name` 的 `compareTo` 方法吧。它实现了标准的名称排序算法，先考虑姓再考虑名。
+这正是你想要在自然顺序中看到的特性。如果自然顺序变得不自然的话就会显得很奇怪了。
+
+<!--
+	Take a look at how compareTo is implemented, because it's quite typical. First, you compare the most significant part of the object (in this case, the last name). Often, you can just use the natural ordering of the part's type. In this case, the part is a String and the natural (lexicographic) ordering is exactly what's called for. If the comparison results in anything other than zero, which represents equality, you're done: You just return the result. If the most significant parts are equal, you go on to compare the next most-significant parts. In this case, there are only two parts — first name and last name. If there were more parts, you'd proceed in the obvious fashion, comparing parts until you found two that weren't equal or you were comparing the least-significant parts, at which point you'd return the result of the comparison.
+-->
+我们来看看 `compareTo` 方法是怎么实现的。首先，你要对对象中最关键的部分进行比较（`Name` 的姓）。有时，你还可以直接使用这部分的类型的自然顺序。
+在示例中，该部分的类型为 `String`，而它的自然顺序（字典序）正是我们所需要的。如果比较的结果不是表示相等的 0，那你就完事了：你可以直接返回该结果。
+如果该部分是相等的，那你就需要去比较下一个部分了。在这个示例中，`Name` 类只包含两个部分：姓和名。如果你需要比较的类中有更多的域，
+那你同样需要以这样的顺序一直比较下去，直到你找到不相等的域或是在比较最后一个域后返回比较的结果。
+
+<!--
+	Just to show that it all works, here's a program that builds a list of names and sorts them.
+-->
+如下是一个创建了一个名称列表并将其进行排序的[程序实例](http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/NameSort.java)：
+
+<pre class="brush: java">
+import java.util.*;
+
+public class NameSort {
+    public static void main(String[] args) {
+        Name nameArray[] = {
+            new Name("John", "Smith"),
+            new Name("Karl", "Ng"),
+            new Name("Jeff", "Smith"),
+            new Name("Tom", "Rich")
+        };
+
+        List&lt;Name> names = Arrays.asList(nameArray);
+        Collections.sort(names);
+        System.out.println(names);
+    }
+}
+</pre>
+
+运行程序将输出如下结果：
+
+<pre>
+[Karl Ng, Tom Rich, Jeff Smith, John Smith]
+</pre>
+
+<!--
+	There are four restrictions on the behavior of the compareTo method, which we won't go into now because they're fairly technical and boring and are better left in the API documentation. It's really important that all classes that implement Comparable obey these restrictions, so read the documentation for Comparable if you're writing a class that implements it. Attempting to sort a list of objects that violate the restrictions has undefined behavior. Technically speaking, these restrictions ensure that the natural ordering is a total order on the objects of a class that implements it; this is necessary to ensure that sorting is well defined.
+-->
+实际上，`compareTo` 方法的行为存在着四项约束。这些约束更多是从技术层面上对其行为进行约束，我们不会在这里对其进行详述，我们认为将其放到 API 文档中会是更好的选择。
+实现了 `Comparable` 的类型必须遵循这些约束，因此当你想要自己编写一个实现 `Comparable` 的类时，记得去阅读一下 `Comparable` 的接口。
+企图对违反了这些约束的对象进行排序将产生不可预料的结果。从技术上来讲，这些约束是为了保证 `compareTo` 所提供的自然顺序关系同样也是对这些对象的**全序关系**（Total Order）。为了正确定义如何对这些对象进行排序，这么做是必须的。
+
+#### 比较器
+
+<!--
+	What if you want to sort some objects in an order other than their natural ordering? Or what if you want to sort some objects that don't implement Comparable? To do either of these things, you'll need to provide a Comparator — an object that encapsulates an ordering. Like the Comparable interface, the Comparator interface consists of a single method.
+-->
+如果你不想按对象的自然顺序进行排序怎么办？或者你想要对一些没有实现 `Comparable` 的对象进行排序怎么办？
+要做到这样的事，你需要提供一个 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html">Comparator</a></code>，一个封装了对象顺序的对象。
+正如 `Comparable` 接口，`Comparator` 接口也只包含了一个方法：
+
+<pre class="brush: java">
+public interface Comparator&lt;T> {
+    int compare(T o1, T o2);
+}
+</pre>
+
+<!--
+	The compare method compares its two arguments, returning a negative integer, 0, or a positive integer depending on whether the first argument is less than, equal to, or greater than the second. If either of the arguments has an inappropriate type for the Comparator, the compare method throws a ClassCastException.
+-->
+`compare` 方法接受两个参数，并在第一个参数小于、等于或大于第二个参数的时候返回负数、0 或正数。如果参数的类型不符，`compare` 方法将抛出 `ClassCastException`。
+
+<!--
+	Much of what was said about Comparable applies to Comparator as well. Writing a compare method is nearly identical to writing a compareTo method, except that the former gets both objects passed in as arguments. The compare method has to obey the same four technical restrictions as Comparable's compareTo method for the same reason — a Comparator must induce a total order on the objects it compares.
+-->
+之前提到的有关 `Comparable` 的事基本都适用于 `Comparator`。除了 `compare` 方法以参数的形式接受两个将要被比较的对象，
+实现 `compare` 方法和实现 `compareTo` 方法基本没什么不同。`compare` 方法同样需要遵循 `Comparable` 的 `compareTo` 方法的四项约束，
+原因也相同：`Comparator` 必须提供其将比较的对象的全序关系。
+
+假设你有一个叫 `Employee` 的类如下：
+
+<pre class="brush: java">
+public class Employee implements Comparable&lt;Employee> {
+    public Name name()     { ... }
+    public int number()    { ... }
+    public Date hireDate() { ... }
+       ...
+}
+</pre>
+
+<!--
+	Let's assume that the natural ordering of Employee instances is Name ordering (as defined in the previous example) on employee name. Unfortunately, the boss has asked for a list of employees in order of seniority. This means we have to do some work, but not much. The following program will produce the required list.
+-->
+假设 `Employee` 的自然顺序即为它们的名称的 `Name` 自然顺序。不幸的是，你的上司想要一个按资历排序的员工列表。那么我们就需要多做些工作了。
+如下程序将产生所需的列表：
+
+<pre class="brush: java">
+import java.util.*;
+public class EmpSort {
+    static final Comparator&lt;Employee> SENIORITY_ORDER = 
+                                        new Comparator&lt;Employee>() {
+            public int compare(Employee e1, Employee e2) {
+                return e2.hireDate().compareTo(e1.hireDate());
+            }
+    };
+
+    // Employee database
+    static final Collection&lt;Employee> employees = ... ;
+
+    public static void main(String[] args) {
+        List&lt;Employee> e = new ArrayList&lt;Employee>(employees);
+        Collections.sort(e, SENIORITY_ORDER);
+        System.out.println(e);
+    }
+}
+</pre>
+
+<!--
+	The Comparator in the program is reasonably straightforward. It relies on the natural ordering of Date applied to the values returned by the hireDate accessor method. Note that the Comparator passes the hire date of its second argument to its first rather than vice versa. The reason is that the employee who was hired most recently is the least senior; sorting in the order of hire date would put the list in reverse seniority order. Another technique people sometimes use to achieve this effect is to maintain the argument order but to negate the result of the comparison.
+-->
+示例程序中的 `Comparator` 应该已经相当直观了。它依赖于 `hireDate` 方法返回的 `Date` 的自然顺序。注意，`Comparator` 将第一个参数的 `Date` 传递给了第二个参数的 `Date`
+而并不是反过来。这么做的原因在于，最近被雇佣的员工自然是最没有资历的，按照任职日期对员工进行排序则正好与我们想要的顺序相反了。
+除此之外，人们还常常试图对比较的结果取反以达成相同的效果：
+
+<pre class="brush: java">
+// 不要这么做！！
+return -r1.hireDate().compareTo(r2.hireDate());
+</pre>
+
+<!--
+	You should always use the former technique in favor of the latter because the latter is not guaranteed to work. The reason for this is that the compareTo method can return any negative int if its argument is less than the object on which it is invoked. There is one negative int that remains negative when negated, strange as it may seem.
+-->
+你应该尽量使用之前的做法，因为后一种做法并不一定能正常工作。原因在于，当参数小于被调用的对象时，`compareTo` 方法可以返回任何负整数。
+也许听起来很奇怪，但有那么一个负整数在取反后仍然为负：
+
+<pre class="brush: java">
+-Integer.MIN_VALUE == Integer.MIN_VALUE
+</pre>
+
+<!--
+	The Comparator in the preceding program works fine for sorting a List, but it does have one deficiency: It cannot be used to order a sorted collection, such as TreeSet, because it generates an ordering that is not compatible with equals. This means that this Comparator equates objects that the equals method does not. In particular, any two employees who were hired on the same date will compare as equal. When you're sorting a List, this doesn't matter; but when you're using the Comparator to order a sorted collection, it's fatal. If you use this Comparator to insert multiple employees hired on the same date into a TreeSet, only the first one will be added to the set; the second will be seen as a duplicate element and will be ignored.
+-->
+在对 `List` 进行排序时，之前的示例程序中的 `Comparator` 将表现良好，但它仍有一点不足：
+它不能用于为一个如 `TreeSet` 的有序集合提供元素顺序，因为它产生的顺序与 `equals` 不相容。
+意思是说，当 `equals` 方法认为两个对象不相等时，这个 `Comparator` 认为它们相等：两个在同一天被雇佣的雇员在这个 `Comparator` 眼里是相等的。
+如果你只是在为一个 `List` 进行排序，这没有什么问题，但如果你想要用这个 `Comparator` 为一个有序集合提供元素顺序，那就有大问题了。
+如果你使用了该 `Comparator` 然后向 `TreeSet` 中插入多个在同一天被雇佣的雇员，那么只有第一个雇员会被成功添加，其他的雇员均会被视作重复元素而被忽略。
+
+<!--
+	To fix this problem, simply tweak the Comparator so that it produces an ordering that is compatible with equals. In other words, tweak it so that the only elements seen as equal when using compare are those that are also seen as equal when compared using equals. The way to do this is to perform a two-part comparison (as for Name), where the first part is the one we're interested in — in this case, the hire date — and the second part is an attribute that uniquely identifies the object. Here the employee number is the obvious attribute. This is the Comparator that results.
+-->
+要解决这个问题，我们只需要对 `Comparator` 进行修改使其产生的元素顺序能与 `equals` 方法相容就好了。也就是说，我们要对其进行修改使其认为相等的元素恰好是 `equals` 方法也认为相等的元素。我们可以在 `Comparator` 中执行两次比较，其中第一次对我们感兴趣的雇佣日期进行比较，而第二次则对唯一标识每个对象的属性进行比较。
+员工号是个不错的选择。如下即为改动后的 `Comparator`：
+
+<pre class="brush: java">
+static final Comparator&lt;Employee> SENIORITY_ORDER = 
+                                        new Comparator&lt;Employee>() {
+    public int compare(Employee e1, Employee e2) {
+        int dateCmp = e2.hireDate().compareTo(e1.hireDate());
+        if (dateCmp != 0)
+            return dateCmp;
+
+        return (e1.number() &lt; e2.number() ? -1 :
+               (e1.number() == e2.number() ? 0 : 1));
+    }
+};
+</pre>
+
+<!--
+	One last note: You might be tempted to replace the final return statement in the Comparator with the simpler:
+-->
+最后，你可能会想要将 `Comparator` 最后的 `return` 语句变成这个样子：
+
+<pre class="brush: java">
+return e1.number() - e2.number();
+</pre>
+
+<!--
+	Don't do it unless you're absolutely sure no one will ever have a negative employee number! This trick does not work in general because the signed integer type is not big enough to represent the difference of two arbitrary signed integers. If i is a large positive integer and j is a large negative integer, i - j will overflow and will return a negative integer. The resulting comparator violates one of the four technical restrictions we keep talking about (transitivity) and produces horrible, subtle bugs. This is not a purely theoretical concern; people get burned by it.
+-->
+千万不要这么做，除非你绝对确定没人的员工号会是负值。实际上，有符号整型数的范围并没有大到足以表示任意两个有符号整型数的差值。
+如果 `i` 是一个很大的正数而 `j` 是一个很小的负数，那么 `i - j` 则有可能溢出并返回负值。这样一来，这个 `Comparator` 就违反了其中一个我们一直在说的约束了（传递性），
+而且会产生出些很微妙的 bug。
+
+---
+
+<h3 id="sorted-set">2.8 SortedSet 接口</h3>
+
+<!--
+	A SortedSet is a Set that maintains its elements in ascending order, sorted according to the elements' natural ordering or according to a Comparator provided at SortedSet creation time. In addition to the normal Set operations, the SortedSet interface provides operations for the following:
+-->
+<code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/SortedSet.html">SortedSet</a></code> 为以升序对元素进行排列的 `Set`，
+它将根据元素的自然顺序或在构建时提供的 `Comparator` 对元素进行排列。除了基本的 `Set` 操作，`SortedSet` 接口还提供了如下几个操作：
+
+- 范围视图：允许对有序集进行任意的范围操作；
+- 端点：返回有序集的第一个或最后一个元素；
+- 访问 `Comparator`：返回有序集所使用的 `Comparator`。
+
+`SortedSet` 的代码如下所示：
+
+<pre class="brush: java">
+public interface SortedSet&lt;E> extends Set&lt;E> {
+    // Range-view
+    SortedSet&lt;E> subSet(E fromElement, E toElement);
+    SortedSet&lt;E> headSet(E toElement);
+    SortedSet&lt;E> tailSet(E fromElement);
+
+    // Endpoints
+    E first();
+    E last();
+
+    // Comparator access
+    Comparator&lt;? super E> comparator();
+}
+</pre>
+
+#### 集操作
+
+除了如下两点外，`SortedSet` 从 `Set` 继承而来的操作行为完全一致：
+
+- `iterator` 方法返回的 `Iterator` 将按照有序集的顺序遍历元素；
+- `toArray` 方法返回的数组将按照有序集的顺序排列元素。
+
+<!--
+	Although the interface doesn't guarantee it, the toString method of the Java platform's SortedSet implementations returns a string containing all the elements of the sorted set, in order.
+-->
+尽管接口本身并没有给出这样的承诺，但 Java 中所有的 `SortedSet` 实现类的 `toString` 方法返回的字符串同样会以有序集的顺序排列元素。
+
+#### 标准构造器
+
+<!--
+	By convention, all general-purpose Collection implementations provide a standard conversion constructor that takes a Collection; SortedSet implementations are no exception. In TreeSet, this constructor creates an instance that sorts its elements according to their natural ordering. This was probably a mistake. It would have been better to check dynamically to see whether the specified collection was a SortedSet instance and, if so, to sort the new TreeSet according to the same criterion (comparator or natural ordering). Because TreeSet took the approach that it did, it also provides a constructor that takes a SortedSet and returns a new TreeSet containing the same elements sorted according to the same criterion. Note that it is the compile-time type of the argument, not its runtime type, that determines which of these two constructors is invoked (and whether the sorting criterion is preserved).
+-->
+按照惯例，所有的 `Collection` 普适实现类都必须提供一个接受一个 `Collection` 参数的标准转换构造器。`SortedSet` 的实现类也不例外。
+`TreeSet` 的这个构造器将构造一个将元素按其自然顺序进行排列的实例。这看起来像是一个设计失误。也许，我们更应该动态地判断给定的集合是不是一个 `SortedSet`，
+如果是的话则让新的 `TreeSet` 采用相同的元素排列顺序。正是由于 `TreeSet` 没有这么做，它还提供了一个接受 `SortedSet` 的构造器，
+这个构造器所构建的 `TreeSet` 就会采用和给定 `SortedSet` 相同的元素排列顺序了。
+注意，取决调用哪个构造器且是否保留原有排列方式的将会是参数的编译时类型，而不是其运行时类型。
+
+<!--
+	SortedSet implementations also provide, by convention, a constructor that takes a Comparator and returns an empty set sorted according to the specified Comparator. If null is passed to this constructor, it returns a set that sorts its elements according to their natural ordering.
+-->
+按照惯例，`SortedSet` 的实现类同样提供了一个接受一个 `Comparator` 并返回一个空的按照该给定 `Comparator` 排列元素的有序集的构造器。
+如果给定的 `Comparator` 为 `null`，新的有序集将以元素的自然顺序对其进行排列。
+
+#### 范围视图操作
+
+<!--
+	The range-view operations are somewhat analogous to those provided by the List interface, but there is one big difference. Range views of a sorted set remain valid even if the backing sorted set is modified directly. This is feasible because the endpoints of a range view of a sorted set are absolute points in the element space rather than specific elements in the backing collection, as is the case for lists. A range-view of a sorted set is really just a window onto whatever portion of the set lies in the designated part of the element space. Changes to the range-view write back to the backing sorted set and vice versa. Thus, it's okay to use range-views on sorted sets for long periods of time, unlike range-views on lists.
+-->
+`SortedSet` 的范围视图操作看起来和 `List` 接口的有点像，实则不然。即使是原本的有序集发生了变化，它的范围视图仍将保持可用。
+这是因为，有序集范围视图的端点并不是有序集中的某个确定的元素，而是元素空间中的一个绝对点。有序集的范围视图不过是对其元素空间的某个部分所开辟的窗口。
+对范围视图做出的修改同样会写入到有序集里，反之亦然。因此，与 `List` 的范围视图不同，长时间持有并使用有序集的范围视图是没有问题的。
+
+<!--
+	Sorted sets provide three range-view operations. The first, subSet, takes two endpoints, like subList. Rather than indices, the endpoints are objects and must be comparable to the elements in the sorted set, using the Set's Comparator or the natural ordering of its elements, whichever the Set uses to order itself. Like subList, the range is half open, including its low endpoint but excluding the high one.
+-->
+有序集提供了三个范围视图操作。`subSet` 方法如同 `subList` 方法接受两个断点。比起接受元素索引值，
+`subSet` 方法接受的端点为两个可以使用有序集的 `Comparator` 或元素的自然顺序与有序集中的元素进行比较的对象。
+如 `subList`，`subSet` 返回的范围是半开放的：下界端点将被包含，而上界端点则不会被包含。
+
+<!--
+	Thus, the following line of code tells you how many words between "doorbell" and "pickle", including "doorbell" but excluding "pickle", are contained in a SortedSet of strings called dictionary:
+-->
+因此，如下代码将告诉你在一个叫做 `dictionary` 的由字符串组成的 `SortedSet` 中有多少单词在 `doorbell` 和 `pickle` 之间，包含 `doorbell` 但不包含 `pickle`：
+
+<pre class="brush: java">
+int count = dictionary.subSet("doorbell", "pickle").size();
+</pre>
+
+<!--
+	In like manner, the following one-liner removes all the elements beginning with the letter f.
+-->
+同样，如下代码将移除所有以 `f` 字母开头的元素：
+
+<pre class="brush: java">
+dictionary.subSet("f", "g").clear();
+</pre>
+
+<!--
+	A similar trick can be used to print a table telling you how many words begin with each letter.
+-->
+类似的，如下代码能够打印出一个表格，告诉你以各个字母开头的单词都有哪些：
+
+<pre class="brush: java">
+for (char ch = 'a'; ch &lt;= 'z'; ) {
+    String from = String.valueOf(ch++);
+    String to = String.valueOf(ch);
+    System.out.println(from + ": " + dictionary.subSet(from, to).size());
+}
+</pre>
+
+<!--
+	Suppose you want to view a closed interval, which contains both of its endpoints, instead of an open interval. If the element type allows for the calculation of the successor of a given value in the element space, merely request the subSet from lowEndpoint to successor(highEndpoint). Although it isn't entirely obvious, the successor of a string s in String's natural ordering is s + "\0" — that is, s with a null character appended.
+-->
+假设你想要获取一个包含两个端点的闭区间视图，而不是默认的半开区间。如果可以为元素类型都某个值计算其在元素空间上的后继值，
+那么你只要计算从 `lowEndpoint` 到 `successor(highEndpoint)` 的 `subSet` 就好了。尽管也不是那么明显，但字符串 `s` 的后继值为 `s + "\0"`。
+
+<!--
+	Thus, the following one-liner tells you how many words between "doorbell" and "pickle", including doorbell and pickle, are contained in the dictionary.
+-->
+因此，下列代码能告诉你 `dictionary` 中有多少单词位于 `doorbell` 和 `pickle` 之间，包括 `doorbell` 和 `pickle`：
+
+<pre class="brush: java">
+count = dictionary.subSet("doorbell", "pickle\0").size();
+</pre>
+
+<!--
+	A similar technique can be used to view an open interval, which contains neither endpoint. The open-interval view from lowEndpoint to highEndpoint is the half-open interval from successor(lowEndpoint) to highEndpoint. Use the following to calculate the number of words between "doorbell" and "pickle", excluding both.
+-->
+你也可以使用类似的方式获取一个不包含两个端点的开区间视图，你只要将半开区间从 `lowEndpoint` 到 `highEndpoint` 的参数改为
+`successor(lowEndpoint)` 到 `highEndpoing` 就可以了。下列代码可以计算 `dictionary` 中有多少单词位于 `doorbell` 和 `pickle` 之间，不包括 `doorbell` 和 `pickle`：
+
+<pre class="brush: java">
+count = dictionary.subSet("doorbell\0", "pickle").size();
+</pre>
+
+<!--
+	The SortedSet interface contains two more range-view operations — headSet and tailSet, both of which take a single Object argument. The former returns a view of the initial portion of the backing SortedSet, up to but not including the specified object. The latter returns a view of the final portion of the backing SortedSet, beginning with the specified object and continuing to the end of the backing SortedSet. Thus, the following code allows you to view the dictionary as two disjoint volumes (a-m and n-z).
+-->
+`SortedSet` 接口还包含另外两个范围视图操作：`headSet` 和 `tailSet`，两个方法都只接受一个 `Object` 参数。
+前一个方法将返回给定 `SortedSet` 从开头到，但不包括，给定对象的那部分的视图。
+后一个方法则返回给定 `SortedSet` 从给定对象到结尾那部分的视图。因此，下述代码可以让你将 `dictionary` 视作两个互不相交的 `volumn`（`a-m` 和 `n-z`）：
+
+<pre class="brush: java">
+SortedSet&lt;String> volume1 = dictionary.headSet("n");
+SortedSet&lt;String> volume2 = dictionary.tailSet("n");
+</pre>
+
+#### 断点操作
+
+<!--
+	The SortedSet interface contains operations to return the first and last elements in the sorted set, not surprisingly called first and last. In addition to their obvious uses, last allows a workaround for a deficiency in the SortedSet interface. One thing you'd like to do with a SortedSet is to go into the interior of the Set and iterate forward or backward. It's easy enough to go forward from the interior: Just get a tailSet and iterate over it. Unfortunately, there's no easy way to go backward.
+-->
+
+<!--
+	The following idiom obtains the first element that is less than a specified object o in the element space.
+-->
+
+<pre class="brush: java">
+Object predecessor = ss.headSet(o).last();
+</pre>
+
+<!--
+	This is a fine way to go one element backward from a point in the interior of a sorted set. It could be applied repeatedly to iterate backward, but this is very inefficient, requiring a lookup for each element returned.
+-->
+
+#### 比较器访问操作
+
+<!--
+	The SortedSet interface contains an accessor method called comparator that returns the Comparator used to sort the set, or null if the set is sorted according to the natural ordering of its elements. This method is provided so that sorted sets can be copied into new sorted sets with the same ordering. It is used by the SortedSet constructor described previously.
+-->
+
+---
+
+<h3 id="sorted-map">2.9 SortedMap 接口</h3>
+
+<!--
+	A SortedMap is a Map that maintains its entries in ascending order, sorted according to the keys' natural ordering, or according to a Comparator provided at the time of the SortedMap creation. Natural ordering and Comparators are discussed in the Object Ordering section. The SortedMap interface provides operations for normal Map operations and for the following:
+-->
+
+<!--
+	The following interface is the Map analog of SortedSet.
+-->
+
+<pre class="brush: java">
+public interface SortedMap&lt;K, V> extends Map&lt;K, V>{
+    Comparator&lt;? super K> comparator();
+    SortedMap&lt;K, V> subMap(K fromKey, K toKey);
+    SortedMap&lt;K, V> headMap(K toKey);
+    SortedMap&lt;K, V> tailMap(K fromKey);
+    K firstKey();
+    K lastKey();
+}
+</pre>
+
+#### 映射操作
+
+
+
+---
 
 <h2 id="stream">3 聚合操作</h2>
 
