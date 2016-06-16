@@ -294,7 +294,7 @@ public interface FtpServerContext extends FtpletContext {
 }
 </pre>
 
-我们再来看 `FtpServerContext` 扩展的 `FtpletContext`：
+我们再来看 `FtpServerContext` 扩展的 `FtpletContext`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/FtpletContext.java;h=afe1742b2a09eb9b644bac5ab12c462480c00899;hb=refs/heads/1.0.6)）
 
 <pre class="brush: java">
 public interface FtpletContext {
@@ -590,3 +590,551 @@ public class DefaultFtpServerContext implements FtpServerContext {
 		<td>默认不存在任何 <code>Ftplet</code></td>
 	</tr>
 </table>
+
+## Listener 和 ListenerFactory
+
+之前我们提到，`DefaultFtpServer` 的 `start` 等运行状态转移方法，实际上就是在对其 `FtpServerContext` 里的 `Listener` 和 `Ftplet` 进行启动和关闭，那么这一节我们先从 `Listener` 看起。
+
+从 Apache FtpServer 的[官方文档](http://mina.apache.org/ftpserver-project/configuration_listeners.html)我们可以得知：
+
+> Listeners are the component in FtpServer which is responsible for listening on the network socket and when clients connect create the user session, execute commands and so on.
+
+也就是说，`Listener` 组件负责监听网络端口，并在客户端连接至服务器时创建用户会话，并为用户执行命令。
+
+话不多说，我们直接开始看 `Listener` 的代码吧：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/listener/Listener.java;h=c078982fe1deff5e6a576a3b80e4eebb103c4c72;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+/**
+ * Interface for the component responsible for waiting for incoming socket
+ * requests and kicking off {@link FtpIoSession}s
+ */
+public interface Listener {
+
+    void start(FtpServerContext serverContext);
+    void stop();
+    void suspend();
+    void resume();
+
+    boolean isStopped();
+    boolean isSuspended();
+
+    Set&lt;FtpIoSession> getActiveSessions();
+
+    DataConnectionConfiguration getDataConnectionConfiguration();
+    String getServerAddress();
+    int getPort();
+    int getIdleTimeout();
+
+    boolean isImplicitSsl();
+    SslConfiguration getSslConfiguration();
+
+    IpFilter getIpFilter();
+
+    @Deprecated
+    List&lt;InetAddress> getBlockedAddresses();
+    @Deprecated
+    List&lt;Subnet> getBlockedSubnets();
+}
+</pre>
+
+这里可以看到，除了几个我们已知的状态转移方法和状态判断方法外，一个 `Listener` 基本的配置信息还包括了它所绑定的本地主机名以及端口号、连接超时时间和一个 `DataConnectionConfiguration`，也就是数据连接的配置信息、一个用于对部分 IP 的请求进行屏蔽的 `IpFilter`，以及 `SslConfiguration` 等 SSL 连接的相关配置。
+
+除此之外我们还看到了两个已经被标记为 `@Deprecated` 的方法。它们同样是用于对来自某些 IP 的请求进行屏蔽的，已经被 `IpFilter` 所替代。在后面的代码中我们还会见到它们的身影，但本笔记只会关注 `IpFilter`，这两个域的相关内容将被跳过。
+
+回忆之前看到的 `DefaultFtpServerContext`，`Listener` 在其实例化时默认是这样设置的：
+
+<pre class="brush: java">
+public class DefaultFtpServerContext implements FtpServerContext {
+
+    ...
+
+    private Map&lt;String, Listener> listeners = new HashMap&lt;String, Listener>();
+
+    ...
+
+    public DefaultFtpServerContext() {
+        // create the default listener
+        listeners.put("default", new ListenerFactory().createListener());
+    }
+
+    ...
+
+}
+</pre>
+
+那么我们接下来就来看看 `ListenerFactory`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/listener/ListenerFactory.java;h=1a3532b6c6770b61dbeb04d34649ba61d7c7feb5;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+/**
+ * Factory for listeners. Listeners themselves are immutable and must be 
+ * created using this factory.
+ */
+public class ListenerFactory {
+
+    private String serverAddress;
+    private int port = 21;
+
+    private SslConfiguration ssl;
+    private boolean implicitSsl = false;
+
+    private DataConnectionConfiguration dataConnectionConfig =
+        new DataConnectionConfigurationFactory().createDataConnectionConfiguration();
+
+    private int idleTimeout = 300;
+
+    private List&lt;InetAddress> blockedAddresses;
+    private List&lt;Subnet> blockedSubnets;
+    
+    /**
+     * The IP filter
+     */
+    private IpFilter ipFilter = null;
+
+    ...
+
+}
+</pre>
+
+这里我们了解到，`Listener` 是不可变的，对 `Listener` 的配置需要通过 `ListenerFactory` 进行。由此，我们也能在 `ListenerFactory` 中看到先前提到的几个 `Listener` 的成员域了。
+
+继续往下看：
+
+<pre class="brush: java">
+public class ListenerFactory {
+    
+    ...
+
+    /**
+     * Create a listener based on the settings of this factory. The listener is immutable.
+     * @return The created listener
+     */
+    public Listener createListener() {
+        try {
+            InetAddress.getByName(serverAddress);
+        } catch(UnknownHostException e) {
+            throw new FtpServerConfigurationException("Unknown host",e);
+        }
+        // Deal with the old style black list and new IP Filter here. 
+        if (ipFilter != null) {
+            if (blockedAddresses != null || blockedSubnets != null) {
+                throw new IllegalStateException("Usage of IPFilter in combination with blockedAddesses/subnets is not supported. ");
+            }
+        }
+        if (blockedAddresses != null || blockedSubnets != null) {
+            return new NioListener(serverAddress, port, implicitSsl, ssl,
+                dataConnectionConfig, idleTimeout, blockedAddresses, blockedSubnets);
+        }
+        else {
+            return new NioListener(serverAddress, port, implicitSsl, ssl,
+                dataConnectionConfig, idleTimeout, ipFilter);
+        }
+    }
+
+    ...
+
+}
+</pre>
+
+可以看到，`ListenerFactory` 创建 `Listener` 的行为，主要包括了对所设定主机名的解析以判断该主机名可用，而后便使用了 `ListenerFactory` 内部设定的成员域创建出一个 `NioListener`。
+
+继续往下看：
+
+<pre class="brush: java">
+public class ListenerFactory {
+    
+    ...
+
+    public boolean isImplicitSsl() { ... }
+    public void setImplicitSsl(boolean implicitSsl) { ... }
+
+    public int getPort() { ... }
+    public void setPort(int port) { ... }
+
+    public String getServerAddress() { ... }
+    public void setServerAddress(String serverAddress) { ... }
+
+    public SslConfiguration getSslConfiguration() { ... }
+    public void setSslConfiguration(SslConfiguration ssl) { ... }
+
+    public DataConnectionConfiguration getDataConnectionConfiguration() { ... }
+    public void setDataConnectionConfiguration(DataConnectionConfiguration dataConnectionConfig) { ... }
+
+    public int getIdleTimeout() { ... }
+    public void setIdleTimeout(int idleTimeout) { ... }
+
+    public IpFilter getIpFilter() { ... }
+    public void setIpFilter(IpFilter ipFilter) { ... }
+
+    ...
+
+}
+</pre>
+
+很好，后面就只是各个域的 Getter 和 Setter 方法了。由于 `NioListener` 是唯一的 `Listener` 实现类，这里我们就不继续往下深究了。
+
+## UserManager
+
+`UserManager` 是我们之前提到的 `FtpServerContext` 的内部组件之一。在 `DefaultFtpServerContext` 中，`UserManager` 组件默认的初始化语句为：
+
+<pre class="brush: java">
+public class DefaultFtpServerContext implements FtpServerContext {
+    ...
+    
+    private UserManager userManager = new PropertiesUserManagerFactory().createUserManager();
+
+    ...
+}
+</pre>
+
+我们先来看看 `UserManager` 的源代码：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/UserManager.java;h=16b35534722c73bf64273559f5340dae70c1e980;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public interface UserManager {
+    User getUserByName(String username) throws FtpException;
+
+    String[] getAllUserNames() throws FtpException;
+
+    void delete(String username) throws FtpException;
+
+    void save(User user) throws FtpException;
+
+    boolean doesExist(String username) throws FtpException;
+
+    User authenticate(Authentication authentication) throws AuthenticationFailedException;
+
+    String getAdminName() throws FtpException;
+
+    boolean isAdmin(String username) throws FtpException;
+}
+</pre>
+
+从方法的名称我们基本就能看出，`UserManager` 相当于一个数据库，用来保存服务器所有的用户信息，
+所有用户的信息均以 `User` 对象的形式注册到 `UserManager` 中。
+
+我们再来看 `User` 类：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/User.java;h=0f94fb9be664b42d850f4435a39d22706b7109a4;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public interface User {
+    String getName();
+
+    String getPassword();
+
+    List&lt;Authority> getAuthorities();
+
+    /**
+     * Get authorities of the specified type granted to this user
+     * @param clazz The type of {@link Authority}
+     * @return Authorities of the specified class
+     */
+    List&lt;Authority> getAuthorities(Class&lt;? extends Authority> clazz);
+
+    /**
+     * Authorize a {@link AuthorizationRequest} for this user
+     *
+     * @param request
+     *            The {@link AuthorizationRequest} to authorize
+     * @return A populated AuthorizationRequest if the user was authorized, null
+     *         otherwise.
+     */
+    AuthorizationRequest authorize(AuthorizationRequest request);
+
+    int getMaxIdleTime();
+
+    boolean getEnabled();
+
+    String getHomeDirectory();
+}
+</pre>
+
+可见，`User` 类包含了用户的登录信息、权限信息以及配置信息。
+
+结合 Apache FtpServer 的官方文档，我们可知 FtpServer 默认提供了 `PropertiesUserManager` 和 `DbUserManager` 两个 `UserManager` 实现类，分别使用 properties 文件和 SQL 数据库来保存 `User` 信息。从 `DefaultFtpServerContext` 的默认初始化语句可知，默认使用的是 `PropertiesUserManager`。
+
+于此，我们不再对 `UserManager` 进行深究。
+
+## FileSystem
+
+`FileSystemFactory` 同样是 `FtpServerContext` 的组件之一，它在 `DefaultFtpServerContext` 的默认设置是这样的：
+
+<pre class="brush: java">
+public class DefaultFtpServerContext implements FtpServerContext {
+    ...
+
+    private FileSystemFactory fileSystemManager = new NativeFileSystemFactory();
+
+    ...
+}
+</pre>
+
+先从 `FileSystemFactory` 看起：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/FileSystemFactory.java;h=38e07abf22b953bc380088f52e244f3707d6a4d9;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+/**
+ * Factory for file system implementations - it returns the file system view for user.
+ */
+public interface FileSystemFactory {
+
+    /**
+     * Create user specific file system view.
+     * @param user The user for which the file system should be created
+     * @return The current {@link FileSystemView} for the provided user
+     * @throws FtpException 
+     */
+    FileSystemView createFileSystemView(User user) throws FtpException;
+
+}
+</pre>
+
+可见，`FileSystemFactory` 会为每个 `User` 返回一个对应的 `FileSystemView`，这就使得不同的 `User` 看到的文件内容是可以不同的。
+
+我们再来看一下 `FileSystemView`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/FileSystemView.java;h=95d88e98f36b68e227282b55495a3ea21bfe99e8;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+/**
+ * This is an abstraction over the user file system view.
+ */
+public interface FileSystemView {
+
+    FtpFile getHomeDirectory() throws FtpException;
+    
+    FtpFile getWorkingDirectory() throws FtpException;
+
+    boolean changeWorkingDirectory(String dir) throws FtpException;
+
+    FtpFile getFile(String file) throws FtpException;
+
+    boolean isRandomAccessible() throws FtpException;
+
+    void dispose();
+}
+</pre>
+
+`FileSystemView` 本身也能算是一个文件系统，能提供的信息包括了 Home 路径、当前路径以及可否随机访问，同时也可通过 `FileSystemView` 更改当前路径或获取指定名称的 `FtpFile`。
+
+我们再来看一下 `FtpFile`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/FtpFile.java;h=343f994dc8a619204f9abeceeae043f26825b116;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+/**
+ * This is the file abstraction used by the server.
+ */
+public interface FtpFile {
+
+    String getAbsolutePath();
+    String getName();
+    boolean isHidden();
+    boolean isDirectory();
+    boolean isFile();
+    boolean doesExist();
+    boolean isReadable();
+    boolean isWritable();
+    boolean isRemovable();
+    String getOwnerName();
+    String getGroupName();
+    int getLinkCount();
+    long getLastModified();
+    boolean setLastModified(long time);
+    long getSize();
+
+    List&lt;FtpFile> listFiles();
+
+    boolean mkdir();
+    boolean delete();
+    boolean move(FtpFile destination);
+
+    /**
+     * Create output stream for writing. 
+     *
+     * @param offset The number of bytes at where to start writing.
+     *      If the file is not random accessible,
+     *      any offset other than zero will throw an exception.
+     */
+    OutputStream createOutputStream(long offset) throws IOException;
+
+    /**
+     * Create input stream for reading. 
+     *
+     * @param offset The number of bytes at where to start writing.
+     *      If the file is not random accessible,
+     *      any offset other than zero will throw an exception.
+     */
+    InputStream createInputStream(long offset) throws IOException;
+}
+</pre>
+
+可见，`FtpFile` 实际上并不对应于一个实实在在的 FTP 服务器上的文件，而是对应于 `FileSystemView` 中的一个给定的路径，正如 `java.io.File`。同时 `FtpFile` 也提供了访问路径的相关信息以及进行特定操作的方法。
+
+接下来我们来看看 Apache FtpServer 给的 `FileSystemFactory`、`FileSystemView` 和 `FtpFile` 的默认实现。
+实际上这些实现都对应于本地文件系统的实现，分别是 `NativeFileSystemFactory`、`NativeFileSystemView` 和 `NativeFtpFile`。
+
+我们先来看看 `NativeFileSystemFactory`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/filesystem/nativefs/NativeFileSystemFactory.java;h=f15a19de375275c929944e84c8d1c06f4cf1f238;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+/**
+ * Native file system factory. It uses the OS file system.
+ */
+public class NativeFileSystemFactory implements FileSystemFactory {
+    private final Logger LOG = LoggerFactory.getLogger(NativeFileSystemFactory.class);
+
+    /**
+     * Should the home directories be created automatically
+     */
+    private boolean createHome;
+
+    /**
+     * Is this file system case insensitive. 
+     * Enabling might cause problems when working against case-sensitive file systems, like on Linux
+     */
+    private boolean caseInsensitive;
+
+    /**
+     * Create the appropriate user file system view.
+     */
+    public FileSystemView createFileSystemView(User user) throws FtpException {
+        synchronized (user) {
+            // create home if does not exist
+            if (createHome) {
+                String homeDirStr = user.getHomeDirectory();
+                File homeDir = new File(homeDirStr);
+                if (homeDir.isFile()) {
+                    LOG.warn("Not a directory :: " + homeDirStr);
+                    throw new FtpException("Not a directory :: " + homeDirStr);
+                }
+                if ((!homeDir.exists()) && (!homeDir.mkdirs())) {
+                    LOG.warn("Cannot create user home :: " + homeDirStr);
+                    throw new FtpException("Cannot create user home :: "
+                            + homeDirStr);
+                }
+            }
+
+            FileSystemView fsView = new NativeFileSystemView(user, caseInsensitive);
+
+            return fsView;
+        }
+    }
+
+    public boolean isCreateHome() { ... }
+    public void setCreateHome(boolean createHome) { ... }
+
+    public boolean isCaseInsensitive() { ... }
+    public void setCaseInsensitive(boolean caseInsensitive) { ... }
+
+}
+</pre>
+
+一目了然，`NativeFilsSystemFactory` 包含 `createHome` 和 `caseInsensitive` 两个标识位，其中 `createHome` 用于决定在为用户创建 `NativeFilsSystemView` 时是否自动创建 Home 目录，而 `caseInsensitive` 位则被传入到了 `NativeFileSystemView` 中。除此之外，通过 `createFileSystemView` 方法调用 `User#getHomeDirectory()` 方法的方式我们也能看出，`User` 对象里保存的所谓 Home 路径实际上是给服务器看的，而用户连接 FTP 服务器后都应默认处于根目录 `/`。
+
+我们再来看 `NativeFileSystemView`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/filesystem/nativefs/impl/NativeFileSystemView.java;h=55da62daf3f48af5c01529677539f1f1a7d8e4ab;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public class NativeFileSystemView implements FileSystemView {
+    private final Logger LOG = LoggerFactory.getLogger(NativeFileSystemView.class);
+
+    private String rootDir;
+    private String currDir;
+
+    private User user;
+
+    private boolean caseInsensitive = false;
+
+    protected NativeFileSystemView(User user) throws FtpException {
+        this(user, false);
+    }
+
+    public NativeFileSystemView(User user, boolean caseInsensitive) throws FtpException {
+        if (user == null) 
+            throw new IllegalArgumentException("user can not be null");
+        
+        if (user.getHomeDirectory() == null)
+            throw new IllegalArgumentException("User home directory can not be null");
+
+        this.caseInsensitive = caseInsensitive;
+
+        // add last '/' if necessary
+        String rootDir = user.getHomeDirectory();
+        rootDir = NativeFtpFile.normalizeSeparateChar(rootDir);
+        if (!rootDir.endsWith("/")) {
+            rootDir += '/';
+        }
+        
+        LOG.debug("Native filesystem view created for user \"{}\" with root \"{}\"", user.getName(), rootDir);
+        
+        this.rootDir = rootDir;
+        this.user = user;
+
+        currDir = "/";
+    }
+
+    ...
+
+}
+</pre>
+
+可见，用户当前工作路径在 `NativeFileSystemView` 中被标识为了 `currDir` 成员，`rootDir` 实际上只用于与 `currDir` 变量相结合而判断用户实际在访问的是服务器上的哪个文件夹。
+
+继续往下：
+
+<pre class="brush: java">
+public class NativeFileSystemView implements FileSystemView {
+    ...
+
+    public FtpFile getHomeDirectory() {
+        return new NativeFtpFile("/", new File(rootDir), user);
+    }
+
+    public FtpFile getWorkingDirectory() {
+        FtpFile fileObj = null;
+        if (currDir.equals("/")) {
+            fileObj = new NativeFtpFile("/", new File(rootDir), user);
+        } else {
+            File file = new File(rootDir, currDir.substring(1));
+            fileObj = new NativeFtpFile(currDir, file, user);
+
+        }
+        return fileObj;
+    }
+
+    public FtpFile getFile(String file) {
+        // get actual file object
+        String physicalName = NativeFtpFile.getPhysicalName(rootDir, currDir, file, caseInsensitive);
+        File fileObj = new File(physicalName);
+
+        // strip the root directory and return
+        String userFileName = physicalName.substring(rootDir.length() - 1);
+        return new NativeFtpFile(userFileName, fileObj, user);
+    }
+
+    public boolean changeWorkingDirectory(String dir) {
+
+        dir = NativeFtpFile.getPhysicalName(rootDir, currDir, dir, caseInsensitive);
+
+        // not a directory - return false
+        File dirObj = new File(dir);
+        if (!dirObj.isDirectory()) {
+            return false;
+        }
+
+        // strip user root and add last '/' if necessary
+        dir = dir.substring(rootDir.length() - 1);
+        if (dir.charAt(dir.length() - 1) != '/') {
+            dir = dir + '/';
+        }
+
+        currDir = dir;
+        return true;
+    }
+
+    public boolean isRandomAccessible() {
+        return true;
+    }
+
+    public void dispose() {}
+
+}
+</pre>
+
+`getHomeDirectory` 和 `getWorkingDirectory` 方法的实现证明了之前我们对 `rootDir` 和 `currDir` 关系的猜想。
+在理解了这一点后，剩下的方法的实现就不难理解了。
+
+至此，我们便理解了 Apache FtpServer 自带的 Native File System 的基本工作原理了。`NativeFtpFile` 的实现便不再赘述。
+
+
