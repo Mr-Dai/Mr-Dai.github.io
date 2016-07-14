@@ -1446,4 +1446,445 @@ public class NativeFileSystemView implements FileSystemView {
 
 至此，我们便理解了 Apache FtpServer 自带的 Native File System 的基本工作原理了。`NativeFtpFile` 的实现便不再赘述。
 
+## CommandFactory
 
+在阅读 `DefaultFtpServerContext` 的时候我们注意到，`CommandFactory` 组件的默认实例化方式是这样的：
+
+<pre class="brush: java">
+public class DefaultFtpServerContext implements FtpServerContext {
+    ...
+
+    private CommandFactory commandFactory = new CommandFactoryFactory().createCommandFactory();
+
+    ...
+}
+</pre>
+
+而在阅读 `DefaultFtpHandler` 的时候我们了解到，`CommandFactory` 的 `getCommand` 方法用于将用户请求里携带的命令字符串转换为 `Command` 对象，通过调用 `Command` 对象的 `execute` 方法即可执行该命令。
+
+那么我们先来看一下 `CommandFactory`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/command/CommandFactory.java;h=ced5bdade688c31533f01d7ef2d0ba76342b7bbc;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public interface CommandFactory {
+
+    /**
+     * Get the command instance.
+     * @param commandName The name of the command to create
+     * @return The {@link Command} matching the provided name, or
+     *   null if no such command exists.
+     */
+    Command getCommand(String commandName);
+
+}
+</pre>
+
+基本是意料之中。我们再来看一下 `Command`（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/command/Command.java;h=24c1dc1ce0afa1faa7c3e61f0069a2f7ffa525da;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public interface Command {
+
+    /**
+     * Execute command.
+     * 
+     * @param session The current {@link FtpIoSession}
+     * @param context The current {@link FtpServerContext}
+     * @param request The current {@link FtpRequest}
+     */
+    void execute(FtpIoSession session, FtpServerContext context,
+            FtpRequest request) throws IOException, FtpException;
+
+}
+</pre>
+
+同样，并无太多出人意料的东西。再来看 `CommandFactoryFactory`（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/command/CommandFactoryFactory.java;h=ad3a2316fbfaf8a04e530c15b7d9d74fbb522b66;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public class CommandFactoryFactory {
+
+    private static final HashMap<String, Command> DEFAULT_COMMAND_MAP = new HashMap<String, Command>();
+
+    static {
+        // first populate the default command list
+        DEFAULT_COMMAND_MAP.put("ABOR", new ABOR());
+        DEFAULT_COMMAND_MAP.put("ACCT", new ACCT());
+
+        ...
+    }
+
+    private Map&lt;String, Command> commandMap = new HashMap&lt;String, Command>();
+
+    private boolean useDefaultCommands = true;
+
+    /**
+     * Create an {@link CommandFactory} based on the configuration on the factory.
+     * @return The {@link CommandFactory}
+     */
+    public CommandFactory createCommandFactory() {
+        
+        Map&lt;String, Command> mergedCommands = new HashMap&lt;String, Command>();
+        if (useDefaultCommands)
+            mergedCommands.putAll(DEFAULT_COMMAND_MAP);
+        
+        mergedCommands.putAll(commandMap);
+        
+        return new DefaultCommandFactory(mergedCommands);
+    }
+
+    ...
+}
+</pre>
+
+首先映入眼帘的是初始化为静态成员的 `DEFAULT_COMMAND_MAP`，包含了默认的从字符串到 `Command` 的映射。
+除此之外我们还看到了实例成员 `commandMap` 和 `useDefaultCommands`。从 `createCommandFactory` 方法来看，`useDefaultCommands` 代表是否要向创建的 `DefaultCommandFactory` 中放入默认的 `DEFAULT_COMMAND_MAP`，而 `commandMap` 代表用户自行添加的命令映射。
+
+`CommandFactoryFactory` 的剩余方法则基本验证了我们的猜想：
+
+<pre class="brush: java">
+public class CommandFactoryFactory {
+    ...
+
+    public boolean isUseDefaultCommands() { ... }
+    public void setUseDefaultCommands(final boolean useDefaultCommands) { ... }
+
+    public Map&lt;String, Command> getCommandMap() { ... }
+    public void addCommand(String commandName, Command command) { ... }
+    public void setCommandMap(final Map&lt;String, Command> commandMap) { ... }
+
+}
+</pre>
+
+再来看 `DefaultCommandFactory`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/command/impl/DefaultCommandFactory.java;h=dea5a2e4f19b419d32f0b59e76f02edb91431473;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public class DefaultCommandFactory implements CommandFactory {
+
+    private Map&lt;String, Command> commandMap = new HashMap&lt;String, Command>();
+
+    public DefaultCommandFactory(Map&lt;String, Command> commandMap) {
+        this.commandMap = commandMap;
+    }
+
+    /**
+     * Get command. Returns null if not found.
+     */
+    public Command getCommand(final String cmdName) {
+        if (cmdName == null || cmdName.equals("")) {
+            return null;
+        }
+        String upperCaseCmdName = cmdName.toUpperCase();
+        return commandMap.get(upperCaseCmdName);
+    }
+}
+</pre>
+
+基本是意料之中：`DefaultCommandFactory` 使用一个内置的命令映射来解析传入的命令字符串。
+
+这里我们以 `HELP` 指令为例，看看 FtpServer 是怎么实现 `Command` 接口的：（[完整源代码]()）
+
+<pre class="brush: java">
+public class HELP extends AbstractCommand {
+
+    public void execute(final FtpIoSession session,
+            final FtpServerContext context, final FtpRequest request)
+            throws IOException {
+
+        // reset state variables
+        session.resetState();
+
+        // print global help
+        if (!request.hasArgument()) {
+            session.write(LocalizedFtpReply.translate(session, request, context,
+                    FtpReply.REPLY_214_HELP_MESSAGE, null, null));
+            return;
+        }
+
+        // print command specific help if available
+        String ftpCmd = request.getArgument().toUpperCase();
+        MessageResource resource = context.getMessageResource();
+        if (resource.getMessage(FtpReply.REPLY_214_HELP_MESSAGE, ftpCmd,
+                session.getLanguage()) == null) {
+            ftpCmd = null;
+        }
+        session.write(LocalizedFtpReply.translate(session, request, context,
+                FtpReply.REPLY_214_HELP_MESSAGE, ftpCmd, null));
+    }
+}
+</pre>
+
+并没有什么特别的地方，但我们注意到，`HELP` 指令回应内容并不在这里直接产生，而是调用了 `LocalizedFtpReply` 的静态方法 `translate`，向其中传入了足够的上下文参数以及响应码，由 `LocalizedFtpReply` 来生成对应的回应信息。
+
+剩余的 `Command` 实现类均处于 `org.apache.ftpserver.command.impl` 包中（[地址](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=tree;f=core/src/main/java/org/apache/ftpserver/command/impl;h=aa38131098b8efaba44eaeb0ecbafbb0c8a3b819;hb=refs/heads/1.0.6)），在此便不对它们进行一一解释。
+
+## FtpStatistics
+
+在 `FtpServerContext` 中包含一个 `FtpStatistics` 组件，而在 `DefaultFtpServerContext` 中，该组件是这样被初始化的：
+
+<pre class="brush: java">
+public class DefaultFtpServerContext implements FtpServerContext {
+    ...
+
+    private FtpStatistics statistics =  new DefaultFtpStatistics();
+
+    ...
+}
+</pre>
+
+从类的名称以及 `DefaultFtpHandler` 调用的方式来看，`FtpStatistics` 用于对 FTP 服务器进行一定的计数统计。
+我们先来看一下 `FtpStatistics`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/FtpStatistics.java;h=39a955710fd8e0988a703f12e2321d8dcb90d705;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public interface FtpStatistics {
+    Date getStartTime();
+    int getTotalUploadNumber();
+    int getTotalDownloadNumber();
+    int getTotalDeleteNumber();
+    long getTotalUploadSize();
+    long getTotalDownloadSize();
+    int getTotalDirectoryCreated();
+    int getTotalDirectoryRemoved();
+    int getTotalConnectionNumber();
+    int getCurrentConnectionNumber();
+    int getTotalLoginNumber();
+    int getTotalFailedLoginNumber();
+    int getCurrentLoginNumber();
+    int getTotalAnonymousLoginNumber();
+    int getCurrentAnonymousLoginNumber();
+    int getCurrentUserLoginNumber(User user);
+    int getCurrentUserLoginNumber(User user, InetAddress ipAddress);
+}
+</pre>
+
+这里我们大概了解到了一个 `FtpStatistics` 都统计了什么数据。接下来我们看一下扩展了 `FtpStatistics` 的 `ServerFtpStatistics` 接口：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/impl/ServerFtpStatistics.java;h=a174ed09d680d632feaee5c2f22ec70ebbee8372;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public interface ServerFtpStatistics extends FtpStatistics {
+
+    void setObserver(StatisticsObserver observer);
+    void setFileObserver(FileObserver observer);
+
+    void setUpload(FtpIoSession session, FtpFile file, long size);
+    void setDownload(FtpIoSession session, FtpFile file, long size);
+    void setMkdir(FtpIoSession session, FtpFile dir);
+    void setRmdir(FtpIoSession session, FtpFile dir);
+    void setDelete(FtpIoSession session, FtpFile file);
+    void setOpenConnection(FtpIoSession session);
+    void setCloseConnection(FtpIoSession session);
+    void setLogin(FtpIoSession session);
+    void setLoginFail(FtpIoSession session);
+    void setLogout(FtpIoSession session);
+
+    void resetStatisticsCounters();
+}
+</pre>
+
+这里我们可以看到，`ServerFtpStatistics` 提供的方法主要都是事件的记录方法，方法将在被调用的时候改变对应的统计值。
+
+到这里，我们基本了解了一个 `FtpStatistics` 的运作原理了。`DefaultFtpStatistics` 是 `FtpStatistics` 的默认实现类，在此便不再赘述，感兴趣的读者可以点击[这里](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/impl/DefaultFtpStatistics.java;h=e8228e5a54d387a84e3830147f266b552d9fc00c;hb=refs/heads/1.0.6)查看它的源代码。
+
+## MessageResource
+
+在阅读 `HELP` 指令的源代码的时候我们了解到，响应的主要内容是通过 `LocalizedFtpReply` 的 `translate` 静态方法产生的。
+那么我们先来看一下这个方法：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/impl/LocalizedFtpReply.java;h=ec7def47cfe21fa73f34fa88e64b22f809e21c09;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public class LocalizedFtpReply extends DefaultFtpReply {
+    ...
+
+    public static LocalizedFtpReply translate(FtpIoSession session, FtpRequest request,
+            FtpServerContext context, int code, String subId, String basicMsg) {
+        String msg = translateMessage(session, request, context, code, subId,
+                basicMsg);
+
+        return new LocalizedFtpReply(code, msg);
+    }
+
+    private static String translateMessage(FtpIoSession session,
+            FtpRequest request, FtpServerContext context, int code,
+            String subId, String basicMsg) {
+        MessageResource resource = context.getMessageResource();
+        String lang = session.getLanguage();
+
+        String msg = null;
+        if (resource != null) {
+            msg = resource.getMessage(code, subId, lang);
+        }
+        if (msg == null) {
+            msg = "";
+        }
+        msg = replaceVariables(session, request, context, code, basicMsg, msg);
+
+        return msg;
+    }
+
+    ...
+}
+</pre>
+
+在 `translateMessage` 方法中，响应信息的内容实际上是通过 `MessageResource` 组件的 `getMessage` 方法获取到的。
+
+那么我们就来看一下 `MessageResource` 这个组件：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/message/MessageResource.java;h=924fa1a8d575d9c59509130f821869e9b6e3f0ff;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public interface MessageResource {
+
+    /**
+     * Get all the available languages.
+     * @return A list of available languages
+     */
+    List&lt;String> getAvailableLanguages();
+
+    /**
+     * Get the message for the corresponding code and sub id. If not found it
+     * will return null.
+     * @param code The reply code
+     * @param subId The sub ID
+     * @param language The language
+     * @return The message matching the provided inputs, or null if not found
+     */
+    String getMessage(int code, String subId, String language);
+
+    /**
+     * Get all the messages.
+     * @param language The language
+     * @return All messages for the provided language
+     */
+    Map&lt;String, String> getMessages(String language);
+}
+</pre>
+
+可以看到，外部类主要调用 `MessageResource` 的 `getMessage` 方法，通过传入响应码、语言以及 `subId` 来获取对应的响应内容。
+
+我们回忆一下 `DefaultFtpServerContext` 默认初始化 `MessageResource` 的方式：
+
+<pre class="brush: java">
+public class DefaultFtpServerContext implements FtpServerContext {
+    ...
+
+    private MessageResource messageResource = new MessageResourceFactory().createMessageResource();
+
+    ...
+}
+</pre>
+
+那么我们来看一下 `MessageResourceFactory`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/message/MessageResourceFactory.java;h=a55c7d3bbb13303e30d6fb34da2a0f90699c8ec3;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public class MessageResourceFactory {
+
+    private List&lt;String> languages;
+    private File customMessageDirectory;
+
+    public MessageResource createMessageResource() {
+        return new DefaultMessageResource(languages, customMessageDirectory);
+    }
+
+    public List&lt;String> getLanguages() { ... }
+    public void setLanguages(List&lt;String> languages) { ... }
+
+    public File getCustomMessageDirectory() { ... }
+    public void setCustomMessageDirectory(File customMessageDirectory) { ... }
+}
+</pre>
+
+由此可知，Apache FtpServer 使用 `DefaultMessageResource` 作为默认的 `MessageResource`，而 `DefaultMessageResource` 主要包含 `languages` 和 `customMessageDirectory` 两个域。
+
+那么我们就来看一下 `DefaultMessageResource`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/message/impl/DefaultMessageResource.java;h=2b0fffa4a701d96aea51d62ba13f8ef85aa6b3ae;hb=refs/heads/1.0.6)）
+
+<pre class="brush: java">
+public class DefaultMessageResource implements MessageResource {
+    private final Logger LOG = LoggerFactory.getLogger(DefaultMessageResource.class);
+
+    private final static String RESOURCE_PATH = "org/apache/ftpserver/message/";
+
+    private List&lt;String> languages;
+    private Map&lt;String, PropertiesPair> messages;
+
+    public DefaultMessageResource(List&lt;String> languages,
+            File customMessageDirectory) {
+        if (languages != null) {
+            this.languages = Collections.unmodifiableList(languages);
+        }
+
+        // populate different properties
+        messages = new HashMap&lt;String, PropertiesPair>();
+        if (languages != null) {
+            for (String language : languages) {
+                PropertiesPair pair = createPropertiesPair(language, customMessageDirectory);
+                messages.put(language, pair);
+            }
+        }
+
+        PropertiesPair pair = createPropertiesPair(null, customMessageDirectory);
+        messages.put(null, pair);
+    }
+
+    ...
+
+    private static class PropertiesPair {
+        public Properties defaultProperties = new Properties();
+        public Properties customProperties = new Properties();
+    }
+}
+</pre>
+
+可以看到，除了之前已经了解到的 `languages` 域，`DefaultMessageResource` 还包含一个 `messages` 映射，值为包含 `defaultProperties` 和 `customProperties` 两个域的静态内部类 `PropertiesPair`，而 `DefaultMessageResource` 的构造函数利用了给定的 `languages` 和 `customMessageDirectory` 调用 `createPropertiesPair` 方法来初始化 `messages` 域。
+
+我们继续往下看：
+
+<pre class="brush: java">
+public class DefaultMessageResource implements MessageResource {
+    ...
+
+    private PropertiesPair createPropertiesPair(String lang, File customMessageDirectory) {
+        PropertiesPair pair = new PropertiesPair();
+
+        // load default resource
+        String defaultResourceName;
+        if (lang == null) {
+            defaultResourceName = RESOURCE_PATH + "FtpStatus.properties";
+        } else {
+            defaultResourceName = RESOURCE_PATH + "FtpStatus_" + lang  + ".properties";
+        }
+        InputStream in = null;
+        try {
+            in = getClass().getClassLoader().getResourceAsStream(defaultResourceName);
+            if (in != null) {
+                try {
+                    pair.defaultProperties.load(in);
+                } catch (IOException e) { ... }
+            } else {
+                throw new FtpServerConfigurationException(
+                    "Failed to load messages from \"" + defaultResourceName
+                    + "\", file not found in classpath");
+            }
+        } finally {
+            IoUtils.close(in);
+        }
+
+        // load custom resource
+        File resourceFile = null;
+        if (lang == null) {
+            resourceFile = new File(customMessageDirectory, "FtpStatus.gen");
+        } else {
+            resourceFile = new File(customMessageDirectory, "FtpStatus_" + lang + ".gen");
+        }
+        in = null;
+        try {
+            if (resourceFile.exists()) {
+                in = new FileInputStream(resourceFile);
+                pair.customProperties.load(in);
+            }
+        } catch (Exception ex) { ... }
+        finally {
+            IoUtils.close(in);
+        }
+
+        return pair;
+    }
+
+    ...
+}
+</pre>
+
+可见，首先 `DefaultMessageResource` 会将声明在包 `org.apache.ftpserver.message` 中的 `properties` 文件的内容作为默认的响应内容读入，再根据给定的 `customMessgaeDirectory` 读入指定文件作为用户指定的响应内容。
+通过阅读 Apache FtpServer 自带的这些 `properties` 文件便能很好地理解大致的作用原理，在此不再进行赘述。
