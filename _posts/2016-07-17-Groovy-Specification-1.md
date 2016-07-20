@@ -2,7 +2,7 @@
 layout: posts_translated
 title: Groovy 语言规范 - 第一章：语法
 author: Robert Peng
-category: Scala
+category: Groovy
 org_title: "Groovy Specification - Chapter 1 : Syntax"
 org_url: "http://www.groovy-lang.org/syntax.html"
 ---
