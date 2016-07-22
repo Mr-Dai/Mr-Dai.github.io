@@ -29,6 +29,10 @@ dd {
 	margin: 50px 0;
 }
 
+table {
+	width: 100%;
+}
+
 h3 {
 	font-size: 25px;
 }
