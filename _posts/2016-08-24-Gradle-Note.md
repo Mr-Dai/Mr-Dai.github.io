@@ -38,8 +38,7 @@ task dist(dependsOn: [compile, test]) &lt;&lt; {
 
 通过 <kbd>-x</kbd> 命令行选项可以在构建时排除指定的任务。被排除的任务不会被执行，同样其他依赖该任务的任务也不会被执行。
 
-
-```
+<pre>
 > gradle dist -x test
 :compile
 compiling source
@@ -49,11 +48,11 @@ building the distribution
 BUILD SUCCESSFUL
 
 Total time: 1 secs
-```
+</pre>
 
 ### 4.3 在任务失败后继续构建
 
-在默认情况下，Gradle 会在某个任务执行失败后立刻停止执行。使用 <kbd>--continue</kbd> 选项可以使 Gradle 继续执行其它不相关的任务，但当一个任务执行失败后，其它依赖它的任务仍然不会被执行。
+在默认情况下，Gradle 会在某个任务执行失败后立刻停止执行。使用 <kbd>\--continue</kbd> 选项可以使 Gradle 继续执行其它不相关的任务，但当一个任务执行失败后，其它依赖它的任务仍然不会被执行。
 
 ### 4.4 任务名称缩写
 
@@ -71,7 +70,7 @@ Total time: 1 secs
 
 ### 4.6 强制任务执行
 
-需要 Gradle 任务都支持增性构建：当它们检测到输入与输出和上一次执行相比没有发生变化时便会不执行，并在执行 <kbd>gradle</kbd> 命令时显示为 `UP-TO-DATE`。我们可以通过使用 <kbd>--rerun-tasks</kbd> 选项来强制执行所需的所有任务。
+需要 Gradle 任务都支持增性构建：当它们检测到输入与输出和上一次执行相比没有发生变化时便会不执行，并在执行 <kbd>gradle</kbd> 命令时显示为 `UP-TO-DATE`。我们可以通过使用 <kbd>\--rerun-tasks</kbd> 选项来强制执行所需的所有任务。
 
 ### 4.7 获取构建的相关信息
 
@@ -96,19 +95,19 @@ dists {
 }
 </pre>
 
-你也可以使用 <kbd>--all</kbd> 选项，如此便会显示所有分组和未分组的任务以及各个任务的依赖。
+你也可以使用 <kbd>\--all</kbd> 选项，如此便会显示所有分组和未分组的任务以及各个任务的依赖。
 
 #### 4.7.3 查看任务的具体使用方法
 
-通过执行 <kbd>gradle help --task someTask</kbd> 即可查看吻合给定任务名的所有任务的详细信息。这些信息包括其完整任务路径、任务类型、可用的命令行参数以及任务的描述。
+通过执行 <kbd>gradle help \--task someTask</kbd> 即可查看吻合给定任务名的所有任务的详细信息。这些信息包括其完整任务路径、任务类型、可用的命令行参数以及任务的描述。
 
 #### 4.7.4 显示任务的依赖
 
 使用 <kbd>gradle dependencies</kbd> 可以查看每个任务的依赖，其直接与间接的依赖将以树状的形式显示。
 
-由于所有任务的所有依赖加起来可能会包含大量的输出信息，因此可以使用 <kbd>--configuration</kbd> 参数查看指定任务的依赖。
+由于所有任务的所有依赖加起来可能会包含大量的输出信息，因此可以使用 <kbd>\--configuration</kbd> 参数查看指定任务的依赖。
 
-```
+<pre>
 > gradle -q api:dependencies --configuration testCompile
 
 ------------------------------------------------------------
@@ -118,7 +117,7 @@ Project :api - The shared API for the application
 testCompile
 \--- junit:junit:4.12
      \--- org.hamcrest:hamcrest-core:1.3
-```
+</pre>
 
 #### 4.7.5 显示项目的构建脚本依赖
 
@@ -128,20 +127,20 @@ testCompile
 
 运行指令 <kbd>gradle dependencyInsight</kbd> 即可查看具体依赖的指定信息：
 
-```
+<pre>
 > gradle -q webapp:dependencyInsight --dependency groovy --configuration compile
 org.codehaus.groovy:groovy-all:2.4.7
 \--- project :api
      \--- compile
-```
+</pre>
 
-该指令可用于查看某个具体的依赖包是从如何被解析出来的。在使用该指令时，我们需要像上述示例那样通过 <kbd>--dependency</kbd> 和 <kbd>--configuration</kbd> 参数指定要查看的依赖和配置。
+该指令可用于查看某个具体的依赖包是从如何被解析出来的。在使用该指令时，我们需要像上述示例那样通过 <kbd>\--dependency</kbd> 和 <kbd>\--configuration</kbd> 参数指定要查看的依赖和配置。
 
 #### 4.7.7 显示所有项目属性
 
 执行 <kbd>gradle properties</kbd> 可以查看项目的所有属性：
 
-```
+<pre>
 > gradle -q api:properties
 
 ------------------------------------------------------------
@@ -156,11 +155,11 @@ asDynamicObject: DynamicObject for project ':api'
 baseClassLoaderScope: org.gradle.api.internal.initialization.DefaultClassLoaderScope@12345
 buildDir: /home/user/gradle/samples/userguide/tutorial/projectReports/api/build
 buildFile: /home/user/gradle/samples/userguide/tutorial/projectReports/api/build.gradle
-```
+</pre>
 
 #### 4.7.8 构建报告
 
-在执行构建时使用 <kbd>--profile</kbd> 选项即可在构建后于 `build/reports/profile` 处生成构建报告。报告的内容包括从配置到任务执行等各个阶段所花的时间。
+在执行构建时使用 <kbd>\--profile</kbd> 选项即可在构建后于 `build/reports/profile` 处生成构建报告。报告的内容包括从配置到任务执行等各个阶段所花的时间。
 
 ### 4.8 构建预演
 
