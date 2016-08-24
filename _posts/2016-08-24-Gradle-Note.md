@@ -52,7 +52,7 @@ Total time: 1 secs
 
 ### 4.3 在任务失败后继续构建
 
-在默认情况下，Gradle 会在某个任务执行失败后立刻停止执行。使用 <kbd>\--continue</kbd> 选项可以使 Gradle 继续执行其它不相关的任务，但当一个任务执行失败后，其它依赖它的任务仍然不会被执行。
+在默认情况下，Gradle 会在某个任务执行失败后立刻停止执行。使用 <kbd>--continue</kbd> 选项可以使 Gradle 继续执行其它不相关的任务，但当一个任务执行失败后，其它依赖它的任务仍然不会被执行。
 
 ### 4.4 任务名称缩写
 
@@ -70,7 +70,7 @@ Total time: 1 secs
 
 ### 4.6 强制任务执行
 
-需要 Gradle 任务都支持增性构建：当它们检测到输入与输出和上一次执行相比没有发生变化时便会不执行，并在执行 <kbd>gradle</kbd> 命令时显示为 `UP-TO-DATE`。我们可以通过使用 <kbd>\--rerun-tasks</kbd> 选项来强制执行所需的所有任务。
+需要 Gradle 任务都支持增性构建：当它们检测到输入与输出和上一次执行相比没有发生变化时便会不执行，并在执行 <kbd>gradle</kbd> 命令时显示为 `UP-TO-DATE`。我们可以通过使用 <kbd>--rerun-tasks</kbd> 选项来强制执行所需的所有任务。
 
 ### 4.7 获取构建的相关信息
 
@@ -95,17 +95,17 @@ dists {
 }
 </pre>
 
-你也可以使用 <kbd>\--all</kbd> 选项，如此便会显示所有分组和未分组的任务以及各个任务的依赖。
+你也可以使用 <kbd>--all</kbd> 选项，如此便会显示所有分组和未分组的任务以及各个任务的依赖。
 
 #### 4.7.3 查看任务的具体使用方法
 
-通过执行 <kbd>gradle help \--task someTask</kbd> 即可查看吻合给定任务名的所有任务的详细信息。这些信息包括其完整任务路径、任务类型、可用的命令行参数以及任务的描述。
+通过执行 <kbd>gradle help --task someTask</kbd> 即可查看吻合给定任务名的所有任务的详细信息。这些信息包括其完整任务路径、任务类型、可用的命令行参数以及任务的描述。
 
 #### 4.7.4 显示任务的依赖
 
 使用 <kbd>gradle dependencies</kbd> 可以查看每个任务的依赖，其直接与间接的依赖将以树状的形式显示。
 
-由于所有任务的所有依赖加起来可能会包含大量的输出信息，因此可以使用 <kbd>\--configuration</kbd> 参数查看指定任务的依赖。
+由于所有任务的所有依赖加起来可能会包含大量的输出信息，因此可以使用 <kbd>--configuration</kbd> 参数查看指定配置的依赖。
 
 <pre>
 > gradle -q api:dependencies --configuration testCompile
@@ -134,7 +134,7 @@ org.codehaus.groovy:groovy-all:2.4.7
      \--- compile
 </pre>
 
-该指令可用于查看某个具体的依赖包是从如何被解析出来的。在使用该指令时，我们需要像上述示例那样通过 <kbd>\--dependency</kbd> 和 <kbd>\--configuration</kbd> 参数指定要查看的依赖和配置。
+该指令可用于查看某个具体的依赖包是从如何被解析出来的。在使用该指令时，我们需要像上述示例那样通过 <kbd>--dependency</kbd> 和 <kbd>--configuration</kbd> 参数指定要查看的依赖和配置。
 
 #### 4.7.7 显示所有项目属性
 
@@ -159,7 +159,7 @@ buildFile: /home/user/gradle/samples/userguide/tutorial/projectReports/api/build
 
 #### 4.7.8 构建报告
 
-在执行构建时使用 <kbd>\--profile</kbd> 选项即可在构建后于 `build/reports/profile` 处生成构建报告。报告的内容包括从配置到任务执行等各个阶段所花的时间。
+在执行构建时使用 <kbd>--profile</kbd> 选项即可在构建后于 `build/reports/profile` 处生成构建报告。报告的内容包括从配置到任务执行等各个阶段所花的时间。
 
 ### 4.8 构建预演
 
@@ -168,3 +168,39 @@ buildFile: /home/user/gradle/samples/userguide/tutorial/projectReports/api/build
 ### 4.9 总结
 
 有关 Gradle 命令行的详细介绍可参阅[附录 D：Gradle 命令行](https://docs.gradle.org/current/userguide/gradle_command_line.html)。
+
+## 5 Gradle Wrapper
+
+在分发项目源代码时，源代码中可以放入特定版本的 Gradle Wrapper。此举的好处有两点：
+
+- 避免代码用户因所使用的 Gradle 版本不同导致构建出错
+- 使我们无需对所使用的持续构建服务器做过多的配置
+
+### 5.1 使用 Gradle Wrapper 执行构建
+
+对于安装了 Gradle Wrapper 的项目，我们应使用 <kbd>gradlew &lt;task></kbd> 对其执行构建，其中命令 `gradlew` 的使用方法和 `gradle` 完全一致。
+
+Gradle Wrapper 的所有文件包括如下，注意不要让版本控制系统忽略这些文件：
+
+- `gradlew`（Unix Shell 脚本）
+- `gradlew.bat`（Windows 批处理文件）
+- `gradle/wrapper/gradle-wrapper.jar`（Wrapper 的 JAR）
+- `gradle/wrapper/gradle-wrapper.properties`（Wrapper 的 properties 文件）
+
+（译者注：可考虑让版本控制系统忽略 `.gradle` 文件夹）
+
+在执行的过程中，`gradlew` 会把指定版本的 Gradle 下载至 `$USER_HOME/.gradle/wrapper/dists` 并执行。
+
+### 5.2 为项目安装 Wrapper
+
+执行 <kbd>gradle wrapper</kbd> 即可为项目安装 Gradle Wrapper。在执行该指令时，我们可以通过参数 <kbd>--gradle-version</kbd> 和 <kbd>--gradle-distribution-url</kbd> 配置需要安装的 Wrapper 的版本和下载 Gradle 的路径。默认安装的 Wrapper 版本与安装时所使用的 Gradle 版本相同。
+
+除此之外，我们还可以在构建脚本中配置一个 [`Wrapper`](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.wrapper.Wrapper.html) 任务，如通过设置属性 `gradleVersion` 来改变默认的 Wrapper 版本：
+
+<pre class="brush: groovy">
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+</pre>
+
+有关 `Wrapper` 任务的更多配置方式，请查阅 `Wrapper` 的 [API 文档](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.wrapper.Wrapper.html)。
