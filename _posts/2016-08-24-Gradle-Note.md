@@ -14,6 +14,8 @@ author: Robert Peng
 
 在使用 Gradle 时，可以如命令 <kbd>gradle compile test</kbd> 这般指定执行多个 Gradle 任务，Gradle 会按照指定的顺序指定这些任务以及它们的以来任务。在执行时，Gradle 也会合理地绘制任务依赖 DAG，以确保被多个任务依赖的任务只执行一次。
 
+（译者注：在 Gradle 安装目录的 `bin` 文件夹里实际上只有 `gradle` 一个可执行文件，因此所有的 Gradle 功能只能通过 `gradle` 命令或是后面提到的 `gradlew` 命令来执行）
+
 除此之外，在代码示例 4.1 中看到我们可以使用 `<<` 运算符为某些默认任务追加逻辑：
 
 <pre class="brush: groovy">
@@ -204,3 +206,54 @@ task wrapper(type: Wrapper) {
 </pre>
 
 有关 `Wrapper` 任务的更多配置方式，请查阅 `Wrapper` 的 [API 文档](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.wrapper.Wrapper.html)。
+
+## 6 Gradle 守护线程
+
+### 6.1 为何要使用 Gradle 守护线程
+
+启动 Gradle 进行项目构建的过程首先涉及到 JVM 的启动，同时 Gradle 依赖的一些库也需要比较长的时间进行初始化，这就使得启动 Gradle 进行构建首先需要等待其进行初始化。
+
+解决的办法就是使用一个持续在后台运行的 Gradle 守护线程，每一次都将构建任务提交至该守护线程便可跳过这些初始化。除此之外，守护线程还会对项目的如依赖 DAG 等信息进行缓存，更进一步地缩小构建所需的时间。
+
+在使用 `--profile` 选项生成构建报告时可以在报告中看到守护线程可以为构建节省多少时间。
+
+从 3.0 版本开始，Gradle 守护线程将会默认开启。（译者注：实际上是如果 `gradle` 命令发现守护线程不存在便会自动开启守护线程）
+
+### 6.2 检查守护线程的状态
+
+使用 <kbd>--status</kbd> 选项即可查看所有守护线程的状态。
+
+### 6.3 关闭守护线程功能
+
+永久关闭守护线程功能的方式有两种：
+
+- 将标识 `-Dorg.gradle.daemon=false` 添加至 `GRADLE_OPTS` 环境变量
+- 将代码 `org.gradle.daemon=false` 添加至属性文件 `$GRADLE_USER_HOME/gradle.properties`
+
+其中，`GRADLE_USER_HOME` 变量的默认值为 `$USER_HOME/.gradle`。该值可以通过 <kbd>-g</kbd> 或 <kbd>--gradle-user-home</kbd> 命令行参数进行设置，或是直接修改 `GRADLE_USER_HOME` 环境变量或 `org.gradle.user.home` JVM 系统属性。
+
+在 Windows 中执行如下指令可为当前用户关闭守护线程功能：
+
+```
+(if not exist "%USERPROFILE%/.gradle" mkdir "%USERPROFILE%/.gradle") && (echo org.gradle.daemon=false >> "%USERPROFILE%/.gradle/gradle.properties")
+```
+
+类 Unix 系统则可通过如下 Bash 指令为当前用户关闭守护线程功能：
+
+```
+mkdir -p ~/.gradle && echo "org.gradle.daemon=false" >> ~/.gradle/gradle.properties
+```
+
+在构建时，我们还可以通过 <kbd>--daemon</kbd> 和 <kbd>--no-daemon</kbd> 选项来显式地声明此次构建是否要使用守护线程。
+
+### 6.4 关闭正在运行的守护线程
+
+每个 Gradle 守护线程在闲置时都会不断对比自己占用的内存和系统剩余的内存，并在剩余内存不多时关闭自己以释放内存。因此在大多数时候我们不需要手动关闭守护线程。
+
+不过，我们也可以通过指令 <kbd>gradle --stop</kbd> 关闭所有 Gradle 守护线程。
+
+### 6.6 何时不该使用 Gradle 守护线程
+
+我们应在开发环境里使用 Gradle 守护线程来加速构建，但在持续整合服务器上，稳定性才是至关重要的，这时我们就应关闭 Gradle 守护线程功能，确保不同的构建之间是完全相互独立的。
+
+
