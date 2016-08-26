@@ -256,4 +256,176 @@ mkdir -p ~/.gradle && echo "org.gradle.daemon=false" >> ~/.gradle/gradle.propert
 
 我们应在开发环境里使用 Gradle 守护线程来加速构建，但在持续整合服务器上，稳定性才是至关重要的，这时我们就应关闭 Gradle 守护线程功能，确保不同的构建之间是完全相互独立的。
 
+## 7 依赖管理基础
 
+本章内容只是对 Gradle 的依赖管理系统进行了浅显的介绍，在用户手册靠后的章节中会对依赖管理系统的不同部分进行详细的阐述，本章中也会给出具体的链接。
+
+### 7.2 声明依赖
+
+先看一个示例 `build.gradle`：
+
+<pre class="brush: groovy">
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.hibernate', name: 'hibernate-core', version: '3.6.7.Final'
+    testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+</pre>
+
+这个示例实际上就包含了声明依赖的几个基本元素。
+
+### 7.3 依赖配置
+
+Gradle 会根据依赖所赋予的配置（Configuration）对其进行分组。对于 Java 项目所使用的 Java 插件来说，插件本身定义了的依赖配置即为 Java 程序编译到运行的几个生命周期。常用的包括：
+
+- `compile`：编译项目源文件所需的依赖
+- `runtime`：运行项目所需的依赖。默认包含上述的编译时依赖
+- `testCompile`：编译项目测试源文件所需的依赖。默认包含上述的编译时依赖和项目源文件编译后产生的类文件
+- `testRuntime`：运行项目测试所需的依赖。默认包含上述的编译依赖、运行依赖和测试编译依赖
+
+有关 Java 插件定义的依赖配置的更多内容详见[表 45.5](https://docs.gradle.org/current/userguide/java_plugin.html#tab:configurations)。
+
+有关依赖配置的更多内容详见 [23.3 小节](https://docs.gradle.org/current/userguide/dependency_management.html#sub:configurations)。
+
+### 7.4 外部依赖
+
+我们可以通过属性 `group`、`name` 和 `version` 为 Gradle 唯一地指定外部依赖：
+
+<pre class="brush: groovy">
+dependencies {
+    compile group: 'org.hibernate', name: 'hibernate-core', version: '3.6.7.Final'
+}
+</pre>
+
+或者我们也可以将其简写为 `group:name:version` 的形式：
+
+<pre class="brush: groovy">
+dependencies {
+    compile 'org.hibernate:hibernate-core:3.6.7.Final'
+}
+</pre>
+
+有关声明依赖的更多内容详见 [23.4 小节](https://docs.gradle.org/current/userguide/dependency_management.html#sec:how_to_declare_your_dependencies)。
+
+### 7.5 库
+
+Gradle 需要在 `build.gradle` 脚本中为 `Project.repositories` 属性进行设置，指定用于下载依赖的远程库。
+常用的设置方式包括如下几种：
+
+<table class="table">
+	<tr>
+		<th>库类型</th>
+		<th>构建脚本</th>
+	</tr>
+	<tr>
+		<td>Maven 中心库</td>
+		<td>
+<pre class="brush: groovy">
+repositories {
+    mavenCentral()
+}
+</pre>
+		</td>
+	</tr>
+	<tr>
+		<td>JCenter 库</td>
+		<td>
+<pre class="brush: groovy">
+repositories {
+    jcenter()
+}
+</pre>
+		</td>
+	</tr>
+	<tr>
+		<td>自定义的远程 Maven 库</td>
+		<td>
+<pre class="brush: groovy">
+repositories {
+    maven {
+        url "http://repo.mycompany.com/maven2"
+    }
+}
+</pre>
+		</td>
+	</tr>
+	<tr>
+		<td>自定义的远程 Ivy 库</td>
+		<td>
+<pre class="brush: groovy">
+repositories {
+    ivy {
+        url "http://repo.mycompany.com/repo"
+    }
+}
+</pre>
+		</td>
+	</tr>
+	<tr>
+		<td>本地 Ivy 库</td>
+		<td>
+<pre class="brush: groovy">
+repositories {
+    ivy {
+        // URL can refer to a local directory
+        url "../local-repo"
+    }
+}
+</pre>
+		</td>
+	</tr>
+</table>
+
+有关库的更多内容详见 [23.6 小节](https://docs.gradle.org/current/userguide/dependency_management.html#sec:repositories)。
+
+### 7.6 发布程序包
+
+Gradle 同样可以像 Maven 那样发布程序包。要做到这一点，我们需要将需要发布至的目标库定义到 `uploadArchives` 任务中：
+
+<table class="table">
+	<tr>
+		<th>目标库类型</th>
+		<th>构建脚本</th>
+	</tr>
+	<tr>
+		<td>Maven 库</td>
+		<td>
+<pre class="brush: groovy">
+apply plugin: 'maven'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file://localhost/tmp/myRepo/")
+        }
+    }
+}	
+</pre>
+		</td>
+	</tr>
+	<tr>
+		<td>Ivy 库</td>
+		<td>
+<pre class="brush: groovy">
+uploadArchives {
+    repositories {
+        ivy {
+            credentials {
+                username "username"
+                password "pw"
+            }
+            url "http://repo.mycompany.com"
+        }
+    }
+}
+</pre>
+		</td>
+	</tr>
+</table>
+
+而后执行 `uploadArchives` 任务，Gradle 便会构建项目并上传生成的程序包。
