@@ -463,3 +463,16 @@ uploadArchives {
 
 对于第二种方式，任务的限定名称结构和 Java 类的限定名类似，只是以冒号 `:` 作为分隔符，同时以一个起始的冒号指代根项目。
 
+## 9 持续构建
+
+在使用 Gradle 命令进行构建时，添加 <kbd>-t</kbd> 或 <kbd>--continuous</kbd> 选项即可打开持续构建模式：在该模式下，Gralde 会持续监控所指定任务的输入，并在输入发生变化时自动重新执行任务。例如在执行 `build` 任务时进入持续构建模式，Gradle 便会在源代码文件发生修改时自动重新构建项目。
+
+值得注意的是，Gradle 只会监控所指定任务的输入，但如构建脚本等文件的修改不会导致 Gradle 自动重新执行任务。
+
+任务可以通过一定的方式声明自己的输入和输出，详见[案例 17.24](https://docs.gradle.org/current/userguide/more_about_tasks.html#incrementalTask)。
+
+## 10 使用 Gradle 图形界面
+
+执行命令 <kbd>gradle --gui</kbd> 即可打开 Gradle 图形界面。注意该命令会一直阻塞直到图形界面退出，因此在 *nix 系统下你可以使用命令 <kbd>gradle --gui &</kbd> 来后台执行。
+
+
