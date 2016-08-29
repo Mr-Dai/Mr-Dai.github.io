@@ -8,6 +8,8 @@ author: Robert Peng
 
 本文为我个人的 Gradle 学习笔记，包含了 [Gradle User Guide](https://docs.gradle.org/current/userguide/userguide.html) 各章节的重点归纳。归纳的内容从 User Guide 的第 4 章开始。
 
+本文的章节顺序有所调整以方便阅读。
+
 ## 4 使用 Gradle 命令行
 
 ### 4.1 执行多个任务
@@ -476,6 +478,54 @@ uploadArchives {
 ## 10 使用 Gradle 图形界面
 
 执行命令 <kbd>gradle --gui</kbd> 即可打开 Gradle 图形界面。注意该命令会一直阻塞直到图形界面退出，因此在 *nix 系统下你可以使用命令 <kbd>gradle --gui &</kbd> 来后台执行。
+
+## 15 构建初始化插件
+
+我们可以使用 Gradle 自带的初始化插件在指定文件夹直接生成一个新的 Gradle 项目。
+
+### 15.1 所执行的任务
+
+该初始化插件为 Gradle 添加了如下任务：
+
+- `wrapper`：[`Wrapper`](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.wrapper.Wrapper.html) 类型的任务，在指定文件夹下生成 Gradle Wrapper
+- `init`：[`InitBuild`](https://docs.gradle.org/current/dsl/org.gradle.buildinit.tasks.InitBuild.html) 类型的任务，依赖 `wrapper` 任务，用于生成 Gradle 项目
+
+### 15.2 初始化类型
+
+在执行 `init` 任务时，我们需要使用 `--type` 命令行参数来给出初始化项目的类型。如果没有显式给出类型，Gradle 则会尝试自行推断类型。
+
+支持的类型包括如下。
+
+#### 15.3.1 `pom`
+
+`pom` 类型用于将一个已有的 Maven 项目转换为 Gradle 项目。该类型要求当前文件夹或 `-p` 命令行参数指定的文件夹下包含有效的 POM 文件以及 Maven 相关配置。如果在文件夹下能够找到有效的 POM 文件，Gradle 也会在未显式指定类型时推断出类型为 `pom`。
+
+#### 15.3.2 `java-library`
+
+`java-library` 只能通过显式指定，Gradle 不会自动推断为 `java-library` 类型。
+
+该类型将自动为生成的项目使用 `java` 插件并使用 `jcenter` 依赖库，使用 `JUnit` 作为测试框架并生成基本的源代码和测试代码文件夹。
+
+除此之外，在使用该类型时还可以通过 `--test-framework` 参数指定使用除 [JUnit](http://junit.org/) 以外的测试框架。支持的框架包括：
+
+- [Spock](http://code.google.com/p/spock/)：<kbd>gradle init --type java-library --test-framework spock</kbd>
+- [TestNG](http://testng.org/doc/index.html)：<kbd>gradle init --type java-library --test-framework testng</kbd>
+
+#### 15.3.3 `scala-library`
+
+`scala-library` 只能通过显式指定，Gradle 不会自动推断为 `scala-library` 类型。
+
+该类型将自动为生成的项目使用 `scala` 插件并使用 `jcenter` 依赖库，使用 [Scala Test](http://www.scalatest.org/)作为测试框架并生成基本的源代码和测试代码文件夹。除此之外，项目会自动使用 2.10 版本的 Scala 并默认使用 Zinc Scala 编译器。
+
+#### 15.3.4 `groovy-library`
+
+`groovy-library` 只能通过显式指定，Gradle 不会自动推断为 `groovy-library` 类型。
+
+该类型将自动为生成的项目使用 `groovy` 插件并使用 `jcenter` 依赖库，使用 [Spock](http://spockframework.org/)作为测试框架并生成基本的源代码和测试代码文件夹。除此之外，项目会自动使用 2.x 版本的 Groovy。
+
+#### 15.3.5 `basic`
+
+默认的初始化类型，当类型没有被显式给出且无法自动推断为 `pom` 类型时便会使用该类型。此时 Gradle 会创建一个示例 `build.gradle` 文件并在其中放入有用的注释和链接。
 
 ## 14 构建脚本入门
 
