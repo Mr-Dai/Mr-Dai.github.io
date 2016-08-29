@@ -121,6 +121,8 @@ testCompile
      \--- org.hamcrest:hamcrest-core:1.3
 </pre>
 
+在执行 `gradle` 命令时使用 <kbd>-q</kbd> 命令行参数可以去除 Gradle 的日志信息，只保留任务本身的输出。有关 Gradle 日志的更多信息详见 [22 章](https://docs.gradle.org/current/userguide/logging.html)。
+
 #### 4.7.5 显示项目的构建脚本依赖
 
 运行指令 <kbd>gradle buildEnvironment</kbd> 可以显示项目的构建脚本依赖，显示的格式与 <kbd>gradle dependencies</kbd> 类似。
@@ -256,7 +258,7 @@ mkdir -p ~/.gradle && echo "org.gradle.daemon=false" >> ~/.gradle/gradle.propert
 
 我们应在开发环境里使用 Gradle 守护线程来加速构建，但在持续整合服务器上，稳定性才是至关重要的，这时我们就应关闭 Gradle 守护线程功能，确保不同的构建之间是完全相互独立的。
 
-## 7 依赖管理基础
+## 7 依赖管理入门
 
 本章内容只是对 Gradle 的依赖管理系统进行了浅显的介绍，在用户手册靠后的章节中会对依赖管理系统的不同部分进行详细的阐述，本章中也会给出具体的链接。
 
@@ -475,4 +477,197 @@ uploadArchives {
 
 执行命令 <kbd>gradle --gui</kbd> 即可打开 Gradle 图形界面。注意该命令会一直阻塞直到图形界面退出，因此在 *nix 系统下你可以使用命令 <kbd>gradle --gui &</kbd> 来后台执行。
 
+## 14 构建脚本入门
 
+### 14.1 项目和任务
+
+在 Gradle 中主要包含两个基本概念：项目（Project）和任务（Task）。项目本身的定义并不明确，取决于你想要做些什么：一个项目可以构建什么东西，也可以部署别的什么东西。一个项目可以包含若干个任务，而一个任务则代表着一个构建可以执行的原子逻辑。
+
+### 14.2 Hello World
+
+这节主要给出了一个构建脚本的 Hello World 示例：
+
+<pre class="brush: groovy">
+task hello {
+    doLast {
+        println 'Hello world!'
+    }
+}
+</pre>
+
+在这段代码中调用了 `Task` 的 `doLast` 方法，其作用即把给定的 Groovy 闭包添加到任务的操作列表末尾。同样的还包括一个 `doFirst` 方法，顾名思义。
+
+在声明了任务以后，我们就可以在脚本内像使用属性那样使用这个任务了：
+
+<pre class="brush: groovy">
+task hello {
+    doLast {
+        println 'Hello Earth!'
+    }
+}
+hello.doFirst {
+    println 'Hello Venus'
+}
+hello.doLast {
+    println "Greetings from the $hello.name task."
+}
+hello &lt;&lt; {
+    println 'Hello Jupiter'
+}
+</pre>
+
+其中方法 `<<` 实际上就是 `doLast` 的别名。
+
+### 14.4 构建脚本就是代码
+
+实际上，Gradle 构建脚本所使用的语言正是 Groovy，因此在构建脚本中我们可以使用任意的 Groovy 代码：
+
+<pre class="brush: groovy">
+task upper &lt;&lt; {
+    String someString = 'mY_nAmE'
+    println "Original: " + someString 
+    println "Upper case: " + someString.toUpperCase()
+}
+</pre>
+
+### 14.5 任务依赖
+
+在声明任务的同时我们也可以声明任务的依赖：
+
+<pre class="brush: groovy">
+task taskX(dependsOn: 'taskY') &lt;&lt; {
+    println 'taskX'
+}
+task taskY &lt;&lt; {
+    println 'taskY'
+}
+</pre>
+
+注意声明依赖的任务的时候，被依赖的任务并不需要提前定义，正如上面的代码那样，尽管 `taskX` 依赖 `taskY`，`taskY` 也可以在 `taskX` 之后定义。
+
+除此之外我们也可以在完成任务声明后再为任务赋予具体依赖：
+
+<pre class="brush: groovy">
+task taskX &lt;&lt; {
+	println 'taskX'
+}
+task taskY &lt;&lt; {
+	println 'taskY'
+}
+taskX.dependsOn taskY
+</pre>
+
+注意，以属性指定 `taskY` 时需要 `taskY` 以预先定义，否则可以用字符串的形式来给定 `taskY`：
+
+<pre class="brush: groovy">
+task taskX &lt;&lt; {
+	println 'taskX'
+}
+taskX.dependsOn 'taskY'
+
+task taskY &lt;&lt; {
+	println 'taskY'
+}
+</pre>
+
+### 14.6 动态任务
+
+Gradle 脚本可以利用 Groovy 的动态特性来动态地创建任务：
+
+<pre class="brush: groovy">
+4.times { counter ->
+    task "task$counter" &lt;&lt; {
+        println "I'm task number $counter"
+    }
+}
+task0.dependsOn task2, task3
+</pre>
+
+### 14.9 额外属性
+
+在任务定义内可以使用 `ext` 属性为任务定义额外属性：
+
+<pre class="brush: groovy">
+task myTask {
+    ext.myProperty = "myValue"
+}
+
+task printTaskProperties &lt;&lt; {
+    println myTask.myProperty
+}	
+</pre>
+
+有关额外属性的更多内容详见 [16.4.2 节](https://docs.gradle.org/current/userguide/writing_build_scripts.html#sec:extra_properties)。
+
+### 14.10 使用 Ant 任务
+
+多亏了 Groovy 对 Ant 任务的支持，我们同样可以在 Gradle 中使用 Ant 任务来更方便地进行各式各样的文件读写操作：
+
+<pre class="brush: groovy">
+task loadfile &lt;&lt; {
+    def files = file('../antLoadfileResources').listFiles().sort()
+    files.each { File file ->
+        if (file.isFile()) {
+            ant.loadfile(srcFile: file, property: file.name)
+            println " *** $file.name ***"
+            println "${ant.properties[file.name]}"
+        }
+    }
+}
+</pre>
+
+详见 [Groovy 的 AntBuilder 教程](http://docs.groovy-lang.org/latest/html/documentation/ant-builder.html)以及[第 19 章](https://docs.gradle.org/current/userguide/ant.html)。
+
+### 14.11 使用方法
+
+在 Gradle 脚本里也可以声明方法并在其他任务中调用方法：
+
+<pre class="brush: groovy">
+task checksum &lt;&lt; {
+    fileList('../antLoadfileResources').each {File file ->
+        ant.checksum(file: file, property: "cs_$file.name")
+        println "$file.name Checksum: ${ant.properties["cs_$file.name"]}"
+    }
+}
+
+task loadfile &lt;&lt; {
+    fileList('../antLoadfileResources').each {File file ->
+        ant.loadfile(srcFile: file, property: file.name)
+        println "I'm fond of $file.name"
+    }
+}
+
+File[] fileList(String dir) {
+    file(dir).listFiles({file -> file.isFile() } as FileFilter).sort()
+}
+</pre>
+
+### 14.12 默认任务
+
+可以通过 `defaultTasks` 方法来指定默认任务：
+
+<pre class="brush: groovy">
+defaultTasks 'clean', 'run'
+</pre>
+
+### 14.13 基于 DAG 的配置
+
+在[第 20 章](https://docs.gradle.org/current/userguide/build_lifecycle.html)可以了解到，Gradle 执行时分为配置阶段和执行阶段，其中任务 DAG 的解析在配置阶段完成，而任务的实际执行则属于执行阶段。因此，部分任务也可以基于 DAG 的信息来改变自己的行为：
+
+<pre class="brush: groovy">
+task distribution &lt;&lt; {
+    println "We build the zip with version=$version"
+}
+
+task release(dependsOn: 'distribution') &lt;&lt; {
+    println 'We release now'
+}
+
+gradle.taskGraph.whenReady {taskGraph ->
+    if (taskGraph.hasTask(release)) {
+        version = '1.0'
+    } else {
+        version = '1.0-SNAPSHOT'
+    }
+}
+</pre>
