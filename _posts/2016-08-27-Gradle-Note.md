@@ -853,3 +853,114 @@ dependencies {
     compile project(':shared')
 } 
 </pre>
+
+## 16 编写构建脚本
+
+### 16.1 Gradle 构建语言
+
+Gradle 在 Groovy 的基础上开发出了一套专门用于便捷地进行构建任务的 DSL，因此在 Gradle 构建脚本中我们可以任意地使用 Groovy 语言。除此之外，Gradle 默认假设我们使用 UTF-8 编写脚本。
+
+### 16.2 `Project` API
+
+对于构建中的每个项目，Gradle 都会为它们各自生成一个 [`Project`](https://docs.gradle.org/current/dsl/org.gradle.api.Project.html) 对象并将其与对应项目的构建脚本绑定起来，并在执行脚本时进行如下动作：
+
+- 凡是对任何没有在该构建脚本中定义的方法进行调用时，该调用都会被委托给对应的 `Project` 对象
+- 凡是对任何没有在该构建脚本中定义的属性进行访问时，该访问都会被委托给对应的 `Project` 对象
+
+### 16.3 `Script` API
+
+Gradle 在执行脚本时实际上会把脚本内容放入到一个实现了 [`Script`](https://docs.gradle.org/current/dsl/org.gradle.api.Script.html) 接口的类中进行编译，因此你可以在你的脚本中使用所有由 `Script` 声明的属性和方法。
+
+### 16.4 声明变量
+
+#### 16.4.1 本地变量
+
+同 Groovy，使用 `def` 关键字声明本地变量。本地变量只能在其所属的作用域内访问。
+
+#### 16.4.2 额外属性
+
+我们可以通过部分由 Gradle 定义的类的 `ext` 属性为该对象添加更多的属性：
+
+<pre class="brush: groovy">
+apply plugin: "java"
+
+ext {
+    springVersion = "3.1.0.RELEASE"
+    emailNotification = "build@master.org"
+}
+
+sourceSets.all { ext.purpose = null }
+
+sourceSets {
+    main {
+        purpose = "production"
+    }
+    test {
+        purpose = "test"
+    }
+    plugin {
+        purpose = "production"
+    }
+}
+
+task printProperties &lt;&lt; {
+    println springVersion
+    println emailNotification
+    sourceSets.matching { it.purpose == "production" }.each { println it.name }
+}
+</pre>
+
+结果如下：
+
+<pre>
+> gradle -q printProperties
+3.1.0.RELEASE
+build@master.org
+main
+plugin
+</pre>
+
+有关额外属性以及其 API 的更多内容详见 [`ExtraPropertiesExtension`](https://docs.gradle.org/current/dsl/org.gradle.api.plugins.ExtraPropertiesExtension.html) 类的文档。
+
+### 16.5 配置任意对象
+
+可以使用 `configure` 方法来配置任意对象：
+
+<pre class="brush: groovy">
+def pos = configure(new java.text.FieldPosition(10)) {
+    beginIndex = 1
+    endIndex = 5
+}
+println pos.beginIndex
+println pos.endIndex
+</pre>
+
+### 16.6 使用其他脚本配置对象
+
+对对象的配置甚至还能放入到另一个 `.gradle` 文件中。
+
+我们可以在 `other.gradle` 中输入：
+
+<pre class="brush: groovy">
+// Set properties.
+beginIndex = 1
+endIndex = 5   
+</pre>
+
+如下代码即可完成与上一节相同的配置：
+
+<pre class="brush: groovy">
+def pos = new java.text.FieldPosition(10)
+// Apply the script
+apply from: 'other.gradle', to: pos
+println pos.beginIndex
+println pos.endIndex
+</pre>
+
+### 16.7 Groovy 基础
+
+介绍了 Groovy 的一些基本语法特性。可以去看我之前写过的 Groovy 相关的博文。
+
+### 16.8 默认引入
+
+Gradle 脚本本身也会默认引入 Gradle 的包。引入数量较多，详见 [16.8 小节](https://docs.gradle.org/current/userguide/writing_build_scripts.html#script-default-imports)。
