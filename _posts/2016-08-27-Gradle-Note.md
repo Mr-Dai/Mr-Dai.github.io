@@ -8,7 +8,7 @@ author: Robert Peng
 
 本文为我个人的 Gradle 学习笔记，包含了 [Gradle User Guide](https://docs.gradle.org/current/userguide/userguide.html) 各章节的重点归纳。归纳的内容从 User Guide 的第 4 章开始。
 
-本文的章节顺序有所调整以方便阅读。
+本文的章节顺序有所调整以方便阅读。笔记会先从使用已有的 Gradle 项目开始，然后进入创建新的 Gradle 项目的部分。在创建项目的部分则会先以 Java 项目为例，再延伸到其他 JVM 语言项目。
 
 ## 4 使用 Gradle 命令行
 
@@ -720,4 +720,136 @@ gradle.taskGraph.whenReady {taskGraph ->
         version = '1.0-SNAPSHOT'
     }
 }
+</pre>
+
+## 44 Java 项目构建入门
+
+### 44.1 Java 插件
+
+比起 Maven 只能用于构建 JVM 项目，实际上 Gradle 是一个更加 general 的构建工具：在 Gradle 主页上我们也能看到 Gradle 甚至能用于构建 C++ 项目。Gradle 的强大来源于其使用 Groovy 脚本来定义构建逻辑，因此只要你写得出来，Gradle 就做得出来，但前提是你必须在构建脚本里写清楚 Gradle 该怎么做。
+
+但对于同样类型的项目，比如同样是 Java 项目，每次创建一个新项目都要把编译、测试、打包等逻辑写到脚本里是很麻烦的，因此 Gradle 可以使用插件，其中就包括专门用于 Java 项目的 Java 插件。
+
+插件通常通过引入一些预定义的任务来省去程序员编写脚本的功夫。比如说像编译、测试、打包这样十分常见的逻辑，在 Java 插件中就对应着 `compile`、`test`、`jar` 等预定义的任务。
+
+Java 插件本身是基于惯例的，它会为项目默认指定一些配置，例如源代码文件和测试代码文件的位置等。如果项目没有遵循这些惯例也可以通过脚本来进行修改。实际上，由于 Gradle 的 Java 项目构建功能本身就是委托给 Java 插件的，如果实在有必要你甚至可以不使用 Java 插件以寻求最大的定制化。
+
+### 44.2 基本的 Java 项目
+
+在构建文件中加入如下代码：
+
+<pre class="brush: groovy">
+apply plugin: 'java'
+</pre>
+
+如此一来，Gradle 就知道这是一个 Java 项目并应用 Java 插件了，你在构建时也就可以使用 Java 插件预定义的任务了。你可以使用 <kbd>gradle tasks</kbd> 来查看由 Java 插件添加的任务。
+
+Java 插件对项目的结构做出如下默认配置：
+
+- 源代码文件位于 `src/main/java`
+- 测试代码文件位于 `src/test/java`
+- 所有位于 `src/main/resources` 的文件都会被作为资源文件复制到构建出的 JAR 文件中
+- 所有位于 `src/test/resources` 的文件都会在运行测试时被添加到 classpath 中
+- 所有的构建输出文件都会出现在 `build` 文件夹中，其中构建出的 JAR 文件会位于 `build/libs`
+
+#### 44.2.1 构建项目
+
+主要提到可以用 `build` 任务来构建 Java 项目。
+
+除此之外还提到如下几个有用的任务：
+
+- `clean`：删除 `build` 文件夹
+- `assemble`：编译并将代码打包成 JAR 但不执行任何单元测试。其他插件可能会为该任务添加更多的行为，如使用 War 插件时该任务还会为任务构建 WAR 文件
+- `check`：编译并测试代码。其他插件可能会为该任务添加更多的行为，如使用 `checkstyle` 插件时该任务还会对你的源代码执行代码风格检测
+
+#### 44.2.2 外部依赖
+
+同第七章。
+
+#### 44.2.3 项目自定义
+
+正如前面所说，Java 插件实际上为项目引入了大量的属性并基于惯例为这些属性赋了默认值。通常来讲这些默认值都足够用于普通的 Java 项目，但你也可以在脚本中改变这些属性值以实现项目定制化。
+
+如如下代码：
+
+<pre class="brush: groovy">
+sourceCompatibility = 1.7
+version = '1.0'
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart',
+                   'Implementation-Version': version
+    }
+}
+</pre>
+
+你可以通过 <kbd>gradle properties</kbd> 来查看项目的所有属性。
+
+除此之外，由 Java 插件预定义的任务和其他在构建脚本中定义的任务没什么不同，你也可以在脚本中访问这些任务并对它们做出设置。具体设置方式详见第 14 章。
+
+#### 44.2.4 发布 JAR 文件
+
+同 7.6 节。
+
+#### 44.2.5 创建 Eclipse 项目
+
+使用 `eclipse` 插件：
+
+<pre class="brush: groovy">
+apply plugin: 'eclipse'
+</pre>
+
+然后执行 <kbd>gradle eclipse</kbd> 命令即可生成 Eclipse 项目文件。详见[第 63 章](https://docs.gradle.org/current/userguide/eclipse_plugin.html)。
+
+### 44.3 多项目 Java 构建
+
+#### 44.3.1 定义多项目构建
+
+首先，多项目构建需要在根目录创建一个 `settings.gradle` 并指定包含的子项目：
+
+<pre class="brush: groovy">
+include "shared", "api", "services:webservice", "services:shared" 
+</pre>
+
+详见[第 24 章](https://docs.gradle.org/current/userguide/multi_project_builds.html)。
+
+#### 44.3.2 共用配置
+
+对于大多数的多项目构建而言，总有一些配置是各个子项目都相同的。这些配置可以被集中放在根项目的构建文件中，并使用名为“配置嵌入”的方式来将这些配置应用到每一个子项目。
+
+见如下脚本配置：
+
+<pre class="brush: groovy">
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse-wtp'
+
+    repositories {
+       mavenCentral()
+    }
+
+    dependencies {
+        testCompile 'junit:junit:4.12'
+    }
+
+    version = '1.0'
+
+    jar {
+        manifest.attributes provider: 'gradle'
+    }
+}
+</pre>
+
+上述代码所使用到的 `subprojects` 方法会遍历项目中的每一个子项目并应用给定的闭包，如此一来便能将闭包内的配置应用到每一个子项目。
+
+值得注意的是，Java 插件的应用语句被放置在了 `subprojects` 里面而不是外面，如此一来 Gradle 便不会把根项目当做是一个 Java 项目并到那些预定义的地方寻找源代码文件了。
+
+#### 44.3.3 子项目间的依赖
+
+如下述代码所示：
+
+<pre class="brush: groovy">
+dependencies {
+    compile project(':shared')
+} 
 </pre>
