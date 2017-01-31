@@ -13,25 +13,9 @@ function branchJumpBinding() {
         	jumpList.append("<li><a href='#"+value.id+"'>"+value.innerHTML+"</a></li>");
     	});
 	}
-}
 
-// 生成 JavaDoc 跳转
-function javaDocBinding() {
-    var nameDestMap = {
-    	"java": "http://docs.oracle.com/javase/8/docs/api",
-    	"scala": "http://www.scala-lang.org/api/current"
-    }
-
-	var jumpCode = $("code .api");
-
-	$.each(jumpCode, function(n, value) {
-        var className = value.innerHTML.split("\\.");
-        var destUrl = nameDestMap[className[0]];
-        for (name in className)
-        	destUrl = destUrl + "/" + name;
-        destUrl = destUrl + ".html";
-        value.innerHTML = "<a href='" + destUrl + "'>" + value.innerHTML + "</a>";
-	});
+	// Add scrollspy to <body>
+	$('body').scrollspy({ target: "#right_wrapper", offset: 50 });
 }
 
 // 将文章内容内的每个链接都设定为在新标签页中打开
@@ -80,24 +64,7 @@ $.fn.pythonStyle = function () {
 	});
 }
 
-// 浏览器跳转
-function browserRedirect() {  
-	var sUserAgent = navigator.userAgent.toLowerCase();  
-	var bIsIpad = sUserAgent.match(/ipad/i) == "ipad";  
-	var bIsIphoneOs = sUserAgent.match(/iphone os/i) == "iphone os";  
-	var bIsMidp = sUserAgent.match(/midp/i) == "midp";  
-	var bIsUc7 = sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4";  
-	var bIsUc = sUserAgent.match(/ucweb/i) == "ucweb";  
-	var bIsAndroid = sUserAgent.match(/android/i) == "android";  
-	var bIsCE = sUserAgent.match(/windows ce/i) == "windows ce";  
-	var bIsWM = sUserAgent.match(/windows mobile/i) == "windows mobile";  
-	if ((bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) ){  
-		window.location.href="/mobile";
-	} 
-} 
-
 $(document).ready(function(){
-    javaDocBinding()
 	branchJumpBinding();
 	aAttributeSetting();
 	$("#post_list_container ul li").last().css("border-bottom-width", "0");

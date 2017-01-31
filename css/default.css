@@ -40,6 +40,7 @@ h2, h3, h4, h5 {
     display: block;
     background: rgb(249,249,249);
 	border-bottom: solid 1px rgb(221,221,221);
+    height: 100px;
 
     font-weight: lighter;
     font-family: "Roboto", "MicroSoft YaHei", 'Myriad Pro', Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -109,7 +110,6 @@ ul.list-unstyled {
 }
 
 #right_wrapper ul {
-	width: 100%;
     list-style-type: none;
 	padding: 10px 5px;
     padding-left: 20px;
