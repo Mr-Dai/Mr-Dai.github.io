@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Java String Formatting
 author: Robert Peng
 category: Java

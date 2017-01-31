@@ -1,7 +1,7 @@
 ---
-layout: posts
+layout: post_original
 title: Android Activity 生命周期
-category: Android
+category: Learn
 author: Robert Peng
 ---
 

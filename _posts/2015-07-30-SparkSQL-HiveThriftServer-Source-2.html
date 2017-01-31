@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: SparkSQL Hive ThriftServer 源码解析（二）：SparkSQLCLIService
 author: Robert Peng
 category: Spark
@@ -9,7 +9,7 @@ category: Spark
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
 
 <h2 class="jump">前情提要</h2>
-<p>此文接<a href="/applications/2015/07/27/SparkSQL-HiveThriftServer-Source-1.html">上文</a>，继续讲解SparkSQL Hive ThriftServer源码。</p>
+<p>此文接<a href="{{ site.url }}{% post_url 2015-07-27-SparkSQL-HiveThriftServer-Source-1 %}">上文</a>，继续讲解SparkSQL Hive ThriftServer源码。</p>
 <p>
 	上文提到，主类HiveThriftServer2在启动后便会启动ThriftCLIService和SparkSQLCLIService，
 	其中ThriftCLIService负责维护与客户端的连接并将客户端的请求转发至SparkSQLCLIService，
@@ -60,7 +60,7 @@ private[hive] class SparkSQLCLIService(hiveContext: HiveContext)
 </pre>
 <p>
 	首先我们看到SparkSQLCLISerivce继承自<code>CLIService</code>，同时混入了<code>ReflectedCompositeService</code>特质
-	（如果你已经忘了ReflectedCompositeService，可以<a href="/applications/2015/07/27/SparkSQL-HiveThriftServer-Source-1.html#ReflectedCompositeService">点此回顾前文</a>）。
+	（如果你已经忘了ReflectedCompositeService，可以<a href="{{ site.url }}{% post_url 2015-07-27-SparkSQL-HiveThriftServer-Source-1 %}#ReflectedCompositeService">点此回顾前文</a>）。
 	由此可见，<code>CompositeService</code>应该也是SparkSQLCLIService的父类之一。对比于CLIService的init方法（其部分源代码已以行注释的形式在上述对应代码中给出），
 	SparkSQLCLIService的init方法可以说完全是在做一模一样的事情，不同点仅在于CLIService启动一个<code>SessionManager</code>，而SparkSQLCLIService启动了一个<code>SparkSQLSessionManager</code>。
 	我觉得光从名字上都能判断出来，SparkSQLSessionManager一定继承自SessionManager。

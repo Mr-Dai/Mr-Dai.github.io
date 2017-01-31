@@ -1,5 +1,5 @@
 ---
-layout: posts_translated
+layout: post_translated
 title: Groovy 模块 - JSON 解析与生成
 author: Robert Peng
 category: Groovy

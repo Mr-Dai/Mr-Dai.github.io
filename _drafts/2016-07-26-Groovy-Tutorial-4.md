@@ -1,5 +1,5 @@
 ---
-layout: posts_translated
+layout: post_translated
 title: Groovy 教程 - Grape 依赖管理
 author: Robert Peng
 category: Groovy

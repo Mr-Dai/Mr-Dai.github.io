@@ -1,5 +1,5 @@
 ---
-layout: posts_translated
+layout: post_translated
 title: Scala 语言规范 - 第二章：标识符、名称与作用域
 author: Robert Peng
 category: Scala

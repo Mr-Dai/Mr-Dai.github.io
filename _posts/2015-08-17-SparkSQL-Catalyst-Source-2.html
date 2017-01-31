@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Spark Catalyst 源码解析：Parser
 author: Robert Peng
 category: Spark
@@ -8,7 +8,7 @@ category: Spark
 
 <h2 class="jump">前情提要</h2>
 <p>
-	在<a href="/2015/08/17/SparkSQL-Catalyst-Source-1.html">上一篇文章</a>中，我们了解了SparkSQL查询的基本执行过程，
+	在<a href="{{ site.url }}{% post_url 2015-08-17-SparkSQL-Catalyst-Source-1 %}">上一篇文章</a>中，我们了解了SparkSQL查询的基本执行过程，
 	并了解到<code>SQLContext</code>的内部类<code>QueryExecution</code>包含了整个执行过程的每一个执行步骤。
 </p>
 <p>在这篇文章中，我将开始讲解SQL语句如何通过Parser转变为Unresolved Logical Plan。</p>
@@ -217,5 +217,5 @@ private[sql] class SparkSQLParser(fallback: String => LogicalPlan) extends Abstr
 	真正的解析逻辑还有待你们自己去发掘。在下一篇文章中我会先为大家讲解一下LogicalPlan的数据结构，敬请期待。
 </p>
 <hr />
-<a href="/2015/08/18/SparkSQL-Catalyst-Source-3.html">Spark Catalyst 源码解析：LogicalPlan</a><br />
-<a href="/2015/08/19/SparkSQL-Catalyst-Adv-1.html">Spark Catalyst 进阶：Parser词素</a>
+<a href="{{ site.url }}{% post_url 2015-08-18-SparkSQL-Catalyst-Source-3 %}">Spark Catalyst 源码解析：LogicalPlan</a><br />
+<a href="{{ site.url }}{% post_url 2015-08-19-SparkSQL-Catalyst-Adv-1 %}">Spark Catalyst 进阶：Parser词素</a>

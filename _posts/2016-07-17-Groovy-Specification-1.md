@@ -1,5 +1,5 @@
 ---
-layout: posts_translated
+layout: post_translated
 title: Groovy 语言规范 - 第一章：语法
 author: Robert Peng
 category: Groovy

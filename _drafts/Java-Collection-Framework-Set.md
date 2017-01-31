@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Java 集合框架源码解析：Set
 author: Robert Peng
 category: Java

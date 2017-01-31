@@ -1,5 +1,5 @@
 ---
-layout: posts_translated
+layout: post_translated
 title: Java 集合框架教程
 author: Robert Peng
 category: Java

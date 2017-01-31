@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Spark Catalyst 源码解析：LogicalPlan
 author: Robert Peng
 category: Spark
@@ -9,7 +9,7 @@ category: Spark
 
 <h2 class="jump">前情提要</h2>
 <p>
-	在<a href="/2015/08/17/SparkSQL-Catalyst-Source-2.html">上一篇文章</a>中，
+	在<a href="{{ site.url }}{% post_url 2015-08-17-SparkSQL-Catalyst-Source-2 %}">上一篇文章</a>中，
 	我们了解了SparkSQL如何将各式语句分别委派到三个不同的Parser中进行解析，并返回一个Unresolved Logical Plan。
 </p>
 <p>在这篇文章中，我打算在讲解Analyzer之前先为大家讲解一下Spark里的LogicalPlan数据结构。</p>
@@ -539,4 +539,4 @@ case class Intersect(left: LogicalPlan, right: LogicalPlan) extends BinaryNode {
 	在这篇文章中，我们学习了以<code>LogicalPlan</code>类为核心的执行计划树数据结构。下一次我们将开始讲解Analyzer的相关代码，敬请期待。
 </p>
 <hr />
-<a href="/2015/08/18/SparkSQL-Catalyst-Source-4.html">Spark Catalyst 源码解析：Analyzer与Optimizer</a>
+<a href="{{ site.url }}{% post_url 2015-08-18-SparkSQL-Catalyst-Source-4 %}">Spark Catalyst 源码解析：Analyzer与Optimizer</a>

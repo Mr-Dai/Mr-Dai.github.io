@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Gradle 学习笔记
 author: Robert Peng
 ---

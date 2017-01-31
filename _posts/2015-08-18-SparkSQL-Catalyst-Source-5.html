@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Spark Catalyst 源码解析：Planner与RDD
 author: Robert Peng
 category: Spark
@@ -9,7 +9,7 @@ category: Spark
 
 <h2 class="jump">前情提要</h2>
 <p>
-	在<a href="/2015/08/18/SparkSQL-Catalyst-Source-4.html">上一篇文章</a>中，
+	在<a href="{{ site.url }}{% post_url 2015-08-18-SparkSQL-Catalyst-Source-4 %}">上一篇文章</a>中，
 	我们详细了解了SparkSQL如何利用Analyzer和Optimizer，一步一步将Unresolved Logical Plan变为Analyzed Logical Plan
 	再变为Optimized Logical Plan。到了这一步，Logical Plan的生命历程就走到了终点。
 </p>

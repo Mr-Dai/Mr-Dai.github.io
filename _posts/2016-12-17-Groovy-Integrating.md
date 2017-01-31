@@ -1,5 +1,5 @@
 ---
-layout: posts_translated
+layout: post_translated
 title: Groovy 教程 - 整合 Groovy 至应用程序
 author: Robert Peng
 category: Groovy

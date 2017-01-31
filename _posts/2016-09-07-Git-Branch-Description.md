@@ -1,5 +1,4 @@
 ---
-layout: board
 title: Git 分支描述
 categories: sticker
 ---

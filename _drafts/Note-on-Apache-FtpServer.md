@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Apache FtpServer 学习笔记
 author: Robert Peng
 category: Java

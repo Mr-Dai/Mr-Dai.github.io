@@ -1,5 +1,5 @@
 ---
-layout: posts_translated
+layout: post_translated
 title: Groovy 教程 - GDK
 author: Robert Peng
 category: Groovy

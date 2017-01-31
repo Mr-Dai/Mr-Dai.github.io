@@ -1,5 +1,5 @@
 ---
-layout: posts_translated
+layout: post_translated
 title: Scala 语言规范 - 第三章：类型
 author: Robert Peng
 category: Scala

@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Spark Catalyst 源码解析：Intro
 author: Robert Peng
 category: Spark
@@ -8,7 +8,7 @@ category: Spark
 
 <h2 class="jump">前言</h2>
 <p>
-	我的<a href="/2015/07/27/SparkSQL-HiveThriftServer-Source-1.html">上一个系列</a>的SparkSQL源码解析已经完结了一段时间了。
+	我的<a href="{{ site.url }}{% post_url 2015-07-27-SparkSQL-HiveThriftServer-Source-1 %}">上一个系列</a>的SparkSQL源码解析已经完结了一段时间了。
 	当时我出于实习工作的需要阅读了SparkSQL HiveThriftServer以及Spark Scala Interpreter的源代码，并顺势写下了那个系列的源码解析文章。
 	但读SparkSQL源代码怎么能只读那些外围插件的源代码呢？于是我又开一个新坑了。
 </p>
@@ -205,4 +205,4 @@ class DataFrame private[sql](
 	知道<code>SQLContext#QueryExecution</code>这样一个类的存在对我们以后的代码阅读工作将带来大量的好处。下一次我将从SparkSQL的第一个步骤：Parse进行讲解，敬请期待。
 </p>
 <hr />
-<a href="/2015/08/17/SparkSQL-Catalyst-Source-2.html">Spark Catalyst 源码解析：Parser</a>
+<a href="{{ site.url }}{% post_url 2015-08-17-SparkSQL-Catalyst-Source-2 %}">Spark Catalyst 源码解析：Parser</a>

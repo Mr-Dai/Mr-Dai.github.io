@@ -1,5 +1,5 @@
 ---
-layout: posts_translated
+layout: post_translated
 title: Groovy 教程 - 与 Java 的差异
 author: Robert Peng
 category: Groovy

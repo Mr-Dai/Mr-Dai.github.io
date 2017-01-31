@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Spark Catalyst 进阶：CacheManager
 author: Robert Peng
 category: Spark
@@ -7,7 +7,7 @@ category: Spark
 <script type="text/javascript" src="/js/syntaxhighlighters/shBrushScala.js"></script>
 <h2 class="jump">前情提要</h2>
 <p>
-	在<a href="/2015/08/17/SparkSQL-Catalyst-Source-1.html">上一个系列</a>以及<a href="/2015/08/19/SparkSQL-Catalyst-Adv-1.html">上一篇文章</a>中，我们详细讲解了SparkSQL如何一步一步地将用户输入的SQL语句变为LogicalPlan再变为PhysicalPlan。
+	在<a href="{{ site.url }}{% post_url 2015-08-17-SparkSQL-Catalyst-Source-1 %}">上一个系列</a>以及<a href="{{ site.url }}{% post_url 2015-08-19-SparkSQL-Catalyst-Adv-1 %}">上一篇文章</a>中，我们详细讲解了SparkSQL如何一步一步地将用户输入的SQL语句变为LogicalPlan再变为PhysicalPlan。
 	至此，这个流程本身的内容已经全部讲完了，因此接下来的文章我们将脱离这个主要流程，去讲解SparkSQL的其他常用功能。
 </p>
 <p>

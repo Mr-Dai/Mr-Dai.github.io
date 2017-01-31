@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Spark Core 源码解析：Scheduler
 author: Robert Peng
 category: Spark
@@ -23,7 +23,7 @@ published: false
 <hr />
 <h2 class="jump">SparkContext</h2>
 <p>
-	在<a href="/2015/08/24/Spark-Core-Source-1.html">上一篇文章</a>中我们了解到，RDD Action通过调用<code>SparkContext#runJob</code>来启动RDD操作流水线。
+	在<a href="{{ site.url }}{% post_url 2015-08-24-Spark-Core-Source-1 %}">上一篇文章</a>中我们了解到，RDD Action通过调用<code>SparkContext#runJob</code>来启动RDD操作流水线。
 	那么我们就先来看一下这个方法。
 </p>
 <h3>runJob</h3>

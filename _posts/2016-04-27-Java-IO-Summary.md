@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Java IO 总结
 author: Robert Peng
 category: Java

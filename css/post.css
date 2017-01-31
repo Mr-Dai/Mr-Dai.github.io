@@ -4,12 +4,18 @@
 	padding-top: 0px;
 	padding-right: 20px;
 	border-right: none;
+	text-align: justify;
+	text-justify: inter-ideograph;
+}
+
+#JumpList {
+	text-align: left;
+	border-left: solid 5px rgb(221, 221, 221);
 }
 
 #right_wrapper {
 	width: 20%;
 	min-width: 0;
-	border-left: solid 1px rgb(221, 221, 221);
 }
 
 #content_wrapper {
@@ -17,11 +23,26 @@
 	line-height: 30px;
 }
 
+table {
+	overflow-x: auto;
+	width: 100%;
+}
+
 dl {
 	margin: 20px 0;
 }
 
-dd {
+img {
+	display: block;
+	margin: auto;
+}
+
+dl dt {
+	font-size: 120%;
+	padding: 10px 0;
+}
+
+dl dd {
 	margin-left: 20px;
 }
 
@@ -29,8 +50,8 @@ dd {
 	margin: 50px 0;
 }
 
-table {
-	width: 100%;
+h1, h2, h3, h4, h5 {
+	text-align: left;
 }
 
 h3 {
@@ -48,7 +69,6 @@ h5 {
 p {
 	margin-top: 10px;
 	margin-bottom: 25px;
-	text-align: justify;
 }
 
 .bg-info {

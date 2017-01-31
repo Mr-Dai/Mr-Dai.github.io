@@ -1,5 +1,5 @@
 ---
-layout: posts
+layout: post_original
 title: Spark Catalyst 源码解析：Analyzer与Optimizer
 author: Robert Peng
 category: Spark
@@ -9,7 +9,7 @@ category: Spark
 
 <h2 class="jump">前情提要</h2>
 <p>
-	在<a href="/2015/08/18/SparkSQL-Catalyst-Source-3.html">上一篇文章</a>中，
+	在<a href="{{ site.url }}{% post_url 2015-08-18-SparkSQL-Catalyst-Source-3 %}">上一篇文章</a>中，
 	我们详细了解了SparkSQL中特殊的TreeNode们以及核心类LogicalPlan，完整理解了整个执行计划树的组成。
 </p>
 <p>
@@ -358,4 +358,4 @@ object DefaultOptimizer extends Optimizer {
 </p>
 <p>下一次，我们将继续大步向前，开始探究SparkSQL如何根据Optimized Logical Plan生成Physical Plan。敬请期待。</p>
 <hr />
-<a href="/2015/08/18/SparkSQL-Catalyst-Source-5.html">Spark Catalyst 源码解析：Planner与RDD</a>
+<a href="{{ site.url }}{% post_url 2015-08-18-SparkSQL-Catalyst-Source-5 %}">Spark Catalyst 源码解析：Planner与RDD</a>
