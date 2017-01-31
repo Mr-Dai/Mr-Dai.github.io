@@ -1,0 +1,8 @@
+#left_wrapper {
+	padding: 0 20px;
+}
+
+.sticker {
+	padding-bottom: 20px;
+	border-bottom: dashed 1px rgb(221, 221, 221); 
+}
