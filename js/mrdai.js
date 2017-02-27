@@ -36,38 +36,11 @@ function searchString(stringArray, reString) {
 	return null;
 }
 
-
-// 代码高亮子函数拓展
-
-$.fn.javaStyle = function () {
-	if (this.length == 0)
-		return this;
-	$.each(this, function(n, value) {
-		var codeArea = $(value);
-	});
-
-}
-
-$.fn.mlStyle = function () {
-	if (this.length == 0)
-		return this;
-	$.each(this, function(n, value) {
-		var codeArea = $(value);
-	});
-}
-
-$.fn.pythonStyle = function () {
-	if (this.length == 0)
-		return this;
-	$.each(this, function(n, value) {
-		var codeArea = $(value);
-	});
-}
-
 $(document).ready(function(){
 	branchJumpBinding();
 	aAttributeSetting();
 	$("#post_list_container ul li").last().css("border-bottom-width", "0");
 	$("html").removeClass("ui-icon-loading");
 	$(".ui-loader").remove();
+	SyntaxHighlighter.all()
 });
