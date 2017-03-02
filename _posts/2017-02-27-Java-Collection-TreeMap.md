@@ -66,7 +66,7 @@ category: Java
 
 `TreeMap` 的 `get(K key)` 方法实现如下：
 
-<pre class="brush: java">
+```java
 public V get(Object key) {
     Entry<K, V> p = getEntry(key);
     return (p == null ? null : p.value);
@@ -111,7 +111,7 @@ final Entry<K, V> getEntryUsingComparator(Object key) {
     }
     return null;
 }
-</pre>
+```
 
 除去针对自定义 `Comparator` 或 `Comparable` 键的独立实现外，`TreeMap#get` 方法的实现并无太特别的地方。
 
@@ -134,12 +134,14 @@ final Entry<K, V> getEntryUsingComparator(Object key) {
 大致的过程可以参考[这里](https://en.wikipedia.org/wiki/2%E2%80%933%E2%80%934_tree#Example)。
 
 对于红黑树而言，在插入前，我们采用与一般二叉搜索树相同的机制寻找新叶结点插入的位置，并在插入后将其颜色置为**红色**，即对应 2-3-4 树中将子结点升阶的一般操作（2-结点变 3-结点，3-结点变 4-结点）。
-该动作将有可能使得红黑树的性质 3 和 4 失效，因此需要在插入后采取修复动作，使红黑树重新平衡。而具体采用什么动作则需要分情况讨论。
-为方便表述，下文将用**叔父结点**（Uncle Node）来表示某个结点的父结点的兄弟结点（Sibling Node）。
+值得注意的是，**该动作不会使红黑树的性质 4 失效**（新插入的红色结点不影响任意路径经过的黑色结点数），**但有可能使性质 3 失效**（父结点同为红色结点时，出现连续的两个红色结点）。
+此时为使性质 3 重新成立，具体采用什么动作则需要分情况讨论。
+
+深刻了解红黑树操作的读者可以直接看[总结](#insertion-summary)。
 
 在详细分析每种情形前，我们先来看看 `TreeMap#put` 方法：
 
-<pre class="brush: java">
+```java
 public V put(K key, V value) {
     Entry<K, V> t = root;
     if (t == null) { // 树为空，将新结点作为根结点
@@ -194,7 +196,9 @@ private void fixAfterInsertion(Entry<K, V> n) {
     }
     root.color = BLACK; // 根结点置为黑色
 }
-</pre>
+```
+
+为方便表述，下文将用**叔父结点**（Uncle Node）来表示某个结点的父结点的兄弟结点（Sibling Node）。
 
 #### 红黑树插入情形 1：插入空树
 
@@ -221,7 +225,7 @@ private void fixAfterInsertion(Entry<K, V> n) {
 
 `TreeMap#fixAfterInsertion` 方法中的相关代码如下：
 
-<pre class="brush: java">
+```java
 while (n != null && n != root && n.parent.color == RED) {
     if (parentOf(n) == leftOf(parentOf(parentOf(n)))) {
         // g = parentOf(parentOf(n))
@@ -238,7 +242,7 @@ while (n != null && n != root && n.parent.color == RED) {
         // 与上半部分代码相对称 
     }
 }
-</pre>
+```
 
 #### 子树的左旋转与右旋转
 
@@ -254,7 +258,7 @@ while (n != null && n != root && n.parent.color == RED) {
 
 在 `TreeMap` 中，左旋转与右旋转分别对应于方法 `rotateLeft` 和 `rotateRight`，代码如下：
 
-<pre class="brush: java">
+```java
 private void rotateLeft(Entry<K, V> p) {
     if (p != null) {
         Entry<K, V> r = p.right;
@@ -288,7 +292,7 @@ private void rotateRight(Entry<K, V> p) {
         p.parent = l;
     }
 }
-</pre>
+```
 
 #### 红黑树插入情形 4：叔父结点为黑色结点，当前结点与其父结点及爷爷结点间形成左左结构
 
@@ -306,7 +310,7 @@ private void rotateRight(Entry<K, V> p) {
 
 `TreeMap#fixAfterInsertion` 方法中的相关代码如下：
 
-<pre class="brush: java">
+```java
 while (n != null && n != root && n.parent.color == RED) {
     if (parentOf(n) == leftOf(parentOf(parentOf(n)))) {
         Entry<K, V> u = rightOf(parentOf(parentOf(n)));
@@ -324,7 +328,7 @@ while (n != null && n != root && n.parent.color == RED) {
         // 与上半部分轴对称
     }
 }
-</pre>
+```
 
 #### 红黑树插入情形 5：叔父结点为黑色结点，当前结点与其父结点及爷爷结点间形成左右结构
 
@@ -341,7 +345,7 @@ while (n != null && n != root && n.parent.color == RED) {
 
 `TreeMap#fixAfterInsertion` 方法中的相关代码如下：
 
-<pre class="brush: java">
+```java
 while (n != null && n != root && n.parent.color == RED) {
     if (parentOf(n) == leftOf(parentOf(parentOf(n)))) {
         Entry<K, V> u = rightOf(parentOf(parentOf(n)));
@@ -361,13 +365,48 @@ while (n != null && n != root && n.parent.color == RED) {
         // 与上半部分轴对称
     }
 }
-</pre>
+```
 
-#### 总结
+<h4 id="insertion-summary">总结</h4>
+
+红黑树插入修复的总结如下：
+
+<table class="table">
+    <tr>
+        <th>#</th>
+        <th>情形</th>
+        <th>处理</th>
+        <th>示意图</th>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>$P$ 为<b>黑色结点</b></td>
+        <td>结束修复</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>$P$ 和 $U$ 均为<b>红色结点</b></td>
+        <td>将 $P$、$U$、$G$ 的颜色反转。 $G$ 的颜色变为红色，故从 $G$ 开始继续往上执行相同的修复过程</td>
+        <td><img width="100%" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Red-black_tree_insert_case_3.svg/800px-Red-black_tree_insert_case_3.svg.png"/></td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>$U$ 为<b>黑色结点</b>，$G$、$P$、$N$ 形成<b>左左</b>结构</td>
+        <td>$P$、$G$ 颜色互换，并以 $G$ 进行右旋转</td>
+        <td><img width="100%" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Red-black_tree_insert_case_5.svg/800px-Red-black_tree_insert_case_5.svg.png"/></td>
+    </tr>
+    <tr>
+        <td>5</td>
+        <td>$U$ 为<b>黑色结点</b>，$G$、$P$、$N$ 形成<b>左右</b>结构</td>
+        <td>以 $P$ 进行左旋转，从 $P$ 开始继续修复，进入情形 4</td>
+        <td><img width="100%" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Red-black_tree_insert_case_4.svg/800px-Red-black_tree_insert_case_4.svg.png"/></td>
+    </tr>
+</table>
 
 `TreeMap#fixAfterInsertion` 方法的总结如下：
 
-<pre class="brush: java">
+```java
 private void fixAfterInsertion(Entry<K, V> n) {
     n.color = RED; // 新结点置为红色
 
@@ -412,7 +451,7 @@ private void fixAfterInsertion(Entry<K, V> n) {
     }
     root.color = BLACK // 将根结点置为黑色
 }
-</pre>
+```
 
 ## 平衡树操作 —— 删除
 
@@ -459,7 +498,7 @@ private void fixAfterInsertion(Entry<K, V> n) {
 
 `TreeMap#remove` 方法的相关代码如下：
 
-<pre class="brush: java">
+```java
 public V remove(Object key) {
     Entry<K, V> p = getEntry(key); // 查找待删除的结点
     if (p == null)                 // 结点不存在，返回
@@ -512,18 +551,18 @@ private void deleteEntry(Entry<K, V> p) {
         }
     }
 }
-</pre>
+```
 
 我们可以看一下 `TreeMap#fixAfterDeletion` 方法的循环结束条件：
 
-<pre class="brush: java">
+```java
 private void fixAfterDeletion(Entry<K, V> n) {
     while (n != root && colorOf(n) == BLACK) { // 当 n 为根结点或红色结点时结束循环
         // ...
     }
     setColor(n, BLACK); // 对于上面提到的第二种情形，红色子结点会在这里被置为黑色
 }
-</pre>
+```
 
 接下来我们就需要分情况讨论**待删除结点及其子结点同为黑色结点**的情况了，即在 2-3-4 树中删除 2-结点的情况。出于方便，接下来我们将作为修复起点的结点称为 $N$，
 其父结点为 $P$，兄弟结点为 $S$，并有 $S$ 结点的左右子结点分别为 $S_L$ 和 $S_R$。
@@ -536,7 +575,7 @@ private void fixAfterDeletion(Entry<K, V> n) {
 
 `TreeMap#fixAfterDeletion` 方法的相关代码如下：
 
-<pre class="brush: java">
+```java
 private void fixAfterDeletion(Entry<K, V> n) {
     Entry<K, V> p = parentOf(n);
     while (n != root && colorOf(n) == BLACK) {
@@ -563,7 +602,7 @@ private void fixAfterDeletion(Entry<K, V> n) {
 
     setColor(n, BLACK);
 }
-</pre>
+```
 
 此时我们并未完成修复，因为由于黑色结点被删除，经过 $N$ 的路径仍然比经过 $S_L$ 的路径少一个黑色结点，因此我们仍然需要以 $N$ 为起点进行修复，
 但此时则进入了其他情形（取决于原 $S_L$ 的颜色）。
@@ -578,7 +617,7 @@ private void fixAfterDeletion(Entry<K, V> n) {
 
 `TreeMap#fixAfterDeletion` 方法中的相关代码如下：
 
-<pre class="brush: java">
+```java
 
 private void fixAfterDeletion(Entry<K, V> n) {
     Entry<K, V> p = parentOf(n);
@@ -606,7 +645,7 @@ private void fixAfterDeletion(Entry<K, V> n) {
 
     setColor(n, BLACK);
 }
-</pre>
+```
 
 #### 红黑树删除情形 3：兄弟结点及其右子结点为黑色结点，其左子结点为红色结点
 
@@ -616,7 +655,7 @@ private void fixAfterDeletion(Entry<K, V> n) {
 
 `TreeMap#fixAfterDeletion` 方法中的相关代码如下：
 
-<pre class="brush: java">
+```java
 private void fixAfterDeletion(Entry<K, V> n) {
     Entry<K, V> p = parentOf(n);
     while (n != root && colorOf(n) == BLACK) {
@@ -650,7 +689,7 @@ private void fixAfterDeletion(Entry<K, V> n) {
 
     setColor(n, BLACK);
 }
-</pre>
+```
 
 #### 红黑树删除情形 4：兄弟结点及其左子结点为黑色结点，其右子结点为红色结点
 
@@ -660,7 +699,7 @@ private void fixAfterDeletion(Entry<K, V> n) {
 
 如此一来，由于 $N$ 新增了一个新的黑色父结点 $P$，原本经过 $N$ 的路径的黑色结点数得到了恢复，同时由于 $S_R$ 的颜色变为了黑色，经过 $S_R$ 的路径的黑色结点数也没有变化。
 
-<pre class="brush: java">
+```java
 private void fixAfterDeletion(Entry<K, V> n) {
     Entry<K, V> p = parentOf(n);
     while (n != root && colorOf(n) == BLACK) {
@@ -693,13 +732,42 @@ private void fixAfterDeletion(Entry<K, V> n) {
 
     setColor(n, BLACK);
 }
-</pre>
+```
 
-#### 红黑树删除操作总结
+<h4 id="deletion-summary">总结</h4>
+
+我们定义待删除的结点为 $D$、其唯一子结点为 $N$、父结点为 $P$、爷爷结点为 $G$、兄弟结点为 $S$，那么红黑树删除修复可总结如下：
+
+<table class="table">
+    <tr>
+        <th>#</th>
+        <th>情形</th>
+        <th>处理</th>
+        <th>示意图</th>
+    </tr>
+    <tr>
+        <td></td>
+        <td>$D$ 为<b>红色</b>结点</td>
+        <td>无需修复</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>$D$ 为<b>黑色</b>结点，$N$ 为<b>红色</b>结点</td>
+        <td>$N$ 置为黑色，结束修复</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>$D$、$N$ 为<b>黑色</b>结点，$S$ 为红色结点</td>
+        <td>以 $P$ 进行左旋转，$P$、$S$ 进行颜色互换，使 $N$ 的父结点为红色结点</td>
+        <td><img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Red-black_tree_delete_case_2.png"/></td>
+    </tr>
+</table>
 
 `TreeMap#fixAfterDeletion` 方法的总结如下：
 
-<pre class="brush: java">
+```java
 private void fixAfterDeletion(Entry<K, V> n) {
     Entry<K, V> p = parentOf(n);
     while (n != root && colorOf(n) == BLACK) {
@@ -770,11 +838,11 @@ private void fixAfterDeletion(Entry<K, V> n) {
 
     setColor(n, BLACK);
 }
-</pre>
+```
 
 没理解为什么这些东西要这么做？没关系，我也不理解，可能写这些代码的人自己也不理解 =。= 实际上这些 `private` 方法大多数都有 `/** From CLR */` 的注释，在 `TreeMap.java` 中也能找到这么一段注释：
 
-<pre class="brush: java">
+```java
 /**
  * Balancing operations.
  *
@@ -784,7 +852,7 @@ private void fixAfterDeletion(Entry<K, V> n) {
  * are used to avoid messiness surrounding nullness checks in the main
  * algorithms.
  */
-</pre>
+```
 
 因此，此 CLR 指的应该就是 Common Language Runtime，这些自平衡代码也很有可能是从 C# 那边“借”来的。详见[这里](http://stackoverflow.com/questions/38482750/from-clr-in-java-treemap-implementation)。
 不管怎么说，红黑树都是很复杂的数据结构，如果你不能完全记忆这些操作那就罢了，没什么必要。
