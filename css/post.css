@@ -102,7 +102,31 @@ code {
 	padding: 0;
 	color: black;
 	font-size: 105%;
-	background-color: transparent;
-	border-radius: 0px;
+	background-color: #dee0e0;
+	padding: 1px 5px;
 	font-family:  "Consolas", "Courier New", monospace !important;
+}
+
+em, i {
+	font-family: 'Times New Roman', Times, serif;
+	font-size: 110%;
+}
+
+blockquote {
+	margin-bottom: 10px;
+	padding: 10px;
+	background-color: #ffffcc;
+	border-left: 4px solid #ffeb3b;
+}
+
+p.info {
+	background-color: #edf7fe;
+	border-left: 4px solid #bde2fb;
+	padding: 10px;
+}
+
+p.message {
+	background-color: #ddffdd;
+	border-left: 4px solid #4CAF50;
+	padding: 10px;
 }

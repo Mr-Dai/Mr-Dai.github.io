@@ -42,5 +42,6 @@ $(document).ready(function(){
 	$("#post_list_container ul li").last().css("border-bottom-width", "0");
 	$("html").removeClass("ui-icon-loading");
 	$(".ui-loader").remove();
+	$("table").addClass("table");
 	SyntaxHighlighter.all()
 });
