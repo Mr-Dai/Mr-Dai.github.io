@@ -4,7 +4,6 @@ title: MongoDB CRUD Cookbook
 author: Robert Peng
 category: MongoDB
 ---
-<script type="text/javascript" src="/js/syntaxhighlighters/shBrushJScript.js"></script>
 
 ## Overview
 
@@ -705,7 +704,7 @@ db.inventory.remove( {} )
 ```
 
 <p class="info">
-To remove all documents from a collection, it may be more efficient to use the `drop()` method to drop the entire
+To remove all documents from a collection, it may be more efficient to use the <code>drop()</code> method to drop the entire
 collection, including the indexes, and then recreate the collection and rebuild the indexes.
 </p>
 
@@ -725,5 +724,5 @@ db.inventory.remove( { type : "food" }, 1 )
 ```
 
 <p class="info">
-    To delete a single document sorted by some specified order, use the `findAndModify()`Specific Fields method.
+    To delete a single document sorted by some specified order, use the <code>findAndModify()</code>Specific Fields method.
 </p>
