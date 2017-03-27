@@ -127,6 +127,12 @@ p.info {
 
 p.message {
 	background-color: #ddffdd;
-	border-left: 4px solid #4CAF50;
+	border-left: 4px solid #4caf50;
+	padding: 10px;
+}
+
+p.warn {
+	background-color:#ffdddd;
+	border-left: 4px solid #f44336;
 	padding: 10px;
 }
