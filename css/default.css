@@ -8,8 +8,8 @@ body {
     border: none 0 rgb(34,34,34);
     padding: 0;
     margin: 0;
-    background: rgb(249,249,249);
-    color: rgb(34,34,34);
+    background: rgb(245,245,245);
+    color: rgb(50,50,50);
     font: 13px/21px "helvetica","MicroSoft YaHei",'Myriad Pro','Lato','Helvetica Neue',Helvetica, Arial,sans-serif;
     font-family: 'helvetica', "MicroSoft YaHei", 'Myriad Pro', Lato, 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -38,7 +38,7 @@ h2, h3, h4, h5 {
 
 #banner_wrapper {
     display: block;
-    background: rgb(249,249,249);
+    background: rgb(245,245,245);
 	border-bottom: solid 1px rgb(221,221,221);
     height: 100px;
 
@@ -67,7 +67,7 @@ h2, h3, h4, h5 {
     padding: 20px 0 0 0;
 	float: left;
 	border-right: solid 1px rgb(221, 221, 221);
-    background: rgb(249,249,249);
+    background: rgb(245,245,245);
 }
 
 #content_wrapper {
@@ -75,7 +75,7 @@ h2, h3, h4, h5 {
     padding: 0;
     background: none;
     font-size: 15px;
-    background: rgb(249,249,249);
+    background: rgb(245,245,245);
 }
 
 blockquote {
