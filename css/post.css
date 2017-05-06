@@ -35,6 +35,7 @@ dl {
 img {
 	display: block;
 	margin: auto;
+	max-width: 100%;
 }
 
 dl dt {
