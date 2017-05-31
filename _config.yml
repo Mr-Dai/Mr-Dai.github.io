@@ -5,3 +5,5 @@ highlighter: rouge
 
 kramdown:
   input: GFM
+
+repository: Mr-Dai/Mr-Dai.github.io

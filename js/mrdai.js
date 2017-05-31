@@ -36,7 +36,20 @@ function searchString(stringArray, reString) {
 	return null;
 }
 
+// Set header ID
+function setHeaderID() {
+	var headers = $("#post_content h2,h3,h4,h5");
+	$.each(headers, function(n, header) {
+		var parts = header.innerHTML.split("#", 2);
+		if (parts.length > 1) {
+			header.innerHTML = parts[0].trim();
+			header.setAttribute("id", parts[1].trim());
+		}
+	})
+}
+
 $(document).ready(function(){
+	setHeaderID();
 	branchJumpBinding();
 	aAttributeSetting();
 	$("#post_list_container ul li").last().css("border-bottom-width", "0");
