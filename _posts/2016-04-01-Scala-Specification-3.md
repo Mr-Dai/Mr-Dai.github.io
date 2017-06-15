@@ -10,7 +10,7 @@ org_url: "http://www.scala-lang.org/files/archive/spec/2.11/03-types.html"
 
 译者注：该章可结合《快学Scala》第十八章进行阅读。最好在先看过《快学Scala》后再来看这一章。
 
-<pre>
+```
 Type              ::=  FunctionArgTypes ‘=>’ Type
                     |  InfixType [ExistentialClause]
 FunctionArgTypes  ::=  InfixType
@@ -30,7 +30,7 @@ SimpleType        ::=  SimpleType TypeArgs
                     |  ‘(’ Types ‘)’
 TypeArgs          ::=  ‘[’ Types ‘]’
 Types             ::=  Type {‘,’ Type}
-</pre>
+```
 
 <!--
 We distinguish between first-order types and type constructors, which take type parameters and yield types.
@@ -67,14 +67,14 @@ is no syntax to write the corresponding anonymous type function directly.
 类型构造器则是另一个例子：我们可以写下语句 `type Swap[m[_, _], a, b] = m[b, a]`，但能直接写出其对应的匿名类型函数的语法却并不存在。
 
 <h2 id="paths">3.1 路径</h2>
-<pre>
+```
 Path            ::=  StableId
                   |  [id ‘.’] this
 StableId        ::=  id
                   |  Path ‘.’ id
                   |  [id ‘.’] ‘super’ [ClassQualifier] ‘.’ id
 ClassQualifier  ::= ‘[’ id ‘]’
-</pre>
+```
 
 <!--
 Paths are not types themselves, but they can be a part of named types and in that function form a central role in Scala's type system.
@@ -113,9 +113,9 @@ Scala 中的每一个值都有其所属的类型，而这些类型包含如下�
 
 <h3 id="singleton-types">3.2.1 单例类型</h3>
 
-<pre>
+```
 SimpleType  ::=  Path ‘.’ ‘type’
-</pre>
+```
 
 <!--
 A singleton type is of the form p.type, where p is a path pointing to a value expected to conform to scala.AnyRef.
@@ -130,9 +130,9 @@ A stable type is either a singleton type or a type which is declared to be a sub
 
 <h3 id="type-projection">3.2.2 类型投影</h3>
 
-<pre>
+```
 SimpleType  ::=  SimpleType ‘#’ id
-</pre>
+```
 
 <!--
 A type projection T#x references the type member named x of type T.
@@ -141,9 +141,9 @@ A type projection T#x references the type member named x of type T.
 
 <h3 id="type-designators">3.2.3 类型标识</h3>
 
-<pre>
+```
 SimpleType  ::=  StableId
-</pre>
+```
 
 <!--
 A type designator refers to a named value type. It can be simple or qualified. All such type designators are shorthands for type projections.
@@ -195,10 +195,10 @@ with a type member Node and the standard class scala.Int,
 
 <h3 id="parameterized-types">3.2.4 含参类型</h3>
 
-<pre>
+```
 SimpleType      ::=  SimpleType TypeArgs
 TypeArgs        ::=  ‘[’ Types ‘]’
-</pre>
+```
 
 <!--
 A parameterized type T[T1,…,Tn] consists of a type designator T and type parameters T1,…,Tn where n≥1.
@@ -221,36 +221,36 @@ Given the partial type definitions:
 -->
 给定部分类型定义：
 
-<pre class="brush: scala">
-class TreeMap[A &lt;: Comparable[A], B] { ... }
+```scala
+class TreeMap[A <: Comparable[A], B] { ... }
 class List[A] { ... }
 class I extends Comparable[I] { ... }
 
 class F[M[_], X] { ... }
-class S[K &lt;: String] { ... }
-class G[M[ Z &lt;: I ], I] { ... }
-</pre>
+class S[K <: String] { ... }
+class G[M[ Z <: I ], I] { ... }
+```
 
 <!--
 the following parameterized types are well formed:
 -->
 那么下列含参类型是良构的：
 
-<pre class="brush: scala">
+```scala
 TreeMap[I, String]
 List[I]
 List[List[Boolean]]
 
 F[List, Int]
 G[S, String]
-</pre>
+```
 
 <!--
 Given the above type definitions, the following types are ill-formed:
 -->
 而下列含参类型则不是良构的：
 
-<pre class="brush: scala">
+```scala
 TreeMap[I]            // 不合法：类型参数数量不吻合
 TreeMap[List[I], Int] // 不合法：类型参数不处于声明的上下界之内
 
@@ -259,12 +259,12 @@ F[TreeMap, Int]       // 不合法：`TreeMap`需要两个类型参数，
                       //   而`F`的第一个参数预期为只接收一个参数的类型构造器
 G[S, Int]             // 不合法：`S`要求其类型参数必须与`String`匹配
                       //   而`G`的第一个参数预期为只接收一个参数且该参数与`Int`匹配的类型构造器
-</pre>
+```
 
 <h3 id="tuple-types">3.2.5 元组类型</h3>
-<pre>
+```
 SimpleType    ::=   ‘(’ Types ‘)’
-</pre>
+```
 
 <!--
 A tuple type (T1,…,Tn) is an alias for the class scala.Tuple[T1, … , Tn], where n≥2.
@@ -279,7 +279,7 @@ Scala library (they might also add other methods and implement other traits).
 元组类属于用例类（case class），它们的域（field）可以用选择器（selector）`_1`, …, `_n` 进行访问。每个元组类的功能尤其对应的 `Product` 特质提供抽象定义。
 标准 Scala 库中的 $n$ 元元组类及其 `Product` 特质的定义大致如下：
 
-<pre class="brush: scala">
+```scala
 case class Tuple_n[+T1, ..., +Tn](_1: T1, ..., _n: Tn)
 extends Product_n[T1, ..., Tn]
 
@@ -289,13 +289,13 @@ trait Product_n[+T1, ..., +Tn] {
   ...
   def _n: Tn
 }
-</pre>
+```
 
 <h3 id="annotated-types">3.2.6 注解类型</h3>
 
-<pre>
+```
 AnnotType  ::=  SimpleType {Annotation}
-</pre>
+```
 
 <!--
 An annotated type T a1,…,an attaches annotations a1,…,an to the type T.
@@ -309,20 +309,20 @@ The following type adds the @suspendable annotation to the type String:
 -->
 如下类型将注解 `@suspendable` 添加到了类型 `String`上：
 
-<pre class="brush: scala">
+```scala
 String @suspendable
-</pre>
+```
 
 <h3 id="compound-types">3.2.7 复合类型</h3>
 
-<pre>
+```
 CompoundType    ::=  AnnotType {‘with’ AnnotType} [Refinement]
                   |  Refinement
 Refinement      ::=  [nl] ‘{’ RefineStat {semi RefineStat} ‘}’
 RefineStat      ::=  Dcl
                   |  ‘type’ TypeDef
                   |
-</pre>
+```
 
 <!--
 A compound type T1 with … with Tn{R} represents objects with members as given in the component types T1,…,Tn and the refinement {R}.
@@ -359,7 +359,7 @@ The following example shows how to declare and use a method which a parameter ty
 -->
 下面的例子展示了如何在一个方法中声明某个参数类型带有一个包含结构声明的校正并使用该方法。
 
-<pre class="brush: scala">
+```scala
 case class Bird (val name: String) extends Object {
         def fly(height: Int) = …
 …
@@ -379,7 +379,7 @@ val bird = new Bird("Polly the parrot"){ val callsign = name }
 val a380 = new Plane("TZ-987")
 takeoff(42, bird)
 takeoff(89, a380)
-</pre>
+```
 
 <!--
 Although Bird and Plane do not share any parent class other than Object, the parameter r of method takeoff is defined
@@ -389,9 +389,9 @@ using a refinement with structural declarations to accept any object that declar
 
 <h3 id="infix-types">3.2.8 中缀类型</h3>
 
-<pre>
+```
 InfixType     ::=  CompoundType {id [nl] CompoundType}
-</pre>
+```
 
 <!--
 An infix type T1 op T2 consists of an infix operator op which gets applied to two type operands T1 and T2.
@@ -415,11 +415,11 @@ If they are all left-associative, the sequence is interpreted as (…(t0op1t1)op
 $t_0\,\mathit{op_1}\,(t_1\,\mathit{op_2}\,( \ldots \mathit{op_n}\,t_n) \ldots)$。
 
 <h3 id="function-types">3.2.9 函数类型</h3>
-<pre>
+```
 Type              ::=  FunctionArgs ‘=>’ Type
 FunctionArgs      ::=  InfixType
                     |  ‘(’ [ ParamType {‘,’ ParamType } ] ‘)’
-</pre>
+```
 
 <!--
 The type (T1,…,Tn)⇒U represents the set of function values that take arguments of types T1,…,Tn and yield results of type U.
@@ -440,13 +440,13 @@ a shorthand for the class type Functionn[T1 , … , Tn, U]. Such class types are
 所有函数类型都是定义了`apply`函数的类的类型缩写。具体来说，$n$ 元函数类型 $(T_1,\ldots,T_n)\Rightarrow U$ 是类型 `Function`$_n[T_1,\ldots,T_n, U]$ 的缩写。
 Scala 库为 $n \in [0,9]$ 均定义了对应的函数类，形如下：
 
-<pre class="brush: scala">
+```scala
 package scala
 trait Function_n[-T1 , … , -Tn, +R] {
   def apply(x1: T1 , … , xn: Tn): R
-  override def toString = "&lt;function>"
+  override def toString = "<function>"
 }
-</pre>
+```
 
 <!--
 Hence, function types are covariant in their result type and contravariant in their argument types.
@@ -455,13 +455,13 @@ Hence, function types are covariant in their result type and contravariant in th
 
 <h3 id="existential-types">3.2.10 存在类型</h3>
 
-<pre>
+```
 Type               ::= InfixType ExistentialClauses
 ExistentialClauses ::= ‘forSome’ ‘{’ ExistentialDcl
                        {semi ExistentialDcl} ‘}’
 ExistentialDcl     ::= ‘type’ TypeDcl
                     |  ‘val’ ValDcl
-</pre>
+```
 
 存在类型（existential type）形如$T$ `forSome` $\lbrace Q\rbrace$，其中 $Q$ 是一个[类型声明](http://www.scala-lang.org/files/archive/spec/2.11/04-basic-declarations-and-definitions.html#type-declarations-and-type-aliases)序列。
 
@@ -519,9 +519,9 @@ $T'$ `forSome` $\lbrace\, Q;$ `type` $t$ `<:` $S$ `with Singleton`$;\,Q'\,\rbrac
 
 #### 用于存在类型的占位符语法
 
-<pre>
+```
 WildcardType   ::=  ‘_’ TypeBounds
-</pre>
+```
 
 <!--
 Scala supports a placeholder syntax for existential types. A wildcard type is of the form _>:L<:U. Both bound clauses may be omitted.
@@ -539,9 +539,9 @@ targs,targs′ may be empty and T is a wildcard type _>:L<:U. Then T is equivale
 通配类型只可被用于含参类型的类型参数。假设有含参类型 $T=p.c$`[`$targs,T,targs'$`]`，其中 $targs,targs'$ 均可为空，且 $T$ 为通配类型 `_ >:` $L$ `<:` $U$。
 那么 $T$ 等价于存在类型
 
-<pre class="brush: scala">
-p.c[targs,t,targs'] forSome { type t >: L &lt;: U }
-</pre>
+```scala
+p.c[targs,t,targs'] forSome { type t >: L <: U }
+```
 
 <!--
 where t is some fresh type variable. Wildcard types may also appear as parts of infix types, function types, or tuple types.
@@ -557,52 +557,52 @@ Assume the class definitions
 -->
 假设有类定义
 
-<pre class="brush: scala">
+```scala
 class Ref[T]
 abstract class Outer { type T }
-</pre>
+```
 
 如下是一些存在类型的示例：
 
-<pre class="brush: scala">
-Ref[T] forSome { type T &lt;: java.lang.Number }
+```scala
+Ref[T] forSome { type T <: java.lang.Number }
 Ref[x.T] forSome { val x: Outer }
-Ref[x_type # T] forSome { type x_type &lt;: Outer with Singleton }
-</pre>
+Ref[x_type # T] forSome { type x_type <: Outer with Singleton }
+```
 
 上述示例中的最后两个存在类型是等价的，而第一个示例类型与如下通配语法又是等价的：
 
-<pre class="brush: scala">
-Ref[_ &lt;: java.lang.Number]
-</pre>
+```scala
+Ref[_ <: java.lang.Number]
+```
 
 ---
 
 类型 `List[List[_]]` 等价于存在类型
 
-<pre class="brush: scala">
+```scala
 List[List[t] forSome { type t }] .
-</pre>
+```
 
 ---
 
 假设有协变类型：
 
-<pre class="brush: scala">
+```scala
 class List[+T]
-</pre>
+```
 
 类型
 
-<pre class="brush: scala">
-List[T] forSome { type T &lt;: java.lang.Number }
-</pre>
+```scala
+List[T] forSome { type T <: java.lang.Number }
+```
 
 （使用上面提到的第四条简化法则后）等价于：
 
-<pre class="brush: scala">
-List[java.lang.Number] forSome { type T &lt;: java.lang.Number }
-</pre>
+```scala
+List[java.lang.Number] forSome { type T <: java.lang.Number }
+```
 
 而该类型（使用上面提到的第二、三条简化法则后）又等价于 `List[java.lang.Number]`。
 
@@ -643,19 +643,19 @@ Method types do not exist as types of values. If a method name is used as a valu
 
 声明
 
-<pre class="brush: scala">
+```scala
 def a: Int
 def b (x: Int): Boolean
 def c (x: Int) (y: String, z: String): String
-</pre>
+```
 
 将产生如下类型：
 
-<pre class="brush: scala">
+```scala
 a: => Int
 b: (Int) Boolean
 c: (Int) (String, String) String
-</pre>
+```
 
 <h3 id="polymorphic-method-types">3.3.2 多态方法类型</h3>
 
@@ -672,17 +672,17 @@ $S_1,\ldots,S_n$ 并产生类型为 $T$ 的结果的方法。
 
 声明
 
-<pre class="brush: scala">
+```scala
 def empty[A]: List[A]
-def union[A &lt;: Comparable[A]] (x: Set[A], xs: Set[A]): Set[A]
-</pre>
+def union[A <: Comparable[A]] (x: Set[A], xs: Set[A]): Set[A]
+```
 
 将产生如下类型：
 
-<pre class="brush: scala">
-empty : [A >: Nothing &lt;: Any] List[A]
-union : [A >: Nothing &lt;: Comparable[A]] (x: Set[A], xs: Set[A]) Set[A]
-</pre>
+```scala
+empty : [A >: Nothing <: Any] List[A]
+union : [A >: Nothing <: Comparable[A]] (x: Set[A], xs: Set[A]) Set[A]
+```
 
 <h3 id="type-constructors">3.3.3 类型构造器</h3>
 
@@ -697,11 +697,11 @@ that is expected by a type constructor parameter or an abstract type constructor
 
 考虑如下来自 `Iterable[+X]` 类的代码片段：
 
-<pre class="brush: scala">
+```scala
 trait Iterable[+X] {
-  def flatMap[newType[+X] &lt;: Iterable[X], S](f: X => newType[S]): newType[S]
+  def flatMap[newType[+X] <: Iterable[X], S](f: X => newType[S]): newType[S]
 }
-</pre>
+```
 
 从概念上讲，类型构造器 `Iterable` 将匿名类型 `[+X]` 命名为了 `Iterable[X]`，而后者可能将会被传入到 `flagMap` 的类型构造器参数 `newType` 之中。
 
@@ -765,12 +765,12 @@ Types of class members depend on the way the members are referenced. Central her
   </tr>
   <tr>
     <td>匹配（Conformance）</td>
-    <td>$T &lt;: U$</td>
+    <td>$T <: U$</td>
     <td>类型 $T$ 匹配于类型 $U$（$T$ 是 $U$ 的子类型）</td>
   </tr>
   <tr>
     <td>弱匹配（Weak Conformance）</td>
-    <td>$T &lt;:_w U$</td>
+    <td>$T <:_w U$</td>
     <td>将匹配规则扩充应用于基本代数类型</td>
   </tr>
   <tr>
@@ -830,7 +830,7 @@ Equivalence (≡)(≡) between types is the smallest congruence 3 such that the 
  - 如果对于任意的 $i \in 1,\ldots ,n$ 有 $T_i \equiv T'_i$ 且 $U$ 匹配于 $U'$，那么方法类型 $(p_1\, :\, T_1,\ldots,p_n\, :\, T_n)U$ 匹配于
    $(p'_1\, :\, T'_1,\ldots,p'_n\, :\, T'_n)U'$。
  - 假设 $L'_1 <: a_1 <: U'_1,\ldots ,L'_n <: a_n <: U'_n$，如果 $T <: T'$ 且对于任意的 $i \in 1,\ldots ,n$ 有 $L_i <: L'_i$ 和 $U'_i <: U_i$，
-   那么多态类型 $[a_1 >: L_1 <: U_1,\ldots a_n >: L_n &lt;: U_n]T$ 匹配于多态类型 $[a_1 >: L'_1 <: U'_1,\ldots a_n >: L'_n <: U'_n]T'$。
+   那么多态类型 $[a_1 >: L_1 <: U_1,\ldots a_n >: L_n <: U_n]T$ 匹配于多态类型 $[a_1 >: L'_1 <: U'_1,\ldots a_n >: L'_n <: U'_n]T'$。
  - 类型构造器 $T$ 与 $T'$ 之间的匹配关系遵循类似的原则。我们不妨将 用它们的类型参数语句 `[`$a_1,\ldots ,a_n$`]` 和 `[`$a'_1,\ldots ,a'_n$`]` 特化 $T$ 和
    $T'$，其中 $a_i$ 或 $a'_i$ 都可能包含协变标记（variance annotation）、高阶类型参数语句以及上下界。如果任意对于 $T'$ 合法的类型参数序列 `[`$t_1,\ldots t_n$`]`
    均对于 $T$ 合法且 $T$`[`$t_1,\ldots ,t_n$`]`$<:\, T'$`[`$t_1,\ldots ,t_n$`]`，那么 $T$ 匹配于 $T'$。注意，这意味着：
@@ -852,11 +852,11 @@ $(<:)$ 关系构成了类型间的预序关系（pre-order），也就是说，�
 我们就可以利用这个概念来为某个类型的集合确定**最低上界**（least upper bound）和**最高下界**（greatest lower bound）了。
 对于任意给定的类型集合，最低上界和最高下界并不总是存在。比如，考虑以下类定义：
 
-<pre class="brush: scala">
+```scala
 class A[+T] {}
 class B extends A[B]
 class C extends A[C]
-</pre>
+```
 
 那么类型 `B` 和 `C` 的上界的降序序列即为 `A[Any], A[A[Any]], A[A[A[Any]]], ...`。最小上界将会是该序列的无穷极限，而该极限无法表示为 Scala 类型。
 由于类似这样的情况在大多数时候都是无法被直接检测到的，因此对于某个使用了某些超出编译器预设限制<sup id="fnref5"><a href="#fn5" rel="footnote">5</a></sup>的最低上界或者最高下界作为类型的项，Scala
@@ -871,12 +871,12 @@ Scala 编译器可以任选其一。
 那么我们说类型 $S$ **弱匹配**于（weakly conform to）类型 $T$，写作 $S <:_w T$。
 
 <blockquote>
-  <b>Byte</b>  $&lt;:_w$ <b>Short</b><br>
-  <b>Short</b> $&lt;:_w$ <b>Int</b><br>
-  <b>Char</b>  $&lt;:_w$ <b>Int</b><br>
-  <b>Int</b>   $&lt;:_w$ <b>Long</b><br>
-  <b>Long</b>  $&lt;:_w$ <b>Float</b><br>
-  <b>Float</b> $&lt;:_w$ <b>Double</b>
+  <b>Byte</b>  $<:_w$ <b>Short</b><br>
+  <b>Short</b> $<:_w$ <b>Int</b><br>
+  <b>Char</b>  $<:_w$ <b>Int</b><br>
+  <b>Int</b>   $<:_w$ <b>Long</b><br>
+  <b>Long</b>  $<:_w$ <b>Float</b><br>
+  <b>Float</b> $<:_w$ <b>Double</b>
 </blockquote>
 
 **弱最低上界**（weak least upper bound）即为考虑弱匹配时的最低上界。
@@ -896,12 +896,12 @@ Scala 编译器可以任选其一。
 
 给定定义
 
-<pre class="brush: scala">
+```scala
 def foo(x: Int => String): Unit
 def foo(x: ToString): Unit
 
 trait ToString { def convert(x: Int): String }
-</pre>
+```
 
 `foo((x: Int) => x.toString)`将会被[解析](http://www.scala-lang.org/files/archive/spec/2.11/06-expressions.html#overloading-resolution)为其更为精确的初次重载：
 

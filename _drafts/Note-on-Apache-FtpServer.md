@@ -27,7 +27,7 @@ category: Java
 
 先从入口类 `FtpServer` 开始。（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/FtpServer.java;h=6f84e496600d17fefadb7cb6b116699ab430c7bd;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface FtpServer {
     void start() throws FtpException;
     void suspend();
@@ -37,13 +37,13 @@ public interface FtpServer {
     boolean isStopped();
     boolean isSuspended();
 }
-</pre>
+```
 
 接口类提供了几个控制和判断 `FtpServer` 运行状态的方法。可想而知，`FtpServer` 的配置应在实例化之前进行。
 
 接下来看一下 `FtpServer` 的唯一实现类 `DefaultFtpServer`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/impl/DefaultFtpServer.java;h=680bd19a8471015094d9f525cab79ad6f6eed736;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServer implements FtpServer {
     private final Logger LOG = LoggerFactory.getLogger(DefaultFtpServer.class);
 
@@ -62,11 +62,11 @@ public class DefaultFtpServer implements FtpServer {
     ...
 
 }
-</pre>
+```
 
 `DefaultFtpServer` 除了两个标记当前运行状态的标识位 `suspended` 和 `started` 以外，值得注意的成员变量只有一个 `FtpServerContext`，可想而知这个变量包含的是 `DefaultFtpServer` 的配置信息。`DefaultFtpServer` 唯一的构造器被 JavaDoc 声明为内部使用，用户应通过 `FtpServerFactory` 来创建 `DefaultFtpServer` 实例。该构造器则接受了传入的 `FtpServerContext`。可想而知，使用 `FtpServerFactory` 时，`FtpServerFactory` 内部会维持一个 `FtpServerContext` 实例，并在构建 `DefaultFtpServer` 时传入构造器。
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServer implements FtpServer {
 	...
 
@@ -80,10 +80,10 @@ public class DefaultFtpServer implements FtpServer {
             throw new IllegalStateException("FtpServer has been stopped. Restart is not supported");
         }
 
-        List&lt;Listener> startedListeners = new ArrayList&lt;Listener>();
+        List<Listener> startedListeners = new ArrayList<Listener>();
         
         try {
-            Map&lt;String, Listener> listeners = serverContext.getListeners();
+            Map<String, Listener> listeners = serverContext.getListeners();
             for (Listener listener : listeners.values()) {
                 listener.start(serverContext);
                 startedListeners.add(listener);
@@ -103,11 +103,11 @@ public class DefaultFtpServer implements FtpServer {
     ...
 
 }
-</pre>
+```
 
 可以看到，`DefaultFtpServer` 的 `start` 方法启动了 `FtpServerContext` 里的所有 `Listener` 和 `Fptlet`。
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServer implements FtpServer {
 	...
 
@@ -122,7 +122,7 @@ public class DefaultFtpServer implements FtpServer {
         }
 
         // stop all listeners
-        Map&lt;String, Listener> listeners = serverContext.getListeners();
+        Map<String, Listener> listeners = serverContext.getListeners();
         for (Listener listener : listeners.values()) {
             listener.stop();
         }
@@ -142,11 +142,11 @@ public class DefaultFtpServer implements FtpServer {
     ...
 
 }
-</pre>
+```
 
 可以看到，`DefaultFtpServer` 在停止时会停止所有的 `Listener` 和 `Ftplet`，并弃用（dispose）其所拥有的 `FtpServerContext`。
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServer implements FtpServer {
 	...
 
@@ -160,7 +160,7 @@ public class DefaultFtpServer implements FtpServer {
 
         LOG.debug("Suspending server");
         // stop all listeners
-        Map&lt;String, Listener> listeners = serverContext.getListeners();
+        Map<String, Listener> listeners = serverContext.getListeners();
         for (Listener listener : listeners.values()) {
             listener.suspend();
         }
@@ -178,7 +178,7 @@ public class DefaultFtpServer implements FtpServer {
         }
 
         LOG.debug("Resuming server");
-        Map&lt;String, Listener> listeners = serverContext.getListeners();
+        Map<String, Listener> listeners = serverContext.getListeners();
         for (Listener listener : listeners.values()) {
             listener.resume();
         }
@@ -189,7 +189,7 @@ public class DefaultFtpServer implements FtpServer {
 
     ...
 }
-</pre>
+```
 
 可以看到，`DefaultFtpServer` 的 `suspend` 和 `resume` 实际上就只是对 `Listener` 的暂停和恢复。
 
@@ -233,7 +233,7 @@ public class DefaultFtpServer implements FtpServer {
 
 先来看用于构建 `DefaultFtpServer` 的 `FtpServerFactory`: （[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/FtpServerFactory.java;h=cac1aa8ba1caf24ad35553158334e30e20125a50;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class FtpServerFactory {
 
     private DefaultFtpServerContext serverContext;
@@ -259,19 +259,19 @@ public class FtpServerFactory {
     ...
 
 }
-</pre>
+```
 
 可见，`FtpServerFactory` 确实维护着一个 `DefaultFtpServerContext` 实例，并在 `createServer` 方法被调用时使用该 `FtpServerContext` 创建了 `DefaultFtpServer` 实例。`FtpServerFactory` 剩余的配置方法实际上都会直接将配置逻辑委托给其 `DefaultFtpServerContext` 成员，因此我们可以直接开始看 `DefaultFtpServerContext`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/impl/DefaultFtpServerContext.java;h=731b0f581da796f3a5a9eb54eff00038722dc33d;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
     ...
 }
-</pre>
+```
 
 可以看到，`DefaultFtpServerContext` 实现了接口 `FtpServerContext`。那么我们先看一下 `FtpServerContext`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/impl/FtpServerContext.java;h=a5eb1459b23994570c140fc425623de10a498691;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface FtpServerContext extends FtpletContext {
 
     ConnectionConfig getConnectionConfig();
@@ -281,7 +281,7 @@ public interface FtpServerContext extends FtpletContext {
     FtpletContainer getFtpletContainer();
 
     Listener getListener(String name);
-    Map&lt;String, Listener> getListeners();
+    Map<String, Listener> getListeners();
 
     CommandFactory getCommandFactory();
     
@@ -292,11 +292,11 @@ public interface FtpServerContext extends FtpletContext {
      */
     void dispose();
 }
-</pre>
+```
 
 我们再来看 `FtpServerContext` 扩展的 `FtpletContext`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/FtpletContext.java;h=afe1742b2a09eb9b644bac5ab12c462480c00899;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface FtpletContext {
     UserManager getUserManager();
 
@@ -306,7 +306,7 @@ public interface FtpletContext {
 
     Ftplet getFtplet(String name);
 }
-</pre>
+```
 
 那么，至此我们就可以总结出，一个 `FtpServerContext` 包含如下几个组件（Component）：
 
@@ -361,7 +361,7 @@ public interface FtpletContext {
 
 那么我们再回过头来看一下 `DefaultFtpServerContext`：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
     private final Logger LOG = LoggerFactory.getLogger(DefaultFtpServerContext.class);
 
@@ -372,7 +372,7 @@ public class DefaultFtpServerContext implements FtpServerContext {
     private FtpStatistics statistics = new DefaultFtpStatistics();
     private CommandFactory commandFactory = new CommandFactoryFactory().createCommandFactory();
     private ConnectionConfig connectionConfig = new ConnectionConfigFactory().createConnectionConfig();
-    private Map&lt;String, Listener> listeners = new HashMap&lt;String, Listener>();
+    private Map<String, Listener> listeners = new HashMap<String, Listener>();
 
 	...
 
@@ -384,13 +384,13 @@ public class DefaultFtpServerContext implements FtpServerContext {
     ...
 
 }
-</pre>
+```
 
 这里我们看到，`DefaultFtpServerContext` 在实例化时为每一个组件都赋予了默认值，其中也创建了一个名为 `default` 的默认 `Listener`。
 
 我们继续往下看：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
 	...
 
@@ -410,8 +410,8 @@ public class DefaultFtpServerContext implements FtpServerContext {
     public void setFtpletContainer(FtpletContainer ftpletContainer) { ... }
     public Ftplet getFtplet(String name) { ... }
 
-    public Map&lt;String, Listener> getListeners() { ... }
-    public void setListeners(Map&lt;String, Listener> listeners) { ... }
+    public Map<String, Listener> getListeners() { ... }
+    public void setListeners(Map<String, Listener> listeners) { ... }
     public Listener getListener(String name) { ... }
     public void setListener(String name, Listener listener) { ... }
     public void addListener(String name, Listener listener) { ... }
@@ -426,11 +426,11 @@ public class DefaultFtpServerContext implements FtpServerContext {
     ...
 
 }
-</pre>
+```
 
 意料之中，`DefaultFtpServerContext` 实现了每个组件对应的 Getter 和 Setter 方法。除此之外，`DefaultFtpServerContext` 还应包含一个 `ThreadPoolExecutor` 组件：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
 	
 	...
@@ -445,7 +445,7 @@ public class DefaultFtpServerContext implements FtpServerContext {
     public synchronized ThreadPoolExecutor getThreadPoolExecutor() {
         if(threadPoolExecutor == null) {
             int maxThreads = connectionConfig.getMaxThreads();
-            if (maxThreads &lt; 1) {
+            if (maxThreads < 1) {
                 int maxLogins = connectionConfig.getMaxLogins();
                 if(maxLogins > 0) {
                     maxThreads = maxLogins;
@@ -460,19 +460,19 @@ public class DefaultFtpServerContext implements FtpServerContext {
         return threadPoolExecutor;
     }
 }
-</pre>
+```
 
 可见，这个 `ThreadPoolExecutor` 的实例化是 lazy 的。它会根据 `ConnectionConfig` 中设定的 `maxThreads` 和 `maxLogins` 值来设定自己的线程数，并实例化为 `OrderedThreadPoolExecutor` 类型。
 
 实际上，`DefaultFtpServerContext` 还包含两个静态成员变量和一个 `createDefaultUsers` 方法：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
 
 	...
 
-	private static final List&lt;Authority> ADMIN_AUTHORITIES = new ArrayList&lt;Authority>();
-    private static final List&lt;Authority> ANON_AUTHORITIES = new ArrayList&lt;Authority>();
+	private static final List<Authority> ADMIN_AUTHORITIES = new ArrayList<Authority>();
+    private static final List<Authority> ANON_AUTHORITIES = new ArrayList<Authority>();
 
     ...
 
@@ -527,7 +527,7 @@ public class DefaultFtpServerContext implements FtpServerContext {
     ...
 
 }
-</pre>
+```
 
 可见，这里是默认配置了管理员账户和匿名账户的权限，并向 `UserManager` 中注册了这两个默认存在的账户。同样由此可见，`UserManager` 负责管理所有账户的用户名和密码等登录信息、权限信息以及它们的连接等待时长、Home 路径等配置信息。
 
@@ -603,7 +603,7 @@ public class DefaultFtpServerContext implements FtpServerContext {
 
 话不多说，我们直接开始看 `Listener` 的代码吧：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/listener/Listener.java;h=c078982fe1deff5e6a576a3b80e4eebb103c4c72;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 /**
  * Interface for the component responsible for waiting for incoming socket
  * requests and kicking off {@link FtpIoSession}s
@@ -618,7 +618,7 @@ public interface Listener {
     boolean isStopped();
     boolean isSuspended();
 
-    Set&lt;FtpIoSession> getActiveSessions();
+    Set<FtpIoSession> getActiveSessions();
 
     DataConnectionConfiguration getDataConnectionConfiguration();
     String getServerAddress();
@@ -631,11 +631,11 @@ public interface Listener {
     IpFilter getIpFilter();
 
     @Deprecated
-    List&lt;InetAddress> getBlockedAddresses();
+    List<InetAddress> getBlockedAddresses();
     @Deprecated
-    List&lt;Subnet> getBlockedSubnets();
+    List<Subnet> getBlockedSubnets();
 }
-</pre>
+```
 
 这里可以看到，除了几个我们已知的状态转移方法和状态判断方法外，一个 `Listener` 基本的配置信息还包括了它所绑定的本地主机名以及端口号、连接超时时间和一个 `DataConnectionConfiguration`，也就是数据连接的配置信息、一个用于对部分 IP 的请求进行屏蔽的 `IpFilter`，以及 `SslConfiguration` 等 SSL 连接的相关配置。
 
@@ -643,12 +643,12 @@ public interface Listener {
 
 回忆之前看到的 `DefaultFtpServerContext`，`Listener` 在其实例化时默认是这样设置的：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
 
     ...
 
-    private Map&lt;String, Listener> listeners = new HashMap&lt;String, Listener>();
+    private Map<String, Listener> listeners = new HashMap<String, Listener>();
 
     ...
 
@@ -660,11 +660,11 @@ public class DefaultFtpServerContext implements FtpServerContext {
     ...
 
 }
-</pre>
+```
 
 那么我们接下来就来看看 `ListenerFactory`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/listener/ListenerFactory.java;h=1a3532b6c6770b61dbeb04d34649ba61d7c7feb5;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 /**
  * Factory for listeners. Listeners themselves are immutable and must be 
  * created using this factory.
@@ -682,8 +682,8 @@ public class ListenerFactory {
 
     private int idleTimeout = 300;
 
-    private List&lt;InetAddress> blockedAddresses;
-    private List&lt;Subnet> blockedSubnets;
+    private List<InetAddress> blockedAddresses;
+    private List<Subnet> blockedSubnets;
     
     /**
      * The IP filter
@@ -693,13 +693,13 @@ public class ListenerFactory {
     ...
 
 }
-</pre>
+```
 
 这里我们了解到，`Listener` 是不可变的，对 `Listener` 的配置需要通过 `ListenerFactory` 进行。由此，我们也能在 `ListenerFactory` 中看到先前提到的几个 `Listener` 的成员域了。
 
 继续往下看：
 
-<pre class="brush: java">
+```java
 public class ListenerFactory {
     
     ...
@@ -733,13 +733,13 @@ public class ListenerFactory {
     ...
 
 }
-</pre>
+```
 
 可以看到，`ListenerFactory` 创建 `Listener` 的行为，主要包括了对所设定主机名的解析以判断该主机名可用，而后便使用了 `ListenerFactory` 内部设定的成员域创建出一个 `NioListener`。
 
 继续往下看：
 
-<pre class="brush: java">
+```java
 public class ListenerFactory {
     
     ...
@@ -768,13 +768,13 @@ public class ListenerFactory {
     ...
 
 }
-</pre>
+```
 
 很好，后面就只是各个域的 Getter 和 Setter 方法了。这个类就算是看完了。
 
 我们接着来看 `NioListener`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/listener/nio/NioListener.java;h=9161403993f058ffeb941c74f9bf3f2671d572eb;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class NioListener extends AbstractListener {
 
     private FtpServerContext context;
@@ -810,7 +810,7 @@ public class NioListener extends AbstractListener {
     ...
 
 }
-</pre>
+```
 
 我们可以看到，`NioListener` 的 `start` 方法实例化了一个 `NioSocketAcceptor`：它实现了 `SocketAcceptor` 接口，而这是 Apache Mina 框架的东西，这里我们不看。
 
@@ -822,7 +822,7 @@ public class NioListener extends AbstractListener {
 
 那么我们来看 `FtpHandler`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/impl/FtpHandler.java;h=69e1c2e76ae7ca18f4534459af24542f574cbbc0;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface FtpHandler {
 
     void init(FtpServerContext context, Listener listener);
@@ -835,13 +835,13 @@ public interface FtpHandler {
     void messageReceived(FtpIoSession session, FtpRequest request) throws Exception;
     void messageSent(FtpIoSession session, FtpReply reply) throws Exception;
 }
-</pre>
+```
 
 从方法名就能很容易看出来，这个所谓的 `FtpHandler` 实际上是一个 Event Handler（事件处理器）：除了 `init` 方法用于初始化 `FtpHandler`，其他方法的调用均意味着对应事件的发生。
 
 我们接着来看 `DefaultFtpHandler`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/impl/DefaultFtpHandler.java;h=bd66ab2d00bc3d0b3070235866d289c1a7c2defd;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class DefaultFtpHandler implements FtpHandler {
     ...
     
@@ -866,13 +866,13 @@ public class DefaultFtpHandler implements FtpHandler {
 
     ...
 }
-</pre>
+```
 
 这里我们看到，`sessionCreated` 方法调用了 `FtpStatistics` 组件的 `setOpenConnection` 方法。
 
 继续往下：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpHandler implements FtpHandler {
     ...
 
@@ -899,13 +899,13 @@ public class DefaultFtpHandler implements FtpHandler {
 
     ...
 }
-</pre>
+```
 
 `sessionOpened` 方法调用了 `FtpletContainer` 的 `onConnect` 方法，并会在 `Ftplet` 们示意应关闭 Session 时关闭掉该 Session。
 
 继续往下：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpHandler implements FtpHandler {
     ...
 
@@ -943,13 +943,13 @@ public class DefaultFtpHandler implements FtpHandler {
 
     ...
 }
-</pre>
+```
 
 `sessionClosed` 被调用时，`FtpletContainer` 的 `onDisconnect` 事件方法被调用，而后关闭了 Session 对应的数据连接和用户的 `FileSystemView`（将在后面的章节中解释），并向 `FtpStatistics` 记录了这一行为。
 
 继续往下：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpHandler implements FtpHandler {
     ...
 
@@ -1028,7 +1028,7 @@ public class DefaultFtpHandler implements FtpHandler {
 
     ...
 }
-</pre>
+```
 
 这里我们看到，`messageReceived` 方法利用传入的 `FtpRequest` 变量的 `command` 域，从 `FtpServerContext` 的 `CommandFactory` 组件中拿到了一个 `Command` 对象，并在进行一定的验证后通过调用 `Command` 对象的 `execute` 方法来执行该命令。这里我们就了解到 `CommandFactory` 的基本作用了。
 
@@ -1085,7 +1085,7 @@ public class DefaultFtpHandler implements FtpHandler {
 
 `UserManager` 是我们之前提到的 `FtpServerContext` 的内部组件之一。在 `DefaultFtpServerContext` 中，`UserManager` 组件默认的初始化语句为：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
     ...
     
@@ -1093,11 +1093,11 @@ public class DefaultFtpServerContext implements FtpServerContext {
 
     ...
 }
-</pre>
+```
 
 我们先来看看 `UserManager` 的源代码：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/UserManager.java;h=16b35534722c73bf64273559f5340dae70c1e980;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface UserManager {
     User getUserByName(String username) throws FtpException;
 
@@ -1115,27 +1115,27 @@ public interface UserManager {
 
     boolean isAdmin(String username) throws FtpException;
 }
-</pre>
+```
 
 从方法的名称我们基本就能看出，`UserManager` 相当于一个数据库，用来保存服务器所有的用户信息，
 所有用户的信息均以 `User` 对象的形式注册到 `UserManager` 中。
 
 我们再来看 `User` 类：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/User.java;h=0f94fb9be664b42d850f4435a39d22706b7109a4;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface User {
     String getName();
 
     String getPassword();
 
-    List&lt;Authority> getAuthorities();
+    List<Authority> getAuthorities();
 
     /**
      * Get authorities of the specified type granted to this user
      * @param clazz The type of {@link Authority}
      * @return Authorities of the specified class
      */
-    List&lt;Authority> getAuthorities(Class&lt;? extends Authority> clazz);
+    List<Authority> getAuthorities(Class<? extends Authority> clazz);
 
     /**
      * Authorize a {@link AuthorizationRequest} for this user
@@ -1153,7 +1153,7 @@ public interface User {
 
     String getHomeDirectory();
 }
-</pre>
+```
 
 可见，`User` 类包含了用户的登录信息、权限信息以及配置信息。
 
@@ -1165,7 +1165,7 @@ public interface User {
 
 `FileSystemFactory` 同样是 `FtpServerContext` 的组件之一，它在 `DefaultFtpServerContext` 的默认设置是这样的：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
     ...
 
@@ -1173,11 +1173,11 @@ public class DefaultFtpServerContext implements FtpServerContext {
 
     ...
 }
-</pre>
+```
 
 先从 `FileSystemFactory` 看起：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/FileSystemFactory.java;h=38e07abf22b953bc380088f52e244f3707d6a4d9;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 /**
  * Factory for file system implementations - it returns the file system view for user.
  */
@@ -1192,13 +1192,13 @@ public interface FileSystemFactory {
     FileSystemView createFileSystemView(User user) throws FtpException;
 
 }
-</pre>
+```
 
 可见，`FileSystemFactory` 会为每个 `User` 返回一个对应的 `FileSystemView`，这就使得不同的 `User` 看到的文件内容是可以不同的。
 
 我们再来看一下 `FileSystemView`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/FileSystemView.java;h=95d88e98f36b68e227282b55495a3ea21bfe99e8;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 /**
  * This is an abstraction over the user file system view.
  */
@@ -1216,13 +1216,13 @@ public interface FileSystemView {
 
     void dispose();
 }
-</pre>
+```
 
 `FileSystemView` 本身也能算是一个文件系统，能提供的信息包括了 Home 路径、当前路径以及可否随机访问，同时也可通过 `FileSystemView` 更改当前路径或获取指定名称的 `FtpFile`。
 
 我们再来看一下 `FtpFile`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/FtpFile.java;h=343f994dc8a619204f9abeceeae043f26825b116;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 /**
  * This is the file abstraction used by the server.
  */
@@ -1244,7 +1244,7 @@ public interface FtpFile {
     boolean setLastModified(long time);
     long getSize();
 
-    List&lt;FtpFile> listFiles();
+    List<FtpFile> listFiles();
 
     boolean mkdir();
     boolean delete();
@@ -1268,7 +1268,7 @@ public interface FtpFile {
      */
     InputStream createInputStream(long offset) throws IOException;
 }
-</pre>
+```
 
 可见，`FtpFile` 实际上并不对应于一个实实在在的 FTP 服务器上的文件，而是对应于 `FileSystemView` 中的一个给定的路径，正如 `java.io.File`。同时 `FtpFile` 也提供了访问路径的相关信息以及进行特定操作的方法。
 
@@ -1277,7 +1277,7 @@ public interface FtpFile {
 
 我们先来看看 `NativeFileSystemFactory`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/filesystem/nativefs/NativeFileSystemFactory.java;h=f15a19de375275c929944e84c8d1c06f4cf1f238;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 /**
  * Native file system factory. It uses the OS file system.
  */
@@ -1328,13 +1328,13 @@ public class NativeFileSystemFactory implements FileSystemFactory {
     public void setCaseInsensitive(boolean caseInsensitive) { ... }
 
 }
-</pre>
+```
 
 一目了然，`NativeFilsSystemFactory` 包含 `createHome` 和 `caseInsensitive` 两个标识位，其中 `createHome` 用于决定在为用户创建 `NativeFilsSystemView` 时是否自动创建 Home 目录，而 `caseInsensitive` 位则被传入到了 `NativeFileSystemView` 中。除此之外，通过 `createFileSystemView` 方法调用 `User#getHomeDirectory()` 方法的方式我们也能看出，`User` 对象里保存的所谓 Home 路径实际上是给服务器看的，而用户连接 FTP 服务器后都应默认处于根目录 `/`。
 
 我们再来看 `NativeFileSystemView`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/filesystem/nativefs/impl/NativeFileSystemView.java;h=55da62daf3f48af5c01529677539f1f1a7d8e4ab;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class NativeFileSystemView implements FileSystemView {
     private final Logger LOG = LoggerFactory.getLogger(NativeFileSystemView.class);
 
@@ -1376,13 +1376,13 @@ public class NativeFileSystemView implements FileSystemView {
     ...
 
 }
-</pre>
+```
 
 可见，用户当前工作路径在 `NativeFileSystemView` 中被标识为了 `currDir` 成员，`rootDir` 实际上只用于与 `currDir` 变量相结合而判断用户实际在访问的是服务器上的哪个文件夹。
 
 继续往下：
 
-<pre class="brush: java">
+```java
 public class NativeFileSystemView implements FileSystemView {
     ...
 
@@ -1439,7 +1439,7 @@ public class NativeFileSystemView implements FileSystemView {
     public void dispose() {}
 
 }
-</pre>
+```
 
 `getHomeDirectory` 和 `getWorkingDirectory` 方法的实现证明了之前我们对 `rootDir` 和 `currDir` 关系的猜想。
 在理解了这一点后，剩下的方法的实现就不难理解了。
@@ -1450,7 +1450,7 @@ public class NativeFileSystemView implements FileSystemView {
 
 在阅读 `DefaultFtpServerContext` 的时候我们注意到，`CommandFactory` 组件的默认实例化方式是这样的：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
     ...
 
@@ -1458,13 +1458,13 @@ public class DefaultFtpServerContext implements FtpServerContext {
 
     ...
 }
-</pre>
+```
 
 而在阅读 `DefaultFtpHandler` 的时候我们了解到，`CommandFactory` 的 `getCommand` 方法用于将用户请求里携带的命令字符串转换为 `Command` 对象，通过调用 `Command` 对象的 `execute` 方法即可执行该命令。
 
 那么我们先来看一下 `CommandFactory`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/command/CommandFactory.java;h=ced5bdade688c31533f01d7ef2d0ba76342b7bbc;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface CommandFactory {
 
     /**
@@ -1476,11 +1476,11 @@ public interface CommandFactory {
     Command getCommand(String commandName);
 
 }
-</pre>
+```
 
 基本是意料之中。我们再来看一下 `Command`（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/command/Command.java;h=24c1dc1ce0afa1faa7c3e61f0069a2f7ffa525da;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface Command {
 
     /**
@@ -1494,11 +1494,11 @@ public interface Command {
             FtpRequest request) throws IOException, FtpException;
 
 }
-</pre>
+```
 
 同样，并无太多出人意料的东西。再来看 `CommandFactoryFactory`（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/command/CommandFactoryFactory.java;h=ad3a2316fbfaf8a04e530c15b7d9d74fbb522b66;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class CommandFactoryFactory {
 
     private static final HashMap<String, Command> DEFAULT_COMMAND_MAP = new HashMap<String, Command>();
@@ -1511,7 +1511,7 @@ public class CommandFactoryFactory {
         ...
     }
 
-    private Map&lt;String, Command> commandMap = new HashMap&lt;String, Command>();
+    private Map<String, Command> commandMap = new HashMap<String, Command>();
 
     private boolean useDefaultCommands = true;
 
@@ -1521,7 +1521,7 @@ public class CommandFactoryFactory {
      */
     public CommandFactory createCommandFactory() {
         
-        Map&lt;String, Command> mergedCommands = new HashMap&lt;String, Command>();
+        Map<String, Command> mergedCommands = new HashMap<String, Command>();
         if (useDefaultCommands)
             mergedCommands.putAll(DEFAULT_COMMAND_MAP);
         
@@ -1532,35 +1532,35 @@ public class CommandFactoryFactory {
 
     ...
 }
-</pre>
+```
 
 首先映入眼帘的是初始化为静态成员的 `DEFAULT_COMMAND_MAP`，包含了默认的从字符串到 `Command` 的映射。
 除此之外我们还看到了实例成员 `commandMap` 和 `useDefaultCommands`。从 `createCommandFactory` 方法来看，`useDefaultCommands` 代表是否要向创建的 `DefaultCommandFactory` 中放入默认的 `DEFAULT_COMMAND_MAP`，而 `commandMap` 代表用户自行添加的命令映射。
 
 `CommandFactoryFactory` 的剩余方法则基本验证了我们的猜想：
 
-<pre class="brush: java">
+```java
 public class CommandFactoryFactory {
     ...
 
     public boolean isUseDefaultCommands() { ... }
     public void setUseDefaultCommands(final boolean useDefaultCommands) { ... }
 
-    public Map&lt;String, Command> getCommandMap() { ... }
+    public Map<String, Command> getCommandMap() { ... }
     public void addCommand(String commandName, Command command) { ... }
-    public void setCommandMap(final Map&lt;String, Command> commandMap) { ... }
+    public void setCommandMap(final Map<String, Command> commandMap) { ... }
 
 }
-</pre>
+```
 
 再来看 `DefaultCommandFactory`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/command/impl/DefaultCommandFactory.java;h=dea5a2e4f19b419d32f0b59e76f02edb91431473;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class DefaultCommandFactory implements CommandFactory {
 
-    private Map&lt;String, Command> commandMap = new HashMap&lt;String, Command>();
+    private Map<String, Command> commandMap = new HashMap<String, Command>();
 
-    public DefaultCommandFactory(Map&lt;String, Command> commandMap) {
+    public DefaultCommandFactory(Map<String, Command> commandMap) {
         this.commandMap = commandMap;
     }
 
@@ -1575,13 +1575,13 @@ public class DefaultCommandFactory implements CommandFactory {
         return commandMap.get(upperCaseCmdName);
     }
 }
-</pre>
+```
 
 基本是意料之中：`DefaultCommandFactory` 使用一个内置的命令映射来解析传入的命令字符串。
 
 这里我们以 `HELP` 指令为例，看看 FtpServer 是怎么实现 `Command` 接口的：（[完整源代码]()）
 
-<pre class="brush: java">
+```java
 public class HELP extends AbstractCommand {
 
     public void execute(final FtpIoSession session,
@@ -1609,7 +1609,7 @@ public class HELP extends AbstractCommand {
                 FtpReply.REPLY_214_HELP_MESSAGE, ftpCmd, null));
     }
 }
-</pre>
+```
 
 并没有什么特别的地方，但我们注意到，`HELP` 指令回应内容并不在这里直接产生，而是调用了 `LocalizedFtpReply` 的静态方法 `translate`，向其中传入了足够的上下文参数以及响应码，由 `LocalizedFtpReply` 来生成对应的回应信息。
 
@@ -1619,7 +1619,7 @@ public class HELP extends AbstractCommand {
 
 在 `FtpServerContext` 中包含一个 `FtpStatistics` 组件，而在 `DefaultFtpServerContext` 中，该组件是这样被初始化的：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
     ...
 
@@ -1627,12 +1627,12 @@ public class DefaultFtpServerContext implements FtpServerContext {
 
     ...
 }
-</pre>
+```
 
 从类的名称以及 `DefaultFtpHandler` 调用的方式来看，`FtpStatistics` 用于对 FTP 服务器进行一定的计数统计。
 我们先来看一下 `FtpStatistics`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=ftplet-api/src/main/java/org/apache/ftpserver/ftplet/FtpStatistics.java;h=39a955710fd8e0988a703f12e2321d8dcb90d705;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface FtpStatistics {
     Date getStartTime();
     int getTotalUploadNumber();
@@ -1652,11 +1652,11 @@ public interface FtpStatistics {
     int getCurrentUserLoginNumber(User user);
     int getCurrentUserLoginNumber(User user, InetAddress ipAddress);
 }
-</pre>
+```
 
 这里我们大概了解到了一个 `FtpStatistics` 都统计了什么数据。接下来我们看一下扩展了 `FtpStatistics` 的 `ServerFtpStatistics` 接口：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/impl/ServerFtpStatistics.java;h=a174ed09d680d632feaee5c2f22ec70ebbee8372;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface ServerFtpStatistics extends FtpStatistics {
 
     void setObserver(StatisticsObserver observer);
@@ -1675,7 +1675,7 @@ public interface ServerFtpStatistics extends FtpStatistics {
 
     void resetStatisticsCounters();
 }
-</pre>
+```
 
 这里我们可以看到，`ServerFtpStatistics` 提供的方法主要都是事件的记录方法，方法将在被调用的时候改变对应的统计值。
 
@@ -1686,7 +1686,7 @@ public interface ServerFtpStatistics extends FtpStatistics {
 在阅读 `HELP` 指令的源代码的时候我们了解到，响应的主要内容是通过 `LocalizedFtpReply` 的 `translate` 静态方法产生的。
 那么我们先来看一下这个方法：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/impl/LocalizedFtpReply.java;h=ec7def47cfe21fa73f34fa88e64b22f809e21c09;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class LocalizedFtpReply extends DefaultFtpReply {
     ...
 
@@ -1718,20 +1718,20 @@ public class LocalizedFtpReply extends DefaultFtpReply {
 
     ...
 }
-</pre>
+```
 
 在 `translateMessage` 方法中，响应信息的内容实际上是通过 `MessageResource` 组件的 `getMessage` 方法获取到的。
 
 那么我们就来看一下 `MessageResource` 这个组件：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/message/MessageResource.java;h=924fa1a8d575d9c59509130f821869e9b6e3f0ff;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public interface MessageResource {
 
     /**
      * Get all the available languages.
      * @return A list of available languages
      */
-    List&lt;String> getAvailableLanguages();
+    List<String> getAvailableLanguages();
 
     /**
      * Get the message for the corresponding code and sub id. If not found it
@@ -1748,15 +1748,15 @@ public interface MessageResource {
      * @param language The language
      * @return All messages for the provided language
      */
-    Map&lt;String, String> getMessages(String language);
+    Map<String, String> getMessages(String language);
 }
-</pre>
+```
 
 可以看到，外部类主要调用 `MessageResource` 的 `getMessage` 方法，通过传入响应码、语言以及 `subId` 来获取对应的响应内容。
 
 我们回忆一下 `DefaultFtpServerContext` 默认初始化 `MessageResource` 的方式：
 
-<pre class="brush: java">
+```java
 public class DefaultFtpServerContext implements FtpServerContext {
     ...
 
@@ -1764,49 +1764,49 @@ public class DefaultFtpServerContext implements FtpServerContext {
 
     ...
 }
-</pre>
+```
 
 那么我们来看一下 `MessageResourceFactory`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/message/MessageResourceFactory.java;h=a55c7d3bbb13303e30d6fb34da2a0f90699c8ec3;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class MessageResourceFactory {
 
-    private List&lt;String> languages;
+    private List<String> languages;
     private File customMessageDirectory;
 
     public MessageResource createMessageResource() {
         return new DefaultMessageResource(languages, customMessageDirectory);
     }
 
-    public List&lt;String> getLanguages() { ... }
-    public void setLanguages(List&lt;String> languages) { ... }
+    public List<String> getLanguages() { ... }
+    public void setLanguages(List<String> languages) { ... }
 
     public File getCustomMessageDirectory() { ... }
     public void setCustomMessageDirectory(File customMessageDirectory) { ... }
 }
-</pre>
+```
 
 由此可知，Apache FtpServer 使用 `DefaultMessageResource` 作为默认的 `MessageResource`，而 `DefaultMessageResource` 主要包含 `languages` 和 `customMessageDirectory` 两个域。
 
 那么我们就来看一下 `DefaultMessageResource`：（[完整源代码](https://git-wip-us.apache.org/repos/asf?p=mina-ftpserver.git;a=blob;f=core/src/main/java/org/apache/ftpserver/message/impl/DefaultMessageResource.java;h=2b0fffa4a701d96aea51d62ba13f8ef85aa6b3ae;hb=refs/heads/1.0.6)）
 
-<pre class="brush: java">
+```java
 public class DefaultMessageResource implements MessageResource {
     private final Logger LOG = LoggerFactory.getLogger(DefaultMessageResource.class);
 
     private final static String RESOURCE_PATH = "org/apache/ftpserver/message/";
 
-    private List&lt;String> languages;
-    private Map&lt;String, PropertiesPair> messages;
+    private List<String> languages;
+    private Map<String, PropertiesPair> messages;
 
-    public DefaultMessageResource(List&lt;String> languages,
+    public DefaultMessageResource(List<String> languages,
             File customMessageDirectory) {
         if (languages != null) {
             this.languages = Collections.unmodifiableList(languages);
         }
 
         // populate different properties
-        messages = new HashMap&lt;String, PropertiesPair>();
+        messages = new HashMap<String, PropertiesPair>();
         if (languages != null) {
             for (String language : languages) {
                 PropertiesPair pair = createPropertiesPair(language, customMessageDirectory);
@@ -1825,13 +1825,13 @@ public class DefaultMessageResource implements MessageResource {
         public Properties customProperties = new Properties();
     }
 }
-</pre>
+```
 
 可以看到，除了之前已经了解到的 `languages` 域，`DefaultMessageResource` 还包含一个 `messages` 映射，值为包含 `defaultProperties` 和 `customProperties` 两个域的静态内部类 `PropertiesPair`，而 `DefaultMessageResource` 的构造函数利用了给定的 `languages` 和 `customMessageDirectory` 调用 `createPropertiesPair` 方法来初始化 `messages` 域。
 
 我们继续往下看：
 
-<pre class="brush: java">
+```java
 public class DefaultMessageResource implements MessageResource {
     ...
 
@@ -1884,7 +1884,7 @@ public class DefaultMessageResource implements MessageResource {
 
     ...
 }
-</pre>
+```
 
 可见，首先 `DefaultMessageResource` 会将声明在包 `org.apache.ftpserver.message` 中的 `properties` 文件的内容作为默认的响应内容读入，再根据给定的 `customMessgaeDirectory` 读入指定文件作为用户指定的响应内容。
 通过阅读 Apache FtpServer 自带的这些 `properties` 文件便能很好地理解大致的作用原理，在此不再进行赘述。

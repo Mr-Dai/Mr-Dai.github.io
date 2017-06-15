@@ -20,29 +20,29 @@ author: Robert Peng
 
 除此之外，在代码示例 4.1 中看到我们可以使用 `<<` 运算符为某些默认任务追加逻辑：
 
-<pre class="brush: groovy">
-task compile &lt;&lt; {
+```groovy
+task compile << {
     println 'compiling source'
 }
 
-task compileTest(dependsOn: compile) &lt;&lt; {
+task compileTest(dependsOn: compile) << {
     println 'compiling unit tests'
 }
 
-task test(dependsOn: [compile, compileTest]) &lt;&lt; {
+task test(dependsOn: [compile, compileTest]) << {
     println 'running unit tests'
 }
 
-task dist(dependsOn: [compile, test]) &lt;&lt; {
+task dist(dependsOn: [compile, test]) << {
     println 'building the distribution'
 }
-</pre>
+```
 
 ### 4.2 排除任务
 
 通过 <kbd>-x</kbd> 命令行选项可以在构建时排除指定的任务。被排除的任务不会被执行，同样其他依赖该任务的任务也不会被执行。
 
-<pre>
+```
 > gradle dist -x test
 :compile
 compiling source
@@ -52,7 +52,7 @@ building the distribution
 BUILD SUCCESSFUL
 
 Total time: 1 secs
-</pre>
+```
 
 ### 4.3 在任务失败后继续构建
 
@@ -82,9 +82,9 @@ Total time: 1 secs
 
 执行 <kbd>gradle projects</kbd> 即可显示所选项目的所有子项目，并显示各个项目的描述。项目的描述可在各个项目的 `build.gradle` 内通过修改项目的 `description` 属性进行设置：
 
-<pre class="brush: groovy">
+```groovy
 description = 'The shared API for the application'
-</pre>
+```
 
 #### 4.7.2 显示所有任务
 
@@ -92,12 +92,12 @@ description = 'The shared API for the application'
 
 默认情况下，该指令只会显示那些被赋予了分组的任务。任务的分组和描述可以分别通过修改其 `group` 和 `description` 属性进行设置：
 
-<pre class="brush: groovy">
+```groovy
 dists {
     description = 'Builds the distribution'
     group = 'build'
 }
-</pre>
+```
 
 你也可以使用 <kbd>--all</kbd> 选项，如此便会显示所有分组和未分组的任务以及各个任务的依赖。
 
@@ -111,7 +111,7 @@ dists {
 
 由于所有任务的所有依赖加起来可能会包含大量的输出信息，因此可以使用 <kbd>--configuration</kbd> 参数查看指定配置的依赖。
 
-<pre>
+```
 > gradle -q api:dependencies --configuration testCompile
 
 ------------------------------------------------------------
@@ -121,7 +121,7 @@ Project :api - The shared API for the application
 testCompile
 \--- junit:junit:4.12
      \--- org.hamcrest:hamcrest-core:1.3
-</pre>
+```
 
 在执行 `gradle` 命令时使用 <kbd>-q</kbd> 命令行参数可以去除 Gradle 的日志信息，只保留任务本身的输出。有关 Gradle 日志的更多信息详见 [22 章](https://docs.gradle.org/current/userguide/logging.html)。
 
@@ -133,12 +133,12 @@ testCompile
 
 运行指令 <kbd>gradle dependencyInsight</kbd> 即可查看具体依赖的指定信息：
 
-<pre>
+```
 > gradle -q webapp:dependencyInsight --dependency groovy --configuration compile
 org.codehaus.groovy:groovy-all:2.4.7
 \--- project :api
      \--- compile
-</pre>
+```
 
 该指令可用于查看某个具体的依赖包是从如何被解析出来的。在使用该指令时，我们需要像上述示例那样通过 <kbd>--dependency</kbd> 和 <kbd>--configuration</kbd> 参数指定要查看的依赖和配置。
 
@@ -146,7 +146,7 @@ org.codehaus.groovy:groovy-all:2.4.7
 
 执行 <kbd>gradle properties</kbd> 可以查看项目的所有属性：
 
-<pre>
+```
 > gradle -q api:properties
 
 ------------------------------------------------------------
@@ -161,7 +161,7 @@ asDynamicObject: DynamicObject for project ':api'
 baseClassLoaderScope: org.gradle.api.internal.initialization.DefaultClassLoaderScope@12345
 buildDir: /home/user/gradle/samples/userguide/tutorial/projectReports/api/build
 buildFile: /home/user/gradle/samples/userguide/tutorial/projectReports/api/build.gradle
-</pre>
+```
 
 #### 4.7.8 构建报告
 
@@ -184,7 +184,7 @@ buildFile: /home/user/gradle/samples/userguide/tutorial/projectReports/api/build
 
 ### 5.1 使用 Gradle Wrapper 执行构建
 
-对于安装了 Gradle Wrapper 的项目，我们应使用 <kbd>gradlew &lt;task></kbd> 对其执行构建，其中命令 `gradlew` 的使用方法和 `gradle` 完全一致。
+对于安装了 Gradle Wrapper 的项目，我们应使用 <kbd>gradlew <task></kbd> 对其执行构建，其中命令 `gradlew` 的使用方法和 `gradle` 完全一致。
 
 Gradle Wrapper 的所有文件包括如下，注意不要让版本控制系统忽略这些文件：
 
@@ -203,11 +203,11 @@ Gradle Wrapper 的所有文件包括如下，注意不要让版本控制系统�
 
 除此之外，我们还可以在构建脚本中配置一个 [`Wrapper`](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.wrapper.Wrapper.html) 任务，如通过设置属性 `gradleVersion` 来改变默认的 Wrapper 版本：
 
-<pre class="brush: groovy">
+```groovy
 task wrapper(type: Wrapper) {
     gradleVersion = '2.0'
 }
-</pre>
+```
 
 有关 `Wrapper` 任务的更多配置方式，请查阅 `Wrapper` 的 [API 文档](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.wrapper.Wrapper.html)。
 
@@ -268,7 +268,7 @@ mkdir -p ~/.gradle && echo "org.gradle.daemon=false" >> ~/.gradle/gradle.propert
 
 先看一个示例 `build.gradle`：
 
-<pre class="brush: groovy">
+```groovy
 apply plugin: 'java'
 
 repositories {
@@ -279,7 +279,7 @@ dependencies {
     compile group: 'org.hibernate', name: 'hibernate-core', version: '3.6.7.Final'
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }
-</pre>
+```
 
 这个示例实际上就包含了声明依赖的几个基本元素。
 
@@ -300,19 +300,19 @@ Gradle 会根据依赖所赋予的配置（Configuration）对其进行分组。
 
 我们可以通过属性 `group`、`name` 和 `version` 为 Gradle 唯一地指定外部依赖：
 
-<pre class="brush: groovy">
+```groovy
 dependencies {
     compile group: 'org.hibernate', name: 'hibernate-core', version: '3.6.7.Final'
 }
-</pre>
+```
 
 或者我们也可以将其简写为 `group:name:version` 的形式：
 
-<pre class="brush: groovy">
+```groovy
 dependencies {
     compile 'org.hibernate:hibernate-core:3.6.7.Final'
 }
-</pre>
+```
 
 有关声明依赖的更多内容详见 [23.4 小节](https://docs.gradle.org/current/userguide/dependency_management.html#sec:how_to_declare_your_dependencies)。
 
@@ -329,58 +329,58 @@ Gradle 需要在 `build.gradle` 脚本中为 `Project.repositories` 属性进行
 	<tr>
 		<td>Maven 中心库</td>
 		<td>
-<pre class="brush: groovy">
+```groovy
 repositories {
     mavenCentral()
 }
-</pre>
+```
 		</td>
 	</tr>
 	<tr>
 		<td>JCenter 库</td>
 		<td>
-<pre class="brush: groovy">
+```groovy
 repositories {
     jcenter()
 }
-</pre>
+```
 		</td>
 	</tr>
 	<tr>
 		<td>自定义的远程 Maven 库</td>
 		<td>
-<pre class="brush: groovy">
+```groovy
 repositories {
     maven {
         url "http://repo.mycompany.com/maven2"
     }
 }
-</pre>
+```
 		</td>
 	</tr>
 	<tr>
 		<td>自定义的远程 Ivy 库</td>
 		<td>
-<pre class="brush: groovy">
+```groovy
 repositories {
     ivy {
         url "http://repo.mycompany.com/repo"
     }
 }
-</pre>
+```
 		</td>
 	</tr>
 	<tr>
 		<td>本地 Ivy 库</td>
 		<td>
-<pre class="brush: groovy">
+```groovy
 repositories {
     ivy {
         // URL can refer to a local directory
         url "../local-repo"
     }
 }
-</pre>
+```
 		</td>
 	</tr>
 </table>
@@ -399,7 +399,7 @@ Gradle 同样可以像 Maven 那样发布程序包。要做到这一点，我们
 	<tr>
 		<td>Maven 库</td>
 		<td>
-<pre class="brush: groovy">
+```groovy
 apply plugin: 'maven'
 
 uploadArchives {
@@ -409,13 +409,13 @@ uploadArchives {
         }
     }
 }	
-</pre>
+```
 		</td>
 	</tr>
 	<tr>
 		<td>Ivy 库</td>
 		<td>
-<pre class="brush: groovy">
+```groovy
 uploadArchives {
     repositories {
         ivy {
@@ -427,7 +427,7 @@ uploadArchives {
         }
     }
 }
-</pre>
+```
 		</td>
 	</tr>
 </table>
@@ -458,7 +458,7 @@ uploadArchives {
 
 对于一个项目源代码用户来说，构建包含多个子项目的项目实际上本质上也是通过 Gradle 执行不同的任务，不过控制具体执行哪个任务的方式则有所不同。我们有两种做法：
 
-- 进入你感兴趣的子项目所属的目录并像平常那样通过指令 <kbd>gradle &lt; task></kdb> 执行你想要的任务
+- 进入你感兴趣的子项目所属的目录并像平常那样通过指令 <kbd>gradle < task></kdb> 执行你想要的任务
 - 在任意目录下使用任务的限定名称来执行，如 <kbd>gradle :services:webservice:build</kbd>
 
 对于第一种执行方式，Gradle 实际上会执行当前目录下所有子目录所包含的所有子项目的同名任务。比如执行命令 <kbd>gradle test</kbd> 则会执行所有相对于当前目录的子项目的 `test` 任务。
@@ -537,19 +537,19 @@ uploadArchives {
 
 这节主要给出了一个构建脚本的 Hello World 示例：
 
-<pre class="brush: groovy">
+```groovy
 task hello {
     doLast {
         println 'Hello world!'
     }
 }
-</pre>
+```
 
 在这段代码中调用了 `Task` 的 `doLast` 方法，其作用即把给定的 Groovy 闭包添加到任务的操作列表末尾。同样的还包括一个 `doFirst` 方法，顾名思义。
 
 在声明了任务以后，我们就可以在脚本内像使用属性那样使用这个任务了：
 
-<pre class="brush: groovy">
+```groovy
 task hello {
     doLast {
         println 'Hello Earth!'
@@ -561,10 +561,10 @@ hello.doFirst {
 hello.doLast {
     println "Greetings from the $hello.name task."
 }
-hello &lt;&lt; {
+hello << {
     println 'Hello Jupiter'
 }
-</pre>
+```
 
 其中方法 `<<` 实际上就是 `doLast` 的别名。
 
@@ -572,80 +572,80 @@ hello &lt;&lt; {
 
 实际上，Gradle 构建脚本所使用的语言正是 Groovy，因此在构建脚本中我们可以使用任意的 Groovy 代码：
 
-<pre class="brush: groovy">
-task upper &lt;&lt; {
+```groovy
+task upper << {
     String someString = 'mY_nAmE'
     println "Original: " + someString 
     println "Upper case: " + someString.toUpperCase()
 }
-</pre>
+```
 
 ### 14.5 任务依赖
 
 在声明任务的同时我们也可以声明任务的依赖：
 
-<pre class="brush: groovy">
-task taskX(dependsOn: 'taskY') &lt;&lt; {
+```groovy
+task taskX(dependsOn: 'taskY') << {
     println 'taskX'
 }
-task taskY &lt;&lt; {
+task taskY << {
     println 'taskY'
 }
-</pre>
+```
 
 注意声明依赖的任务的时候，被依赖的任务并不需要提前定义，正如上面的代码那样，尽管 `taskX` 依赖 `taskY`，`taskY` 也可以在 `taskX` 之后定义。
 
 除此之外我们也可以在完成任务声明后再为任务赋予具体依赖：
 
-<pre class="brush: groovy">
-task taskX &lt;&lt; {
+```groovy
+task taskX << {
 	println 'taskX'
 }
-task taskY &lt;&lt; {
+task taskY << {
 	println 'taskY'
 }
 taskX.dependsOn taskY
-</pre>
+```
 
 注意，以属性指定 `taskY` 时需要 `taskY` 以预先定义，否则可以用字符串的形式来给定 `taskY`：
 
-<pre class="brush: groovy">
-task taskX &lt;&lt; {
+```groovy
+task taskX << {
 	println 'taskX'
 }
 taskX.dependsOn 'taskY'
 
-task taskY &lt;&lt; {
+task taskY << {
 	println 'taskY'
 }
-</pre>
+```
 
 ### 14.6 动态任务
 
 Gradle 脚本可以利用 Groovy 的动态特性来动态地创建任务：
 
-<pre class="brush: groovy">
+```groovy
 4.times { counter ->
-    task "task$counter" &lt;&lt; {
+    task "task$counter" << {
         println "I'm task number $counter"
     }
 }
 task0.dependsOn task2, task3
-</pre>
+```
 
 ### 14.9 额外属性
 
 在任务定义内可以使用 `ext` 属性为任务定义额外属性：
 
-<pre class="brush: groovy">
+```groovy
 task myTask {
     ext.myProperty = "myValue"
 }
 
-task printTaskProperties &lt;&lt; {
+task printTaskProperties << {
     println myTask.myProperty
 }	
-</pre>
+```
 
 有关额外属性的更多内容详见 [16.4.2 节](https://docs.gradle.org/current/userguide/writing_build_scripts.html#sec:extra_properties)。
 
@@ -653,8 +653,8 @@ task printTaskProperties &lt;&lt; {
 
 多亏了 Groovy 对 Ant 任务的支持，我们同样可以在 Gradle 中使用 Ant 任务来更方便地进行各式各样的文件读写操作：
 
-<pre class="brush: groovy">
-task loadfile &lt;&lt; {
+```groovy
+task loadfile << {
     def files = file('../antLoadfileResources').listFiles().sort()
     files.each { File file ->
         if (file.isFile()) {
@@ -664,7 +664,7 @@ task loadfile &lt;&lt; {
         }
     }
 }
-</pre>
+```
 
 详见 [Groovy 的 AntBuilder 教程](http://docs.groovy-lang.org/latest/html/documentation/ant-builder.html)以及[第 19 章](https://docs.gradle.org/current/userguide/ant.html)。
 
@@ -672,15 +672,15 @@ task loadfile &lt;&lt; {
 
 在 Gradle 脚本里也可以声明方法并在其他任务中调用方法：
 
-<pre class="brush: groovy">
-task checksum &lt;&lt; {
+```groovy
+task checksum << {
     fileList('../antLoadfileResources').each {File file ->
         ant.checksum(file: file, property: "cs_$file.name")
         println "$file.name Checksum: ${ant.properties["cs_$file.name"]}"
     }
 }
 
-task loadfile &lt;&lt; {
+task loadfile << {
     fileList('../antLoadfileResources').each {File file ->
         ant.loadfile(srcFile: file, property: file.name)
         println "I'm fond of $file.name"
@@ -690,26 +690,26 @@ task loadfile &lt;&lt; {
 File[] fileList(String dir) {
     file(dir).listFiles({file -> file.isFile() } as FileFilter).sort()
 }
-</pre>
+```
 
 ### 14.12 默认任务
 
 可以通过 `defaultTasks` 方法来指定默认任务：
 
-<pre class="brush: groovy">
+```groovy
 defaultTasks 'clean', 'run'
-</pre>
+```
 
 ### 14.13 基于 DAG 的配置
 
 在[第 20 章](https://docs.gradle.org/current/userguide/build_lifecycle.html)可以了解到，Gradle 执行时分为配置阶段和执行阶段，其中任务 DAG 的解析在配置阶段完成，而任务的实际执行则属于执行阶段。因此，部分任务也可以基于 DAG 的信息来改变自己的行为：
 
-<pre class="brush: groovy">
-task distribution &lt;&lt; {
+```groovy
+task distribution << {
     println "We build the zip with version=$version"
 }
 
-task release(dependsOn: 'distribution') &lt;&lt; {
+task release(dependsOn: 'distribution') << {
     println 'We release now'
 }
 
@@ -720,7 +720,7 @@ gradle.taskGraph.whenReady {taskGraph ->
         version = '1.0-SNAPSHOT'
     }
 }
-</pre>
+```
 
 ## 44 Java 项目构建入门
 
@@ -738,9 +738,9 @@ Java 插件本身是基于惯例的，它会为项目默认指定一些配置，
 
 在构建文件中加入如下代码：
 
-<pre class="brush: groovy">
+```groovy
 apply plugin: 'java'
-</pre>
+```
 
 如此一来，Gradle 就知道这是一个 Java 项目并应用 Java 插件了，你在构建时也就可以使用 Java 插件预定义的任务了。你可以使用 <kbd>gradle tasks</kbd> 来查看由 Java 插件添加的任务。
 
@@ -772,7 +772,7 @@ Java 插件对项目的结构做出如下默认配置：
 
 如如下代码：
 
-<pre class="brush: groovy">
+```groovy
 sourceCompatibility = 1.7
 version = '1.0'
 jar {
@@ -781,7 +781,7 @@ jar {
                    'Implementation-Version': version
     }
 }
-</pre>
+```
 
 你可以通过 <kbd>gradle properties</kbd> 来查看项目的所有属性。
 
@@ -795,9 +795,9 @@ jar {
 
 使用 `eclipse` 插件：
 
-<pre class="brush: groovy">
+```groovy
 apply plugin: 'eclipse'
-</pre>
+```
 
 然后执行 <kbd>gradle eclipse</kbd> 命令即可生成 Eclipse 项目文件。详见[第 63 章](https://docs.gradle.org/current/userguide/eclipse_plugin.html)。
 
@@ -807,9 +807,9 @@ apply plugin: 'eclipse'
 
 首先，多项目构建需要在根目录创建一个 `settings.gradle` 并指定包含的子项目：
 
-<pre class="brush: groovy">
+```groovy
 include "shared", "api", "services:webservice", "services:shared" 
-</pre>
+```
 
 详见[第 24 章](https://docs.gradle.org/current/userguide/multi_project_builds.html)。
 
@@ -819,7 +819,7 @@ include "shared", "api", "services:webservice", "services:shared"
 
 见如下脚本配置：
 
-<pre class="brush: groovy">
+```groovy
 subprojects {
     apply plugin: 'java'
     apply plugin: 'eclipse-wtp'
@@ -838,7 +838,7 @@ subprojects {
         manifest.attributes provider: 'gradle'
     }
 }
-</pre>
+```
 
 上述代码所使用到的 `subprojects` 方法会遍历项目中的每一个子项目并应用给定的闭包，如此一来便能将闭包内的配置应用到每一个子项目。
 
@@ -848,11 +848,11 @@ subprojects {
 
 如下述代码所示：
 
-<pre class="brush: groovy">
+```groovy
 dependencies {
     compile project(':shared')
 } 
-</pre>
+```
 
 ## 16 编写构建脚本
 
@@ -881,7 +881,7 @@ Gradle 在执行脚本时实际上会把脚本内容放入到一个实现了 [`S
 
 我们可以通过部分由 Gradle 定义的类的 `ext` 属性为该对象添加更多的属性：
 
-<pre class="brush: groovy">
+```groovy
 apply plugin: "java"
 
 ext {
@@ -903,22 +903,22 @@ sourceSets {
     }
 }
 
-task printProperties &lt;&lt; {
+task printProperties << {
     println springVersion
     println emailNotification
     sourceSets.matching { it.purpose == "production" }.each { println it.name }
 }
-</pre>
+```
 
 结果如下：
 
-<pre>
+```
 > gradle -q printProperties
 3.1.0.RELEASE
 build@master.org
 main
 plugin
-</pre>
+```
 
 有关额外属性以及其 API 的更多内容详见 [`ExtraPropertiesExtension`](https://docs.gradle.org/current/dsl/org.gradle.api.plugins.ExtraPropertiesExtension.html) 类的文档。
 
@@ -926,14 +926,14 @@ plugin
 
 可以使用 `configure` 方法来配置任意对象：
 
-<pre class="brush: groovy">
+```groovy
 def pos = configure(new java.text.FieldPosition(10)) {
     beginIndex = 1
     endIndex = 5
 }
 println pos.beginIndex
 println pos.endIndex
-</pre>
+```
 
 ### 16.6 使用其他脚本配置对象
 
@@ -941,21 +941,21 @@ println pos.endIndex
 
 我们可以在 `other.gradle` 中输入：
 
-<pre class="brush: groovy">
+```groovy
 // Set properties.
 beginIndex = 1
 endIndex = 5   
-</pre>
+```
 
 如下代码即可完成与上一节相同的配置：
 
-<pre class="brush: groovy">
+```groovy
 def pos = new java.text.FieldPosition(10)
 // Apply the script
 apply from: 'other.gradle', to: pos
 println pos.beginIndex
 println pos.endIndex
-</pre>
+```
 
 ### 16.7 Groovy 基础
 

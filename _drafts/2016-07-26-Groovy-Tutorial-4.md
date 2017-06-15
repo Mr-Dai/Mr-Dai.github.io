@@ -16,18 +16,18 @@ org_url: "http://www.groovy-lang.org/grape.html"
 <!-- Grape is a JAR dependency manager embedded into Groovy. Grape lets you quickly add maven repository dependencies to your classpath, making scripting even easier. The simplest use is as simple as adding an annotation to your script: -->
 Grape 是 Groovy 内置的一个 JAR 依赖管理系统。Grape 可以让你快速地将 Maven 库依赖添加到类路径中，使得脚本编写变得更加容易。最简单的使用方式仅仅只需要在你的脚本中添加一个注解：
 
-<pre class="brush: groovy">
+```groovy
 @Grab(group='org.springframework', module='spring-orm', version='3.2.5.RELEASE')
 import org.springframework.jdbc.core.JdbcTemplate
-</pre>
+```
 
 <!-- @Grab also supports a shorthand notation: -->
 `@Grab` 还支持另一种便捷写法：
 
-<pre class="brush: groovy">
+```groovy
 @Grab('org.springframework:spring-orm:3.2.5.RELEASE')
 import org.springframework.jdbc.core.JdbcTemplate
-</pre>
+```
 
 <!-- Note that we are using an annotated import here, which is the recommended way. You can also search for dependencies on mvnrepository.com and it will provide you the @Grab annotation form of the pom.xml entry. -->
 注意这里我们使用的是一个带注解的引入语句，而这样是最好的做法。你还可以在 [mvnrepository.com](http://mvnrepository.com/) 上搜索依赖，而它能给出所有 `pom.xml` 项的 `@Grab` 注解形式。
@@ -37,64 +37,64 @@ import org.springframework.jdbc.core.JdbcTemplate
 <!-- Not all dependencies are in maven central. You can add new ones like this: -->
 并不是所有依赖都存在于 Maven 中心库。你可以这样添加一个新的库：
 
-<pre class="brush: groovy">
+```groovy
 @GrabResolver(name='restlet', root='http://maven.restlet.org/')
 @Grab(group='org.restlet', module='org.restlet', version='1.1.6')
-</pre>
+```
 
 ### 1.3 Maven 分类器
 
 <!-- Some maven dependencies need classifiers in order to be able to resolve. You can fix that like this: -->
 某些 Maven 依赖需要添加分类器才能被成功解析。你可以这样添加分类器：
 
-<pre class="brush: groovy">
+```groovy
 @Grab(group='net.sf.json-lib', module='json-lib', version='2.2.3', classifier='jdk15')
-</pre>
+```
 
 ### 1.4 排除间接依赖
 
 <!-- Sometimes you will want to exclude transitive dependencies as you might be already using a slightly different but compatible version of some artifact. You can do this as follows: -->
 有时可能你已经添加了另一个有点不同但又相互兼容的依赖使得你需要排除某些间接依赖。你可以这样做：
 
-<pre class="brush: groovy">
+```groovy
 @Grab('net.sourceforge.htmlunit:htmlunit:2.8')
 @GrabExclude('xml-apis:xml-apis')
-</pre>
+```
 
 ### 1.5 JDBC 驱动
 
 <!-- Because of the way JDBC drivers are loaded, you’ll need to configure Grape to attach JDBC driver dependencies to the system class loader. I.e: -->
 考虑到 JDBC 驱动载入的方式，你需要对 Grape 进行特殊的设置来让它将 JDBC 驱动依赖放入到系统类加载器中，即这样：
 
-<pre class="brush: groovy">
+```groovy
 @GrabConfig(systemClassLoader=true)
 @Grab(group='mysql', module='mysql-connector-java', version='5.1.6')
-</pre>
+```
 
 ### 1.6 在 Groovy Shell 里使用 Grape
 
 <!-- From groovysh use the method call variant: -->
 在 `groovysh` 中可以调用同名的方法：
 
-<pre class="brush: groovy">
+```groovy
 groovy.grape.Grape.grab(group:'org.springframework', module:'spring', version:'2.5.6')
-</pre>
+```
 
 ### 1.7 代理设置
 
 <!-- If you are behind a firewall and/or need to use Groovy/Grape through a proxy server, you can specify those settings on the command like via the http.proxyHost and http.proxyPort system properties: -->
 如果你的设备处于防火墙之后，或者你需要通过一个代理服务器来让 Groovy 或 Grape 访问外部网络的话，你可以在命令行设置 `http.proxyHost` 和 `http.proxyPort` 系统属性：
 
-<pre class="brush: bash">
+```bash
 groovy -Dhttp.proxyHost=yourproxy -Dhttp.proxyPort=8080 yourscript.groovy
-</pre>
+```
 
 <!-- Or you can make this system wide by adding these properties to your JAVA_OPTS environment variable: -->
 或者你也可以将这些设置添加到 `JAVA_OPTS` 环境变量中来让其在全系统中生效：
 
-<pre class="brush: bash">
+```bash
 JAVA_OPTS = -Dhttp.proxyHost=yourproxy -Dhttp.proxyPort=8080
-</pre>
+```
 
 ### 1.8 日志
 
@@ -132,7 +132,7 @@ Grape 仍使用 Ivy 的规范来对模块版本进行区分，尽管部分名称
 <!-- One or more groovy.lang.Grab annotations can be added at any place that annotations are accepted to tell the compiler that this code relies on the specific library. This will have the effect of adding the library to the classloader of the groovy compiler. This annotation is detected and evaluated before any other resolution of classes in the script, so imported classes can be properly resolved by a @Grab annotation. -->
 `groovy.lang.Grab` 注解可被添加至任何可添加注解的位置以告诉编译器这些代码依赖于某个特定的库。这样会使得库被添加到 Groovy 编译器的类加载器中。该注解会在脚本文件中的类被解析之前就被发现并处理，因此引入的类也可以由 `@Grab` 注解而正确地解析。
 
-<pre class="brush: groovy">
+```groovy
 import com.jidesoft.swing.JideSplitButton
 @Grab(group='com.jidesoft', module='jide-oss', version='[2.2.1,2.3.0)')
 public class TestClassAnnotation {
@@ -140,4 +140,4 @@ public class TestClassAnnotation {
         return JideSplitButton.class.name
     }
 }
-</pre>
+```

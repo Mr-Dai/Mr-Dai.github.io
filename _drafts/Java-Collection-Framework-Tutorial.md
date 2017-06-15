@@ -162,9 +162,9 @@ org_url: "http://docs.oracle.com/javase/tutorial/collections/index.html"
 -->
 注意，所有的这些核心接口都是泛型的。例如，`Collection` 接口的声明是这样的：
 
-<pre class="brush: java">
-public interface Collection&lt;E&gt;...
-</pre>
+```java
+public interface Collection<E>...
+```
 
 <!--
 	The <E> syntax tells you that the interface is generic. When you declare a Collection instance you can and should specify the type of object contained in the collection.
@@ -314,18 +314,18 @@ public interface Collection&lt;E&gt;...
 比如，假设你有一个 `Collectio<String> c`，它可能是一个 `List`、一个 `Set` 或者是任何其他 `Collection`。
 下面的代码即可创建一个新的 `ArrayList`（`List` 接口的一个实现类），其中包含 `c` 的所有元素：
 
-<pre class="brush: java">
-List&lt;String&gt; list = new ArrayList&lt;String&gt;(c);
-</pre>
+```java
+List<String> list = new ArrayList<String>(c);
+```
 
 <!--
 	Or — if you are using JDK 7 or later — you can use the diamond operator:
 -->
 或者，如果你使用的是 JDK7 或者更新的版本，你可以使用菱形运算符：
 
-<pre class="brush: java">
-List&lt;String&gt; list = new ArrayList&lt;&gt;(c);
-</pre>
+```java
+List<String> list = new ArrayList<>(c);
+```
 
 <!--
 	The Collection interface contains methods that perform basic operations, such as int size(), boolean isEmpty(),
@@ -392,22 +392,22 @@ List&lt;String&gt; list = new ArrayList&lt;&gt;(c);
 在 JDK8 及更新的版本中，遍历一个集合最好的方式是获取一个流（stream）并对其使用聚合操作。聚合操作通常与 Lambda 表达式相结合，让你可以在更短的代码中表达更多的功能。
 下述代码遍历了一个几何体的集合并输出其中是红色的几何体的名字：
 
-<pre class="brush: java">
+```java
 myShapesCollection.stream()
     .filter(e -> e.getColor() == Color.RED)
     .forEach(e -> System.out.println(e.getName()));
-</pre>
+```
 
 <!--
 	Likewise, you could easily request a parallel stream, which might make sense if the collection is large enough and your computer has enough cores:
 -->
 同样，你也可以很方便地获取一个并行流，如果你的集合足够大、计算机核心足够多，使用它可能会是更好的选择：
 
-<pre class="brush: java">
+```java
 myShapesCollection.parallelStream()
 	.filter(e -> e.getColor() == Color.RED)
 	.forEach(e -> System.out.println(e.getName()));
-</pre>
+```
 
 <!--
 	There are many different ways to collect data with this API. For example, you might want to convert the elements of a Collection to String objects,
@@ -415,21 +415,21 @@ myShapesCollection.parallelStream()
 -->
 这套 API 有很多不同的方式来让你收集数据。比如，你可能想要把一个`Collection`中的元素转换为`String`对象并把它们连接起来，以逗号分隔：
 
-<pre class="brush: java">
+```java
  String joined = elements.stream()
     .map(Object::toString)
     .collect(Collectors.joining(", "));
-</pre>
+```
 
 <!--
 	Or perhaps sum the salaries of all employees:
 -->
 或者把员工们的薪水加起来求个总和：
 
-<pre class="brush: java">
+```java
 int total = employees.stream()
 	.collect(Collectors.summingInt(Employee::getSalary)));
-</pre>
+```
 
 <!--
 	These are but a few examples of what you can do with streams and aggregate operations. For more information and examples, see the lesson entitled Aggregate Operations.
@@ -458,10 +458,10 @@ Java 集合框架一直都将“批量操作”（bulk operation）API 作为其
 `for-each` 语句可以让你使用一个简洁的 `for` 循环来遍历集合或数组，详见<a href="http://docs.oracle.com/javase/tutorial/java/nutsandbolts/for.html"> for 语句</a>一章。
 下述代码使用 `for-each` 语句来将一个集合中的每个元素输出到了独立的行中：
 
-<pre class="brush: java">
+```java
 for (Object o : collection)
     System.out.println(o);
-</pre>
+```
 
 ##### 迭代器
 
@@ -472,13 +472,13 @@ for (Object o : collection)
 一个 [Iterator][]（迭代器）可以让你遍历或是删除集合中的元素。
 通过调用集合的 `iterator` 方法即可获取它的 `Iterator` 对象。下述代码即为 `Iterator` 接口：
 
-<pre class="brush: java">
-public interface Iterator&lt;E&gt; {
+```java
+public interface Iterator<E> {
     boolean hasNext();
     E next();
     void remove(); // 可选
 }
-</pre>
+```
 
 <!--
 	The hasNext method returns true if the iteration has more elements, and the next method returns the next element in the iteration.
@@ -518,13 +518,13 @@ public interface Iterator&lt;E&gt; {
 -->
 下述代码展示了如何使用 `Iterator` 来过滤任意 `Collection` 的元素，即遍历该集合并把特定的元素移除。
 
-<pre class="brush: java">
-static void filter(Collection&lt;?&gt; c) {
-    for (Iterator&lt;?&gt; it = c.iterator(); it.hasNext(); )
+```java
+static void filter(Collection<?> c) {
+    for (Iterator<?> it = c.iterator(); it.hasNext(); )
         if (!cond(it.next()))
             it.remove();
 }
-</pre>
+```
 
 <!--
 	This simple piece of code is polymorphic, which means that it works for any Collection regardless of implementation.
@@ -579,18 +579,18 @@ static void filter(Collection&lt;?&gt; c) {
 -->
 为了展示批量操作的威力，我们不妨考虑下述常用写法，用以从 `Collection c` 中移除所有元素 `e` 的实例：
 
-<pre class="brush: java">
+```java
 c.removeAll(Collections.singleton(e));
-</pre>
+```
 
 <!--
 	More specifically, suppose you want to remove all of the null elements from a Collection.
 -->
 或者，考虑你想要从一个 `Collection` 中移除所有 `null` 元素：
 
-<pre class="brush: java">
+```java
 c.removeAll(Collections.singleton(null));
-</pre>
+```
 
 <!--
 	This idiom uses Collections.singleton, which is a static factory method that returns an immutable Set containing only the specified element.
@@ -615,9 +615,9 @@ c.removeAll(Collections.singleton(null));
 比如，我们假设 `c` 是一个 `Collection`。下述代码会将 `c` 的所有内容物放入到一个新创建的 `Object` 数组中，
 数组的长度和 `c` 中的元素数量相同。
 
-<pre class="brush: java">
+```java
 Object[] a = c.toArray();
-</pre>
+```
 
 <!--
 	Suppose that c is known to contain only strings (perhaps because c is of type Collection<String>).
@@ -626,9 +626,9 @@ Object[] a = c.toArray();
 假设我们知道 `c` 中只包含字符串（也许是因为 `c` 的类型是 `Collection<String>`）。
 下述代码会将 `c` 的所有内容物放入到一个新创建的 `String` 数组中，数组的长度和 `c` 中的元素数量相同。
 
-<pre class="brush: java">
+```java
 Object[] a = c.toArray(new String[0]);
-</pre>
+```
 
 <h3 id="set">2.2 Set 接口</h3>
 
@@ -664,9 +664,9 @@ Java 提供了三种普适的 `Set` 实现：`HashSet`、`TreeSet`和`LinkedHash
 -->
 下述代码即为 `Set` 的其中一种常用语法。假设你有一个 `Collection c`，你想要创建一个新的 `Collection` 包含 `c` 中的所有元素，但移除所有重复的元素：
 
-<pre class="brush: java">
-Collection&lt;Type&gt; noDups = new HashSet&lt;Type&gt;(c);
-</pre>
+```java
+Collection<Type> noDups = new HashSet<Type>(c);
+```
 
 <!--
 	It works by creating a Set (which, by definition, cannot contain duplicates), initially containing all the elements in c.
@@ -680,40 +680,40 @@ Collection&lt;Type&gt; noDups = new HashSet&lt;Type&gt;(c);
 -->
 或者，如果你使用的是 JDK8 或更新的版本，你还可以轻易地使用聚合操作把元素收集到一个 `Set` 中：
 
-<pre class="brush: java">
+```java
 c.stream().collect(Collectors.toSet());
-</pre>
+```
 
 <!--
 	Here's a slightly longer example that accumulates a Collection of names into a TreeSet:
 -->
 下面的例子把一个 `Collection` 里的名称放入到了一个 `TreeSet` 中：
 
-<pre class="brush: java">
-Set&lt;String&gt; set = people.stream()
+```java
+Set<String> set = people.stream()
 	.map(Person::getName)
 	.collect(Collectors.toCollection(TreeSet::new));
-</pre>
+```
 
 <!--
 	And the following is a minor variant of the first idiom that preserves the order of the original collection while removing duplicate elements:
 -->
 下面则是第一个例子的小变形，保留了元素在原本的集合中的顺序并移除了重复的元素：
 
-<pre class="brush: java">
-Collection&lt;Type&gt; noDups = new LinkedHashSet&lt;Type&gtl;(c);
-</pre>
+```java
+Collection<Type> noDups = new LinkedHashSet<Type&gtl;(c);
+```
 
 <!--
 	The following is a generic method that encapsulates the preceding idiom, returning a Set of the same generic type as the one passed.
 -->
 下面的泛型方法是对上面的例子的封装，它返回一个和传入 `Collection` 有着相同泛型参数的 `Set`。
 
-<pre class="brush: java">
-public static &lt;E&gt; Set&lt;E&gt; removeDups(Collection&lt;E&gt; c) {
-    return new LinkedHashSet&lt;E&gt;(c);
+```java
+public static <E> Set<E> removeDups(Collection<E> c) {
+    return new LinkedHashSet<E>(c);
 }
-</pre>
+```
 
 #### Set 接口基本操作
 
@@ -740,55 +740,55 @@ public static &lt;E&gt; Set&lt;E&gt; removeDups(Collection&lt;E&gt; c) {
 -->
 使用 JDK8 聚合操作：
 
-<pre class="brush: java">
+```java
 import java.util.*;
 import java.util.stream.*;
 
 public class FindDups {
     public static void main(String[] args) {
-        Set&lt;String&gt; distinctWords = Arrays.asList(args)
+        Set<String> distinctWords = Arrays.asList(args)
         										.stream()
 												.collect(Collectors.toSet()); 
         System.out.println(distinctWords.size() + " distinct words: " + distinctWords);
     }
 }
-</pre>
+```
 
 <!--
 	Using the for-each Construct:
 -->
 使用 `for-each` 语句：
 
-<pre class="brush: java">
+```java
 import java.util.*;
 
 public class FindDups {
     public static void main(String[] args) {
-        Set&lt;String&gt; s = new HashSet&lt;String&gt;();
+        Set<String> s = new HashSet<String>();
         for (String a : args)
         	s.add(a);
         System.out.println(s.size() + " distinct words: " + s);
     }
 }
-</pre>
+```
 
 <!--
 	Now run either version of the program.
 -->
 现在我们运行上述任意一个版本的程序：
 
-<pre class="brush: bash">
+```bash
 java FindDups i came i saw i left
-</pre>
+```
 
 <!--
 	The following output is produced:
 -->
 程序将给出以下输出：
 
-<pre>
+```
 4 distinct words: [left, came, saw, i]
-</pre>
+```
 
 <!--
 	Note that the code always refers to the Collection by its interface type (Set) rather than by its implementation type.
@@ -817,13 +817,13 @@ java FindDups i came i saw i left
 如果你想要程序按字典序输出这些单词，你只需要把 `Set` 实现类从 `HashSet` 改成 `TreeSet` 就可以了。
 在你进行了这项修改后，上述案例中的命令行将产生如下输出：
 
-<pre class="brush: bash">
+```bash
 java FindDups i came i saw i left
-</pre>
+```
 
-<pre>
+```
 4 distinct words: [came, i, left, saw]
-</pre>
+```
 
 #### Set 接口批量操作
 
@@ -859,16 +859,16 @@ java FindDups i came i saw i left
 如果想在不修改两个集的情况下计算它们的并集、交集或差集，调用者需要在调用相应的批量操作之前先对其中一个集进行复制。
 下述代码给出了这样做的常用写法：
 
-<pre class="brush: java">
-Set&lt;Type&gt; union = new HashSet&lt;Type&gt;(s1);
+```java
+Set<Type> union = new HashSet<Type>(s1);
 union.addAll(s2);
 
-Set&lt;Type&gt; intersection = new HashSet&lt;Type&gt;(s1);
+Set<Type> intersection = new HashSet<Type>(s1);
 intersection.retainAll(s2);
 
-Set&lt;Type&gt; difference = new HashSet&lt;Type&gt;(s1);
+Set<Type> difference = new HashSet<Type>(s1);
 difference.removeAll(s2);
-</pre>
+```
 
 <!--
 	The implementation type of the result Set in the preceding idioms is HashSet, which is, as already mentioned,
@@ -887,13 +887,13 @@ difference.removeAll(s2);
 我们可以通过创建两个集来完成这样的功能，一个保存参数列表中的所有单词，而另一个则保存那些重复过的单词。这样一来，只出现过一次的单词将组成这两个集的差集，
 而我们也知道该怎么计算两个集的差集了。如此一来，这个程序应该会变成<a href="http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/FindDups2.java">这个样子</a>：
 
-<pre class="brush: java">
+```java
 import java.util.*;
 
 public class FindDups2 {
     public static void main(String[] args) {
-        Set&lt;String&gt; uniques = new HashSet&lt;String&gt;();
-        Set&lt;String&gt; dups    = new HashSet&lt;String&gt;();
+        Set<String> uniques = new HashSet<String>();
+        Set<String> dups    = new HashSet<String>();
 
         for (String a : args)
             if (!uniques.add(a))
@@ -906,17 +906,17 @@ public class FindDups2 {
         System.out.println("Duplicate words: " + dups);
     }
 }
-</pre>
+```
 
 <!--
 	When run with the same argument list used earlier (i came i saw i left), the program yields the following output.
 -->
 我们继续使用之前的参数列表（`i came i saw i left`），这次程序的输出应该会是这个样子：
 
-<pre>
+```
 Unique words:    [left, saw, came]
 Duplicate words: [i]
-</pre>
+```
 
 <!--
 	A less common set-algebraic operation is the symmetric set difference — the set of elements contained in either of two specified sets but not in both.
@@ -925,13 +925,13 @@ Duplicate words: [i]
 还有一个不那么常用的集合代数运算 —— 对称差集，只存在于其中一个集合的元素的集合。（译者注：$A \bigtriangleup B = \{ x : (x \in A) \oplus (x \in B) \}$）
 下述代码可以在不修改两个集的情况下计算两个集的对称差集：
 
-<pre class="brush: java">
-Set&lt;Type&gt; symmetricDiff = new HashSet&lt;Type&gt;(s1);
+```java
+Set<Type> symmetricDiff = new HashSet<Type>(s1);
 symmetricDiff.addAll(s2);
-Set&lt;Type&gt; tmp = new HashSet&lt;Type&gt;(s1);
+Set<Type> tmp = new HashSet<Type>(s1);
 tmp.retainAll(s2);
 symmetricDiff.removeAll(tmp);
-</pre>
+```
 
 #### Set 接口数组操作
 
@@ -982,19 +982,19 @@ Java 提供了两种普适的`List`实现类：[ArrayList][] 在多数情况下�
 我们建议你现在去看一下 <a href="#collection">Collection 接口</a>一节。`remove` 方法会把表中第一次出现的给定元素移除，
 而 `add` 和 `addAll` 方法则会把新的元素放到表的末端。因此，如下代码可将一个表拼接到另一个表的尾部：
 
-<pre class="brush: java">
+```java
 list1.addAll(list2);
-</pre>
+```
 
 <!--
 	Here's a nondestructive form of this idiom, which produces a third List consisting of the second list appended to the first.
 -->
 如下代码则非破坏性地创建出了一个新的 `List`，由原有的两个 `List` 首尾拼接而成：
 
-<pre class="brush: java">
-List&lt;Type> list3 = new ArrayList&lt;Type>(list1);
+```java
+List<Type> list3 = new ArrayList<Type>(list1);
 list3.addAll(list2);
-</pre>
+```
 
 <!--
 	Note that the idiom, in its nondestructive form, takes advantage of ArrayList's standard conversion constructor.
@@ -1006,11 +1006,11 @@ list3.addAll(list2);
 -->
 对于 JDK8 或更新的版本，可以使用如下代码将人的姓名收集到一个 `List` 中：
 
-<pre class="brush: java">
-List&lt;String> list = people.stream()
+```java
+List<String> list = people.stream()
 	.map(Person::getName)
 	.collect(Collectors.toList());
-</pre>
+```
 
 <!--
 	Like the Set interface, List strengthens the requirements on the equals and hashCode methods so that two List objects can be compared for logical equality without regard to their implementation classes. Two List objects are equal if they contain the same elements in the same order.
@@ -1037,13 +1037,13 @@ List&lt;String> list = people.stream()
 -->
 如下示例互换了 `List` 中两个元素的位置：
 
-<pre class="brush: java">
-public static &lt;E> void swap(List&lt;E> a, int i, int j) {
+```java
+public static <E> void swap(List<E> a, int i, int j) {
     E tmp = a.get(i);
     a.set(i, a.get(j));
     a.set(j, tmp);
 }
-</pre>
+```
 
 ---
 
@@ -1056,15 +1056,15 @@ public static &lt;E> void swap(List&lt;E> a, int i, int j) {
 -->
 [Queue][]（队列）是一种用于在进行处理前暂存元素的集合。除了最基本的 `Collection` 操作，队列还提供了额外的增、删、查操作。`Queue` 接口如下所示：
 
-<pre class="brush: java">
-public interface Queue&lt;E> extends Collection&lt;E> {
+```java
+public interface Queue<E> extends Collection<E> {
     E element();
     boolean offer(E e);
     E peek();
     E poll();
     E remove();
 }
-</pre>
+```
 
 <!--
 	Each Queue method exists in two forms: (1) one throws an exception if the operation fails, and (2) the other returns a special value if the operation fails (either null or false, depending on the operation). The regular structure of the interface is illustrated in the following table.
@@ -1148,13 +1148,13 @@ public interface Queue&lt;E> extends Collection&lt;E> {
 下面的示例程序使用了队列来实现一个倒数计时器。程序首先会由命令行参数给定一个整数，然后以降序将该整数到 `0` 之间的所有整数添加到队列中。而后，每隔一秒钟，程序都会从队列中获取一个值并打印输出。
 尽管该程序显得十分做作，因为即使不使用队列我们也能实现这样的功能，但该程序也示范了如何在对元素进行后续处理前先使用队列来存放元素。
 
-<pre class="brush: java">
+```java
 import java.util.*;
 
 public class Countdown {
     public static void main(String[] args) throws InterruptedException {
         int time = Integer.parseInt(args[0]);
-        Queue&lt;Integer> queue = new LinkedList&lt;Integer>();
+        Queue<Integer> queue = new LinkedList<Integer>();
 
         for (int i = time; i >= 0; i--)
             queue.add(i);
@@ -1165,7 +1165,7 @@ public class Countdown {
         }
     }
 }
-</pre>
+```
 
 <!--
 	In the following example, a priority queue is used to sort a collection of elements. Again this program is artificial in that there is no reason to use it in favor of the sort method provided in Collections, but it illustrates the behavior of priority queues.
@@ -1173,17 +1173,17 @@ public class Countdown {
 下面的例子则使用了一个优先队列来对一个元素集合进行排序。这个程序依然十分做作，因为我们已经有了 `Collections` 类提供的 `sort` 方法，没有理由还使用这种方式来对元素进行排序，
 但它也展示了优先队列的基本行为表现。
 
-<pre class="brush: java">
-static &lt;E> List&lt;E> heapSort(Collection&lt;E> c) {
-    Queue&lt;E> queue = new PriorityQueue&lt;E>(c);
-    List&lt;E> result = new ArrayList&lt;E>();
+```java
+static <E> List<E> heapSort(Collection<E> c) {
+    Queue<E> queue = new PriorityQueue<E>(c);
+    List<E> result = new ArrayList<E>();
 
     while (!queue.isEmpty())
         result.add(queue.remove());
 
     return result;
 }
-</pre>
+```
 
 ---
 
@@ -1309,57 +1309,57 @@ Java 为 `Map` 提供了三个普适实现类：
 本节接下来的内容将对 `Map` 节接口进行详细介绍。不过，首先我们要先看一下如下几个使用 JDK 8 提供的聚合操作将流元素收集到 `Map` 中的示例代码。
 对于面向对象编程而言，模拟现实生活中的物件是十分常见的，因此我们不妨假设有一个程序需要将员工按部门进行分组：
 
-<pre class="brush: java">
+```java
 // 将员工按部门进行分组
-Map&lt;Department, List&lt;Employee>> byDept = employees.stream()
+Map<Department, List<Employee>> byDept = employees.stream()
     .collect(Collectors.groupingBy(Employee::getDepartment));
-</pre>
+```
 
 <!--
 	Or compute the sum of all salaries by department:
 -->
 或是计算各部门的工资总和：
 
-<pre class="brush: java">
+```java
 // 计算各部门的工资总和
-Map&lt;Department, Integer> totalByDept = employees.stream()
+Map<Department, Integer> totalByDept = employees.stream()
     .collect(Collectors.groupingBy(Employee::getDepartment,
         Collectors.summingInt(Employee::getSalary)));
-</pre>
+```
 
 <!--
 	Or perhaps group students by passing or failing grades:
 -->
 或是将学生按合格和不合格进行分组：
 
-<pre class="brush: java">
+```java
 // 将学生按合格和不合格进行分组
-Map&lt;Boolean, List&lt;Student>> passingFailing = students.stream()
+Map<Boolean, List<Student>> passingFailing = students.stream()
     .collect(Collectors.partitioningBy(s -> s.getGrade()>= PASS_THRESHOLD)); 
-</pre>
+```
 
 <!--
 	You could also group people by city:
 -->
 你还可以将人们根据城市进行分组：
 
-<pre class="brush: java">
+```java
 // 按城市分组
-Map&lt;String, List&lt;Person>> peopleByCity
+Map<String, List<Person>> peopleByCity
          = personStream.collect(Collectors.groupingBy(Person::getCity));
-</pre>
+```
 
 <!--
 	Or even cascade two collectors to classify people by state and city:
 -->
 或是将两个收集器进行级联以将人们根据城市和州进行分组：
 
-<pre class="brush: java">
+```java
 // 级联收集器
-Map&lt;String, Map&lt;String, List&lt;Person>>> peopleByStateAndCity =
+Map<String, Map<String, List<Person>>> peopleByStateAndCity =
     personStream.collect(Collectors.groupingBy(Person::getState,
     Collectors.groupingBy(Person::getCity)))
-</pre>
+```
 
 <!--
 	Again, these are but a few examples of how to use the new JDK 8 APIs. For in-depth coverage of lambda expressions and aggregate operations see the lesson entitled Aggregate Operations.
@@ -1375,12 +1375,12 @@ Map&lt;String, Map&lt;String, List&lt;Person>>> peopleByStateAndCity =
 [下面这个程序](http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/Freq.java)将会为出现在命令行参数列表中的单词生成一个频率表。
 该频率表会将单词映射到其在参数列表中出现的次数。
 
-<pre class="brush: java">
+```java
 import java.util.*;
 
 public class Freq {
     public static void main(String[] args) {
-        Map&lt;String, Integer> m = new HashMap&lt;String, Integer>();
+        Map<String, Integer> m = new HashMap<String, Integer>();
 
         // 初始化频率表
         for (String a : args) {
@@ -1392,7 +1392,7 @@ public class Freq {
         System.out.println(m);
     }
 }
-</pre>
+```
 
 <!--
 	The only tricky thing about this program is the second argument of the put statement. That argument is a conditional expression that has the effect of setting the frequency to one if the word has never been seen before or one more than its current value if the word has already been seen. Try running this program with the command:
@@ -1400,16 +1400,16 @@ public class Freq {
 这个程序唯一一个有趣的地方在于 `put` 语句的第二个参数。该参数是一个条件表达式：在之前没遇到过这个单词时它能将频率设定为 1，也能在遇到这个单词的情况下将频率增加。
 尝试在命令行中运行此程序：
 
-<pre>
+```
 java Freq if it is to be it is up to me to delegate
-</pre>
+```
 
 程序将产生如下输出：
 
-<pre>
+```
 8 distinct words:
 {to=3, delegate=1, be=1, it=2, up=1, if=1, me=1, is=2}
-</pre>
+```
 
 <!--
 	Suppose you'd prefer to see the frequency table in alphabetical order. All you have to do is change the implementation type of the Map from HashMap to TreeMap. Making this four-character change causes the program to generate the following output from the same command line.
@@ -1417,20 +1417,20 @@ java Freq if it is to be it is up to me to delegate
 假设你想要让频率表按字典序排序。你只需要将 `Map` 的实现类从 `HashMap` 变为 `TreeMap` 就可以了。
 在改了这四个字母以后，相同的命令将是程序产生如下输出：
 
-<pre>
+```
 8 distinct words:
 {be=1, delegate=1, if=1, is=2, it=2, me=1, to=3, up=1}
-</pre>
+```
 
 <!--
 	Similarly, you could make the program print the frequency table in the order the words first appear on the command line simply by changing the implementation type of the map to LinkedHashMap. Doing so results in the following output.
 -->
 类似地，你还可以让程序将频率表按照单词第一次出现在命令行中的顺序进行打印，只需要将实现类改为 `LinkedHashMap` 即可。这样一来，程序将产生如下输出：
 
-<pre>
+```
 8 distinct words:
 {if=1, it=2, is=2, to=3, be=1, up=1, me=1, delegate=1}
-</pre>
+```
 
 <!--
 	This flexibility provides a potent illustration of the power of an interface-based framework.
@@ -1450,9 +1450,9 @@ java Freq if it is to be it is up to me to delegate
 这个标准 `Map` 转换构造器和 `Collection` 的标准构造器类似：它使得使用者能够创建一个拥有特定实现类型且包含另一个 `Map` 中所有映射的 `Map`。
 例如，假设你有一个名为 `m` 的 `Map`。如下这一行代码将创建一个与 `m` 拥有相同映射的 `HashMap`：
 
-<pre class="brush: java">
-Map&lt;K, V> copy = new HashMap&lt;K, V>(m);
-</pre>
+```java
+Map<K, V> copy = new HashMap<K, V>(m);
+```
 
 #### Map 接口批量操作
 
@@ -1463,13 +1463,13 @@ Map&lt;K, V> copy = new HashMap&lt;K, V>(m);
 除了这个如此明显的将一个 `Map` 丢到另一个 `Map` 的方法之外，还有另外一种更巧妙的做法。假设有一个 `Map` 被来表示属性值对的集合。
 `putAll` 方法加上 `Map` 的转换构造器可以很方便地创建一个带有默认属性值的属性映射。下面这个静态工厂方法便展示了这项技巧：
 
-<pre class="brush: java">
-static &lt;K, V> Map&lt;K, V> newAttributeMap(Map&lt;K, V>defaults, Map&lt;K, V> overrides) {
-    Map&lt;K, V> result = new HashMap&lt;K, V>(defaults);
+```java
+static <K, V> Map<K, V> newAttributeMap(Map<K, V>defaults, Map<K, V> overrides) {
+    Map<K, V> result = new HashMap<K, V>(defaults);
     result.putAll(overrides);
     return result;
 }
-</pre>
+```
 
 #### 集合视图
 
@@ -1487,32 +1487,32 @@ static &lt;K, V> Map&lt;K, V> newAttributeMap(Map&lt;K, V>defaults, Map&lt;K, V>
 -->
 `Map` 的集合视图**只是**为了提供迭代 `Map` 的方法。如下示例展示了如何使用 `for-each` 语句来迭代 `Map` 中的所有键：
 
-<pre class="brush: java">
+```java
 for (KeyType key : m.keySet())
     System.out.println(key);
-</pre>
+```
 
 <!--
 	and with an iterator:
 -->
 而如下示例则使用了一个迭代器：
 
-<pre class="brush: java">
+```java
 // 根据键的某些属性来过滤一个 Map
-for (Iterator&lt;Type> it = m.keySet().iterator(); it.hasNext(); )
+for (Iterator<Type> it = m.keySet().iterator(); it.hasNext(); )
     if (it.next().isBogus())
         it.remove();
-</pre>
+```
 
 <!--
 	The idiom for iterating over values is analogous. Following is the idiom for iterating over key-value pairs.
 -->
 迭代值的方式也是类似的。如下示例迭代了 `Map` 中的键值对：
 
-<pre class="brush: java">
-for (Map.Entry&lt;KeyType, ValType> e : m.entrySet())
+```java
+for (Map.Entry<KeyType, ValType> e : m.entrySet())
     System.out.println(e.getKey() + ": " + e.getValue());
-</pre>
+```
 
 <!--
 	At first, many people worry that these idioms may be slow because the Map has to create a new Collection instance each time a Collection view operation is called. Rest easy: There's no reason that a Map cannot always return the same object each time it is asked for a given Collection view. This is precisely what all the Map implementations in java.util do.
@@ -1548,22 +1548,22 @@ for (Map.Entry&lt;KeyType, ValType> e : m.entrySet())
 当应用在集合视图上时，如 `containsAll`、`removeAll` 和 `retainAll` 的批量操作便变得十分有用了。比如，假设你想知道一个 `Map` 是否是另一个 `Map` 的子映射，
 即第一个 `Map` 是否包含第二个 `Map` 的所有键值对。如下代码就能做到这一点：
 
-<pre class="brush: java">
+```java
 if (m1.entrySet().containsAll(m2.entrySet())) {
     ...
 }
-</pre>
+```
 
 <!--
 	Along similar lines, suppose you want to know whether two Map objects contain mappings for all of the same keys.
 -->
 又比如，假设你想知道两个 `Map` 对象是否均包含的相同键的映射：
 
-<pre class="brush: java">
+```java
 if (m1.keySet().equals(m2.keySet())) {
     ...
 }
-</pre>
+```
 
 <!--
 	Suppose you have a Map that represents a collection of attribute-value pairs, and two Sets representing required attributes and permissible attributes. (The permissible attributes include the required attributes.) The following snippet determines whether the attribute map conforms to these constraints and prints a detailed error message if it doesn't.
@@ -1571,36 +1571,36 @@ if (m1.keySet().equals(m2.keySet())) {
 假设你有一个表示属性值对集合的 `Map`，以及两个分别用来表示必需属性和可用属性的 `Set`（可用属性包括必需属性）。
 如下代码将判断给定的属性映射是否满足这些约束并在不满足时打印出详细的错误信息：
 
-<pre class="brush: java">
-static &lt;K, V> boolean validate(Map&lt;K, V> attrMap, Set&lt;K> requiredAttrs, Set&lt;K>permittedAttrs) {
+```java
+static <K, V> boolean validate(Map<K, V> attrMap, Set<K> requiredAttrs, Set<K>permittedAttrs) {
     boolean valid = true;
-    Set&lt;K> attrs = attrMap.keySet();
+    Set<K> attrs = attrMap.keySet();
 
     if (!attrs.containsAll(requiredAttrs)) {
-        Set&lt;K> missing = new HashSet&lt;K>(requiredAttrs);
+        Set<K> missing = new HashSet<K>(requiredAttrs);
         missing.removeAll(attrs);
         System.out.println("Missing attributes: " + missing);
         valid = false;
     }
     if (!permittedAttrs.containsAll(attrs)) {
-        Set&lt;K> illegal = new HashSet&lt;K>(attrs);
+        Set<K> illegal = new HashSet<K>(attrs);
         illegal.removeAll(permittedAttrs);
         System.out.println("Illegal attributes: " + illegal);
         valid = false;
     }
     return valid;
 }
-</pre>
+```
 
 <!--
 	Suppose you want to know all the keys common to two Map objects.
 -->
 假设你想要知道两个 `Map` 对象的公有键：
 
-<pre class="brush: java">
-Set&lt;KeyType>commonKeys = new HashSet&lt;KeyType>(m1.keySet());
+```java
+Set<KeyType>commonKeys = new HashSet<KeyType>(m1.keySet());
 commonKeys.retainAll(m2.keySet());
-</pre>
+```
 
 <!--
 	A similar idiom gets you the common values.
@@ -1612,18 +1612,18 @@ commonKeys.retainAll(m2.keySet());
 -->
 以上所有的代码示例都是非破坏性的，也就是说，它们不会修改原有的 `Map`。下面这些就不是了。假设你想要从一个 `Map` 中移除另一个 `Map` 包含的所有键值对：
 
-<pre class="brush: java">
+```java
 m1.entrySet().removeAll(m2.entrySet());
-</pre>
+```
 
 <!--
 	Suppose you want to remove from one Map all of the keys that have mappings in another.
 -->
 假设你想要从一个 `Map` 中移除另一个 `Map` 包含的所有键：
 
-<pre class="brush: java">
+```java
 m1.keySet().removeAll(m2.keySet());
-</pre>
+```
 
 <!--
 	What happens when you start mixing keys and values in the same bulk operation? Suppose you have a Map, managers, that maps each employee in a company to the employee's manager. We'll be deliberately vague about the types of the key and the value objects. It doesn't matter, as long as they're the same. Now suppose you want to know who all the "individual contributors" (or nonmanagers) are. The following snippet tells you exactly what you want to know.
@@ -1632,20 +1632,20 @@ m1.keySet().removeAll(m2.keySet());
 这里我们故意模糊键与值的类型，但实际上这并不重要，你只要知道它们是一样的就可以了（译者注：经理也是雇员）。
 现在假设你想知道谁不是经理。如下代码就能做到这一点：
 
-<pre class="brush: java">
-Set&lt;Employee> individualContributors = new HashSet&lt;Employee>(managers.keySet());
+```java
+Set<Employee> individualContributors = new HashSet<Employee>(managers.keySet());
 individualContributors.removeAll(managers.values());
-</pre>
+```
 
 <!--
 	Suppose you want to fire all the employees who report directly to some manager, Simon.
 -->
 假设你想要开除一个叫做 Simon 的经理的所有直接下属：
 
-<pre class="brush: java">
+```java
 Employee simon = ... ;
 managers.values().removeAll(Collections.singleton(simon));
-</pre>
+```
 
 <!--
 	Note that this idiom makes use of Collections.singleton, a static factory method that returns an immutable Set with the single, specified element.
@@ -1657,11 +1657,11 @@ managers.values().removeAll(Collections.singleton(simon));
 -->
 之后，你可能就会发现你的一些雇员的经理已经不在公司里了（如果 Simon 的直接下属也是经理）。下列代码会告诉你哪些雇员的经理已经离开了公司：
 
-<pre class="brush: java">
-Map&lt;Employee, Employee> m = new HashMap&lt;Employee, Employee>(managers);
+```java
+Map<Employee, Employee> m = new HashMap<Employee, Employee>(managers);
 m.values().removeAll(managers.keySet());
-Set&lt;Employee> slackers = m.keySet();
-</pre>
+Set<Employee> slackers = m.keySet();
+```
 
 <!--
 	This example is a bit tricky. First, it makes a temporary copy of the Map, and it removes from the temporary copy all entries whose (manager) value is a key in the original Map. Remember that the original Map has an entry for each employee. Thus, the remaining entries in the temporary Map comprise all the entries from the original Map whose (manager) values are no longer employees. The keys in the temporary copy, then, represent precisely the employees that we're looking for.
@@ -1696,7 +1696,7 @@ Set&lt;Employee> slackers = m.keySet();
 -->
 [下面的程序](http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/Anagrams.java)直观地实现了这一功能：
 
-<pre class="brush: java">
+```java
 import java.util.*;
 import java.io.*;
 
@@ -1705,16 +1705,16 @@ public class Anagrams {
         int minGroupSize = Integer.parseInt(args[1]);
 
         // Read words from file and put into a simulated multimap
-        Map&lt;String, List&lt;String>> m = new HashMap&lt;String, List&lt;String>>();
+        Map<String, List<String>> m = new HashMap<String, List<String>>();
 
         try {
             Scanner s = new Scanner(new File(args[0]));
             while (s.hasNext()) {
                 String word = s.next();
                 String alpha = alphabetize(word);
-                List&lt;String> l = m.get(alpha);
+                List<String> l = m.get(alpha);
                 if (l == null)
-                    m.put(alpha, l=new ArrayList&lt;String>());
+                    m.put(alpha, l=new ArrayList<String>());
                 l.add(word);
             }
         } catch (IOException e) {
@@ -1723,7 +1723,7 @@ public class Anagrams {
         }
 
         // Print all permutation groups above size threshold
-        for (List&lt;String> l : m.values())
+        for (List<String> l : m.values())
             if (l.size() >= minGroupSize)
                 System.out.println(l.size() + ": " + l);
     }
@@ -1734,14 +1734,14 @@ public class Anagrams {
         return new String(a);
     }
 }
-</pre>
+```
 
 <!--
 	Running this program on a 173,000-word dictionary file with a minimum anagram group size of eight produces the following output.
 -->
 给定一个包含 `173,000` 个单词的字典文件以及输出变形词组的最小大小为 `8`，那么程序将产生如下输出：
 
-<pre>
+```
 9: [estrin, inerts, insert, inters, niters, nitres, sinter,
      triens, trines]
 8: [lapse, leaps, pales, peals, pleas, salep, sepal, spale]
@@ -1768,7 +1768,7 @@ public class Anagrams {
 8: [ates, east, eats, etas, sate, seat, seta, teas]
 8: [carets, cartes, caster, caters, crates, reacts, recast,
      traces]
-</pre>
+```
 
 <!--
 	Many of these words seem a bit bogus, but that's not the program's fault; they're in the dictionary file. Here's the dictionary file we used. It was derived from the Public Domain ENABLE benchmark reference word list.
@@ -1783,9 +1783,9 @@ public class Anagrams {
 
 列表 `l` 可这样进行排序：
 
-<pre class="brush: java">
+```java
 Collections.sort(l);
-</pre>
+```
 
 <!--
 	If the List consists of String elements, it will be sorted into alphabetical order. If it consists of Date elements, it will be sorted into chronological order. How does this happen? String and Date both implement the Comparable interface. Comparable implementations provide a natural ordering for a class, which allows objects of that class to be sorted automatically. The following table summarizes some of the more important Java platform classes that implement Comparable.
@@ -1838,7 +1838,7 @@ Collections.sort(l);
 	</tr>
 	<tr>
 		<td><code>Boolean</code></td>
-		<td><code>Boolean.FALSE &lt; Boolean.TRUE</code></td>
+		<td><code>Boolean.FALSE < Boolean.TRUE</code></td>
 	</tr>
 	<tr>
 		<td><code>File</code></td>
@@ -1879,11 +1879,11 @@ Collections.sort(l);
 
 `Comparable` 接口包含如下方法：
 
-<pre class="brush: java">
-public interface Comparable&lt;T> {
+```java
+public interface Comparable<T> {
     public int compareTo(T o);
 }
-</pre>
+```
 
 <!--
 	The compareTo method compares the receiving object with the specified object and returns a negative integer, 0, or a positive integer depending on whether the receiving object is less than, equal to, or greater than the specified object. If the specified object cannot be compared to the receiving object, the method throws a ClassCastException.
@@ -1896,10 +1896,10 @@ public interface Comparable&lt;T> {
 -->
 [下面这个表示一个人的名称的类](http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/Name.java)实现了 `Comparable` 接口：
 
-<pre class="brush: java">
+```java
 import java.util.*;
 
-public class Name implements Comparable&lt;Name> {
+public class Name implements Comparable<Name> {
     private final String firstName, lastName;
 
     public Name(String firstName, String lastName) {
@@ -1932,7 +1932,7 @@ public class Name implements Comparable&lt;Name> {
         return (lastCmp != 0 ? lastCmp : firstName.compareTo(n.firstName));
     }
 }
-</pre>
+```
 
 <!--
 	To keep the preceding example short, the class is somewhat limited: It doesn't support middle names, it demands both a first and a last name, and it is not internationalized in any way. Nonetheless, it illustrates the following important points:
@@ -1968,7 +1968,7 @@ public class Name implements Comparable&lt;Name> {
 -->
 如下是一个创建了一个名称列表并将其进行排序的[程序实例](http://docs.oracle.com/javase/tutorial/collections/interfaces/examples/NameSort.java)：
 
-<pre class="brush: java">
+```java
 import java.util.*;
 
 public class NameSort {
@@ -1980,18 +1980,18 @@ public class NameSort {
             new Name("Tom", "Rich")
         };
 
-        List&lt;Name> names = Arrays.asList(nameArray);
+        List<Name> names = Arrays.asList(nameArray);
         Collections.sort(names);
         System.out.println(names);
     }
 }
-</pre>
+```
 
 运行程序将输出如下结果：
 
-<pre>
+```
 [Karl Ng, Tom Rich, Jeff Smith, John Smith]
-</pre>
+```
 
 <!--
 	There are four restrictions on the behavior of the compareTo method, which we won't go into now because they're fairly technical and boring and are better left in the API documentation. It's really important that all classes that implement Comparable obey these restrictions, so read the documentation for Comparable if you're writing a class that implements it. Attempting to sort a list of objects that violate the restrictions has undefined behavior. Technically speaking, these restrictions ensure that the natural ordering is a total order on the objects of a class that implements it; this is necessary to ensure that sorting is well defined.
@@ -2009,11 +2009,11 @@ public class NameSort {
 要做到这样的事，你需要提供一个 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Comparator.html">Comparator</a></code>，一个封装了对象顺序的对象。
 正如 `Comparable` 接口，`Comparator` 接口也只包含了一个方法：
 
-<pre class="brush: java">
-public interface Comparator&lt;T> {
+```java
+public interface Comparator<T> {
     int compare(T o1, T o2);
 }
-</pre>
+```
 
 <!--
 	The compare method compares its two arguments, returning a negative integer, 0, or a positive integer depending on whether the first argument is less than, equal to, or greater than the second. If either of the arguments has an inappropriate type for the Comparator, the compare method throws a ClassCastException.
@@ -2029,14 +2029,14 @@ public interface Comparator&lt;T> {
 
 假设你有一个叫 `Employee` 的类如下：
 
-<pre class="brush: java">
-public class Employee implements Comparable&lt;Employee> {
+```java
+public class Employee implements Comparable<Employee> {
     public Name name()     { ... }
     public int number()    { ... }
     public Date hireDate() { ... }
        ...
 }
-</pre>
+```
 
 <!--
 	Let's assume that the natural ordering of Employee instances is Name ordering (as defined in the previous example) on employee name. Unfortunately, the boss has asked for a list of employees in order of seniority. This means we have to do some work, but not much. The following program will produce the required list.
@@ -2044,26 +2044,26 @@ public class Employee implements Comparable&lt;Employee> {
 假设 `Employee` 的自然顺序即为它们的名称的 `Name` 自然顺序。不幸的是，你的上司想要一个按资历排序的员工列表。那么我们就需要多做些工作了。
 如下程序将产生所需的列表：
 
-<pre class="brush: java">
+```java
 import java.util.*;
 public class EmpSort {
-    static final Comparator&lt;Employee> SENIORITY_ORDER = 
-                                        new Comparator&lt;Employee>() {
+    static final Comparator<Employee> SENIORITY_ORDER = 
+                                        new Comparator<Employee>() {
             public int compare(Employee e1, Employee e2) {
                 return e2.hireDate().compareTo(e1.hireDate());
             }
     };
 
     // Employee database
-    static final Collection&lt;Employee> employees = ... ;
+    static final Collection<Employee> employees = ... ;
 
     public static void main(String[] args) {
-        List&lt;Employee> e = new ArrayList&lt;Employee>(employees);
+        List<Employee> e = new ArrayList<Employee>(employees);
         Collections.sort(e, SENIORITY_ORDER);
         System.out.println(e);
     }
 }
-</pre>
+```
 
 <!--
 	The Comparator in the program is reasonably straightforward. It relies on the natural ordering of Date applied to the values returned by the hireDate accessor method. Note that the Comparator passes the hire date of its second argument to its first rather than vice versa. The reason is that the employee who was hired most recently is the least senior; sorting in the order of hire date would put the list in reverse seniority order. Another technique people sometimes use to achieve this effect is to maintain the argument order but to negate the result of the comparison.
@@ -2072,10 +2072,10 @@ public class EmpSort {
 而并不是反过来。这么做的原因在于，最近被雇佣的员工自然是最没有资历的，按照任职日期对员工进行排序则正好与我们想要的顺序相反了。
 除此之外，人们还常常试图对比较的结果取反以达成相同的效果：
 
-<pre class="brush: java">
+```java
 // 不要这么做！！
 return -r1.hireDate().compareTo(r2.hireDate());
-</pre>
+```
 
 <!--
 	You should always use the former technique in favor of the latter because the latter is not guaranteed to work. The reason for this is that the compareTo method can return any negative int if its argument is less than the object on which it is invoked. There is one negative int that remains negative when negated, strange as it may seem.
@@ -2083,9 +2083,9 @@ return -r1.hireDate().compareTo(r2.hireDate());
 你应该尽量使用之前的做法，因为后一种做法并不一定能正常工作。原因在于，当参数小于被调用的对象时，`compareTo` 方法可以返回任何负整数。
 也许听起来很奇怪，但有那么一个负整数在取反后仍然为负：
 
-<pre class="brush: java">
+```java
 -Integer.MIN_VALUE == Integer.MIN_VALUE
-</pre>
+```
 
 <!--
 	The Comparator in the preceding program works fine for sorting a List, but it does have one deficiency: It cannot be used to order a sorted collection, such as TreeSet, because it generates an ordering that is not compatible with equals. This means that this Comparator equates objects that the equals method does not. In particular, any two employees who were hired on the same date will compare as equal. When you're sorting a List, this doesn't matter; but when you're using the Comparator to order a sorted collection, it's fatal. If you use this Comparator to insert multiple employees hired on the same date into a TreeSet, only the first one will be added to the set; the second will be seen as a duplicate element and will be ignored.
@@ -2102,28 +2102,28 @@ return -r1.hireDate().compareTo(r2.hireDate());
 要解决这个问题，我们只需要对 `Comparator` 进行修改使其产生的元素顺序能与 `equals` 方法相容就好了。也就是说，我们要对其进行修改使其认为相等的元素恰好是 `equals` 方法也认为相等的元素。我们可以在 `Comparator` 中执行两次比较，其中第一次对我们感兴趣的雇佣日期进行比较，而第二次则对唯一标识每个对象的属性进行比较。
 员工号是个不错的选择。如下即为改动后的 `Comparator`：
 
-<pre class="brush: java">
-static final Comparator&lt;Employee> SENIORITY_ORDER = 
-                                        new Comparator&lt;Employee>() {
+```java
+static final Comparator<Employee> SENIORITY_ORDER = 
+                                        new Comparator<Employee>() {
     public int compare(Employee e1, Employee e2) {
         int dateCmp = e2.hireDate().compareTo(e1.hireDate());
         if (dateCmp != 0)
             return dateCmp;
 
-        return (e1.number() &lt; e2.number() ? -1 :
+        return (e1.number() < e2.number() ? -1 :
                (e1.number() == e2.number() ? 0 : 1));
     }
 };
-</pre>
+```
 
 <!--
 	One last note: You might be tempted to replace the final return statement in the Comparator with the simpler:
 -->
 最后，你可能会想要将 `Comparator` 最后的 `return` 语句变成这个样子：
 
-<pre class="brush: java">
+```java
 return e1.number() - e2.number();
-</pre>
+```
 
 <!--
 	Don't do it unless you're absolutely sure no one will ever have a negative employee number! This trick does not work in general because the signed integer type is not big enough to represent the difference of two arbitrary signed integers. If i is a large positive integer and j is a large negative integer, i - j will overflow and will return a negative integer. The resulting comparator violates one of the four technical restrictions we keep talking about (transitivity) and produces horrible, subtle bugs. This is not a purely theoretical concern; people get burned by it.
@@ -2148,21 +2148,21 @@ return e1.number() - e2.number();
 
 `SortedSet` 的代码如下所示：
 
-<pre class="brush: java">
-public interface SortedSet&lt;E> extends Set&lt;E> {
+```java
+public interface SortedSet<E> extends Set<E> {
     // Range-view
-    SortedSet&lt;E> subSet(E fromElement, E toElement);
-    SortedSet&lt;E> headSet(E toElement);
-    SortedSet&lt;E> tailSet(E fromElement);
+    SortedSet<E> subSet(E fromElement, E toElement);
+    SortedSet<E> headSet(E toElement);
+    SortedSet<E> tailSet(E fromElement);
 
     // Endpoints
     E first();
     E last();
 
     // Comparator access
-    Comparator&lt;? super E> comparator();
+    Comparator<? super E> comparator();
 }
-</pre>
+```
 
 #### 集操作
 
@@ -2214,31 +2214,31 @@ public interface SortedSet&lt;E> extends Set&lt;E> {
 -->
 因此，如下代码将告诉你在一个叫做 `dictionary` 的由字符串组成的 `SortedSet` 中有多少单词在 `doorbell` 和 `pickle` 之间，包含 `doorbell` 但不包含 `pickle`：
 
-<pre class="brush: java">
+```java
 int count = dictionary.subSet("doorbell", "pickle").size();
-</pre>
+```
 
 <!--
 	In like manner, the following one-liner removes all the elements beginning with the letter f.
 -->
 同样，如下代码将移除所有以 `f` 字母开头的元素：
 
-<pre class="brush: java">
+```java
 dictionary.subSet("f", "g").clear();
-</pre>
+```
 
 <!--
 	A similar trick can be used to print a table telling you how many words begin with each letter.
 -->
 类似的，如下代码能够打印出一个表格，告诉你以各个字母开头的单词都有哪些：
 
-<pre class="brush: java">
-for (char ch = 'a'; ch &lt;= 'z'; ) {
+```java
+for (char ch = 'a'; ch <= 'z'; ) {
     String from = String.valueOf(ch++);
     String to = String.valueOf(ch);
     System.out.println(from + ": " + dictionary.subSet(from, to).size());
 }
-</pre>
+```
 
 <!--
 	Suppose you want to view a closed interval, which contains both of its endpoints, instead of an open interval. If the element type allows for the calculation of the successor of a given value in the element space, merely request the subSet from lowEndpoint to successor(highEndpoint). Although it isn't entirely obvious, the successor of a string s in String's natural ordering is s + "\0" — that is, s with a null character appended.
@@ -2251,9 +2251,9 @@ for (char ch = 'a'; ch &lt;= 'z'; ) {
 -->
 因此，下列代码能告诉你 `dictionary` 中有多少单词位于 `doorbell` 和 `pickle` 之间，包括 `doorbell` 和 `pickle`：
 
-<pre class="brush: java">
+```java
 count = dictionary.subSet("doorbell", "pickle\0").size();
-</pre>
+```
 
 <!--
 	A similar technique can be used to view an open interval, which contains neither endpoint. The open-interval view from lowEndpoint to highEndpoint is the half-open interval from successor(lowEndpoint) to highEndpoint. Use the following to calculate the number of words between "doorbell" and "pickle", excluding both.
@@ -2261,9 +2261,9 @@ count = dictionary.subSet("doorbell", "pickle\0").size();
 你也可以使用类似的方式获取一个不包含两个端点的开区间视图，你只要将半开区间从 `lowEndpoint` 到 `highEndpoint` 的参数改为
 `successor(lowEndpoint)` 到 `highEndpoing` 就可以了。下列代码可以计算 `dictionary` 中有多少单词位于 `doorbell` 和 `pickle` 之间，不包括 `doorbell` 和 `pickle`：
 
-<pre class="brush: java">
+```java
 count = dictionary.subSet("doorbell\0", "pickle").size();
-</pre>
+```
 
 <!--
 	The SortedSet interface contains two more range-view operations — headSet and tailSet, both of which take a single Object argument. The former returns a view of the initial portion of the backing SortedSet, up to but not including the specified object. The latter returns a view of the final portion of the backing SortedSet, beginning with the specified object and continuing to the end of the backing SortedSet. Thus, the following code allows you to view the dictionary as two disjoint volumes (a-m and n-z).
@@ -2272,10 +2272,10 @@ count = dictionary.subSet("doorbell\0", "pickle").size();
 前一个方法将返回给定 `SortedSet` 从开头到，但不包括，给定对象的那部分的视图。
 后一个方法则返回给定 `SortedSet` 从给定对象到结尾那部分的视图。因此，下述代码可以让你将 `dictionary` 视作两个互不相交的 `volumn`（`a-m` 和 `n-z`）：
 
-<pre class="brush: java">
-SortedSet&lt;String> volume1 = dictionary.headSet("n");
-SortedSet&lt;String> volume2 = dictionary.tailSet("n");
-</pre>
+```java
+SortedSet<String> volume1 = dictionary.headSet("n");
+SortedSet<String> volume2 = dictionary.tailSet("n");
+```
 
 #### 断点操作
 
@@ -2287,9 +2287,9 @@ SortedSet&lt;String> volume2 = dictionary.tailSet("n");
 	The following idiom obtains the first element that is less than a specified object o in the element space.
 -->
 
-<pre class="brush: java">
+```java
 Object predecessor = ss.headSet(o).last();
-</pre>
+```
 
 <!--
 	This is a fine way to go one element backward from a point in the interior of a sorted set. It could be applied repeatedly to iterate backward, but this is very inefficient, requiring a lookup for each element returned.
@@ -2313,16 +2313,16 @@ Object predecessor = ss.headSet(o).last();
 	The following interface is the Map analog of SortedSet.
 -->
 
-<pre class="brush: java">
-public interface SortedMap&lt;K, V> extends Map&lt;K, V>{
-    Comparator&lt;? super K> comparator();
-    SortedMap&lt;K, V> subMap(K fromKey, K toKey);
-    SortedMap&lt;K, V> headMap(K toKey);
-    SortedMap&lt;K, V> tailMap(K fromKey);
+```java
+public interface SortedMap<K, V> extends Map<K, V>{
+    Comparator<? super K> comparator();
+    SortedMap<K, V> subMap(K fromKey, K toKey);
+    SortedMap<K, V> headMap(K toKey);
+    SortedMap<K, V> tailMap(K fromKey);
     K firstKey();
     K lastKey();
 }
-</pre>
+```
 
 #### 映射操作
 
@@ -2355,7 +2355,7 @@ public interface SortedMap&lt;K, V> extends Map&lt;K, V>{
 -->
 和往常一样，假设这个网络社交应用的用户由如下 `Person` 类表示：
 
-<pre class="brush: java">
+```java
 public class Person {
 
     public enum Sex {
@@ -2377,27 +2377,27 @@ public class Person {
         // ...
     }
 }
-</pre>
+```
 
 <!--
 	The following example prints the name of all members contained in the collection roster with a for-each loop:
 -->
 如下代码使用了一个 `for-each` 循环来打印集合 `roster` 中所有用户的名称：
 
-<pre class="brush: java">
+```java
 for (Person p : roster) {
     System.out.println(p.getName());
 }
-</pre>
+```
 
 <!--
 	The following example prints all members contained in the collection roster but with the aggregate operation forEach:
 -->
 而如下代码使用了聚合操作 `forEach` 来打印集合 `roster` 中所有用户的名称：
 
-<pre class="brush: java">
+```java
 roster.stream().forEach(e -> System.out.println(e.getName()));
-</pre>
+```
 
 <!--
 	Although, in this example, the version that uses aggregate operations is longer than the one that uses a for-each loop, you will see that versions that use bulk-data operations will be more concise for more complex tasks.
@@ -2415,20 +2415,20 @@ roster.stream().forEach(e -> System.out.println(e.getName()));
 
 **流水线**（pipeline）即为由聚合操作组成的有序序列。如下示例使用了一个包含聚合操作 `filter` 和 `forEach` 的流水线来打印集合 `roster` 中所有男性用户的名称：
 
-<pre class="brush: java">
+```java
 roster.stream().filter(e -> e.getGender() == Person.Sex.MALE)
                .forEach(e -> System.out.println(e.getName()));
-</pre>
+```
 
 我们可以和下面这个使用 `for-each` 循环来打印集合 `roster` 中所有男性用户名称的例子对比一下：
 
-<pre class="brush: java">
+```java
 for (Person p : roster) {
     if (p.getGender() == Person.Sex.MALE) {
         System.out.println(p.getName());
     }
 }
-</pre>
+```
 
 一个流水线包含如下几个组成部分：
 
@@ -2444,12 +2444,12 @@ for (Person p : roster) {
 -->
 如下示例使用了一个包含聚合操作 `filter`、`mapToInt` 和 `average` 的流水线类统计集合 `roster` 中所有男性用户的平均年龄：
 
-<pre class="brush: java">
+```java
 double average =
     roster.stream().filter(p -> p.getGender() == Person.Sex.MALE)
                    .mapToInt(Person::getAge)
                    .average().getAsDouble();
-</pre>
+```
 
 <!--
 	The mapToInt operation returns a new stream of type IntStream (which is a stream that contains only integer values). The operation applies the function specified in its parameter to each element in a particular stream. In this example, the function is Person::getAge, which is a method reference that returns the age of the member. (Alternatively, you could use the lambda expression e -> e.getAge().) Consequently, the mapToInt operation in this example returns a stream that contains the ages of all male members in the collection roster.
@@ -2479,12 +2479,12 @@ double average =
 -->
 之前我们给出了如下统计集合 `roster` 中所有男性用户的平均年龄的例子：
 
-<pre class="brush: java">
+```java
 double average =
     roster.stream().filter(p -> p.getGender() == Person.Sex.MALE)
                    .mapToInt(Person::getAge)
                    .average().getAsDouble();
-</pre>
+```
 
 <!--
 	The JDK contains many terminal operations (such as average, sum, min, max, and count) that return one value by combining the contents of a stream. These operations are called reduction operations. The JDK also contains reduction operations that return a collection instead of a single value. Many reduction operations perform a specific task, such as finding the average of values or grouping elements into categories. However, the JDK provides you with the general-purpose reduction operations reduce and collect, which this section describes in detail.
@@ -2507,20 +2507,20 @@ JDK 中还包含了返回一个集合而不是一个单一值的归约操作。�
 -->
 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#reduce-T-java.util.function.BinaryOperator-">Stream.reduce</a></code> 方法是一个普适的归约操作。考虑如下流水线，它计算了集合 `roster` 中所有用户的年龄总和。该流水线使用了 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html#sum--">Stream.sum</a></code> 归约操作：
 
-<pre class="brush: java">
+```java
 Integer totalAge = roster.stream().mapToInt(Person::getAge).sum();
-</pre>
+```
 
 <!--
 	Compare this with the following pipeline, which uses the Stream.reduce operation to calculate the same value:
 -->
 我们可以将其与以下流水线相对比，该流水线使用 `Stream.reduce` 操作计算相同的值：
 
-<pre class="brush: java">
+```java
 Integer totalAgeReduce =
     roster.stream().map(Person::getAge)
                    .reduce(0, (a, b) -> a + b);
-</pre>
+```
 
 <!--
 	The reduce operation in this example takes two arguments:
@@ -2549,7 +2549,7 @@ Integer totalAgeReduce =
 考虑如何为流中的值计算平均值。要这么做，你需要两个数据：流中的元素个数以及元素的总和。然而，和 `reduce` 或其他归约方法类似，`collect` 方法也只会返回一个值。
 为此，你可以创建一种新的数据类型来记录元素的个数和总和，如下 `Averager` 类所示：
 
-<pre class="brush: java">
+```java
 class Averager implements IntConsumer {
     private int total = 0;
     private int count = 0;
@@ -2564,14 +2564,14 @@ class Averager implements IntConsumer {
         count += other.count;
     }
 }
-</pre>
+```
 
 <!--
 	The following pipeline uses the Averager class and the collect method to calculate the average age of all male members:
 -->
 如下流水线使用了 `Averager` 类和 `collect` 方法来计算所有男性用户的平均年龄：
 
-<pre class="brush: java">
+```java
 Averager averageCollect = roster.stream()
     .filter(p -> p.getGender() == Person.Sex.MALE)
     .map(Person::getAge)
@@ -2579,7 +2579,7 @@ Averager averageCollect = roster.stream()
                    
 System.out.println("Average age of male members: " +
     averageCollect.average());
-</pre>
+```
 
 <!--
 	The collect operation in this example takes three arguments:
@@ -2606,12 +2606,12 @@ System.out.println("Average age of male members: " +
 -->
 `collect` 操作十分适合用于集合。以下的例子使用了 `collect` 操作来将男性用户的名称放置到了一个集合中：
 
-<pre class="brush: java">
-List&lt;String> namesOfMaleMembersCollect =
+```java
+List<String> namesOfMaleMembersCollect =
 	roster.stream().filter(p -> p.getGender() == Person.Sex.MALE)
                    .map(p -> p.getName())
                    .collect(Collectors.toList());
-</pre>
+```
 
 <!--
 	This version of the collect operation takes one parameter of type Collector. This class encapsulates the functions used as arguments in the collect operation that requires three arguments (supplier, accumulator, and combiner functions).
@@ -2636,10 +2636,10 @@ List&lt;String> namesOfMaleMembersCollect =
 -->
 如下示例将集合 `roster` 中的用户根据性别进行分组：
 
-<pre class="brush: java">
-Map&lt;Person.Sex, List&lt;Person>> byGender =
+```java
+Map<Person.Sex, List<Person>> byGender =
     roster.stream().collect(Collectors.groupingBy(Person::getGender));
-</pre>
+```
 
 <!--
 	The groupingBy operation returns a map whose keys are the values that result from applying the lambda expression specified as its parameter (which is called a classification function). In this example, the returned map contains two keys, Person.Sex.MALE and Person.Sex.FEMALE. The keys' corresponding values are instances of List that contain the stream elements that, when processed by the classification function, correspond to the key value. For example, the value that corresponds to key Person.Sex.MALE is an instance of List that contains all male members.
@@ -2653,15 +2653,15 @@ Map&lt;Person.Sex, List&lt;Person>> byGender =
 -->
 如下示例获取了集合 `roster` 中所有用户的名称并按性别分类：
 
-<pre class="brush: java">
-Map&lt;Person.Sex, List&lt;String>> namesByGender =
+```java
+Map<Person.Sex, List<String>> namesByGender =
     roster.stream().collect(
             Collectors.groupingBy(
                 Person::getGender,                      
                 Collectors.mapping(
                     Person::getName,
                     Collectors.toList())));
-</pre>
+```
 
 <!--
 	The groupingBy operation in this example takes two parameters, a classification function and an instance of Collector. The Collector parameter is called a downstream collector. This is a collector that the Java runtime applies to the results of another collector. Consequently, this groupingBy operation enables you to apply a collect method to the List values created by the groupingBy operator. This example applies the collector mapping, which applies the mapping function Person::getName to each element of the stream. Consequently, the resulting stream consists of only the names of members. A pipeline that contains one or more downstream collectors, like this example, is called a multilevel reduction.
@@ -2676,8 +2676,8 @@ Java 运行时将将该收集器应用于另一个收集器的结果。因此，
 -->
 如下示例返回每种性别的用户的年龄总和：
 
-<pre class="brush: java">
-Map&lt;Person.Sex, Integer> totalAgeByGender =
+```java
+Map<Person.Sex, Integer> totalAgeByGender =
     roster.stream().collect(
             Collectors.groupingBy(
                 Person::getGender,                      
@@ -2685,7 +2685,7 @@ Map&lt;Person.Sex, Integer> totalAgeByGender =
                     0,
                     Person::getAge,
                     Integer::sum)));
-</pre>
+```
 
 其中 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html#reducing-U-java.util.function.Function-java.util.function.BinaryOperator-">reducing</a></code> 操作接受三个参数：
 
@@ -2698,13 +2698,13 @@ Map&lt;Person.Sex, Integer> totalAgeByGender =
 -->
 如下示例返回每种性别的用户的平均年龄：
 
-<pre class="brush: java">
-Map&lt;Person.Sex, Double> averageAgeByGender =
+```java
+Map<Person.Sex, Double> averageAgeByGender =
     roster.stream().collect(
         Collectors.groupingBy(
             Person::getGender,                      
             Collectors.averagingInt(Person::getAge)));
-</pre>
+```
 
 <h3 id="parallelism">3.2 并行</h3>
 
@@ -2753,14 +2753,14 @@ Java 集合框架本身提供了[同步包装类](http://docs.oracle.com/javase/
 <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/BaseStream.html#parallel--">BaseStream.parallel</a></code>。
 例如，如下语句并行地计算所有男性用户的平均年龄：
 
-<pre class="brush: java">
+```java
 double average =
     roster.parallelStream()
           .filter(p -> p.getGender() == Person.Sex.MALE)
           .mapToInt(Person::getAge)
           .average()
           .getAsDouble();
-</pre>
+```
 
 #### 并行归约
 
@@ -2769,20 +2769,20 @@ double average =
 -->
 我们再来考虑下面这个来自[归约操作](#reduction)一节的根据性别对用户进行分类的代码示例。示例代码调用了 `collect` 操作以将 `roster` 集合规约到一个 `Map` 中：
 
-<pre class="brush: java">
-Map&lt;Person.Sex, List&lt;Person>> byGender =
+```java
+Map<Person.Sex, List<Person>> byGender =
     roster.stream().collect(Collectors.groupingBy(Person::getGender));
-</pre>
+```
 
 <!--
 	The following is the parallel equivalent:
 -->
 如下代码则并行地执行相同的操作：
 
-<pre class="brush: java">
-ConcurrentMap&lt;Person.Sex, List&lt;Person>> byGender =
+```java
+ConcurrentMap<Person.Sex, List<Person>> byGender =
     roster.parallelStream().collect(Collectors.groupingByConcurrent(Person::getGender));
-</pre>
+```
 
 这样的操作被称为**并行归约**（Concurrent Reduction）。当如下所有条件对于一个包含 `collect` 操作的流水线均为真时，Java 运行时将执行并行归约：
 
@@ -2808,10 +2808,10 @@ ConcurrentMap&lt;Person.Sex, List&lt;Person>> byGender =
 -->
 流水线处理流中元素的顺序取决于该流是顺序执行还是并发执行、流的数据来源以及中间操作。例如，考虑如下使用 `forEach` 操作打印 `ArrayList` 中的元素的示例：
 
-<pre class="brush: java">
+```java
 Integer[] intArray = {1, 2, 3, 4, 5, 6, 7, 8 };
-List&lt;Integer> listOfIntegers =
-    new ArrayList&lt;>(Arrays.asList(intArray));
+List<Integer> listOfIntegers =
+    new ArrayList<>(Arrays.asList(intArray));
 
 System.out.println("listOfIntegers:");
 listOfIntegers
@@ -2820,8 +2820,8 @@ listOfIntegers
 System.out.println("");
 
 System.out.println("listOfIntegers sorted in reverse order:");
-Comparator&lt;Integer> normal = Integer::compare;
-Comparator&lt;Integer> reversed = normal.reversed(); 
+Comparator<Integer> normal = Integer::compare;
+Comparator<Integer> reversed = normal.reversed(); 
 Collections.sort(listOfIntegers, reversed);  
 listOfIntegers
     .stream()
@@ -2845,14 +2845,14 @@ listOfIntegers
     .parallelStream()
     .forEachOrdered(e -> System.out.print(e + " "));
 System.out.println("");
-</pre>
+```
 
 <!--
 	This example consists of five pipelines. It prints output similar to the following:
 -->
 示例代码包含了五个流水线。其输入与如下类似：
 
-<pre>
+```
 listOfIntegers:
 1 2 3 4 5 6 7 8
 listOfIntegers sorted in reverse order:
@@ -2863,7 +2863,7 @@ Another parallel stream:
 6 3 1 5 7 8 4 2
 With forEachOrdered:
 8 7 6 5 4 3 2 1
-</pre>
+```
 
 <!--
 	This example does the following:
@@ -2904,10 +2904,10 @@ JDK 能很好地处理流水线中的某些副作用。比如，`collect` 方法
 流操作使用的 Lambda 表达式不应产生任何冲突。当流水线在处理流时，流的数据来源发生了修改就会产生冲突。例如，考虑如下代码。
 如下代码尝试将 `List listOfStrings` 中的字符串进行拼接，但却会抛出一个 `ConcurrentModificationException`：
 
-<pre class="brush: java">
+```java
 try {
-    List&lt;String> listOfStrings =
-        new ArrayList&lt;>(Arrays.asList("one", "two"));
+    List<String> listOfStrings =
+        new ArrayList<>(Arrays.asList("one", "two"));
          
     // This will fail as the peek operation will attempt to add the
     // string "three" to the source after the terminal operation has
@@ -2927,7 +2927,7 @@ try {
 } catch (Exception e) {
     System.out.println("Exception caught: " + e.toString());
 }
-</pre>
+```
 
 <!--
 	This example concatenates the strings contained in listOfStrings into an Optional<String> value with the reduce operation, which is a terminal operation. However, the pipeline here invokes the intermediate operation peek, which attempts to add a new element to listOfStrings. Remember, all intermediate operations are lazy. This means that the pipeline in this example begins execution when the operation get is invoked, and ends execution when the get operation completes. The argument of the peek operation attempts to modify the stream source during the execution of the pipeline, which causes the Java runtime to throw a ConcurrentModificationException.
@@ -2947,8 +2947,8 @@ try {
 如下示例代码通过中间操作 `map` 将列表 `listOfIntegers` 中的元素添加到一个新的 `List` 中。
 这个操作分别被顺序和并行地执行了一次。
 
-<pre class="brush: java">
-List&lt;Integer> serialStorage = new ArrayList&lt;>();
+```java
+List<Integer> serialStorage = new ArrayList<>();
      
 System.out.println("Serial stream:");
 listOfIntegers
@@ -2966,8 +2966,8 @@ serialStorage
 System.out.println("");
 
 System.out.println("Parallel stream:");
-List&lt;Integer> parallelStorage = Collections.synchronizedList(
-    new ArrayList&lt;>());
+List<Integer> parallelStorage = Collections.synchronizedList(
+    new ArrayList<>());
 listOfIntegers
     .parallelStream()
     
@@ -2981,21 +2981,21 @@ parallelStorage
     .stream()
     .forEachOrdered(e -> System.out.print(e + " "));
 System.out.println("");
-</pre>
+```
 
 <!--
 	The lambda expression e -> { parallelStorage.add(e); return e; } is a stateful lambda expression. Its result can vary every time the code is run. This example prints the following:
 -->
 Lambda 表达式 `e -> { parallelStorage.add(e); return e; }` 是有状态的。它的结果在每次运行时都有可能不同。示例代码输出如下：
 
-<pre>
+```
 Serial stream:
 8 7 6 5 4 3 2 1
 8 7 6 5 4 3 2 1
 Parallel stream:
 8 7 6 5 4 3 2 1
 1 3 6 2 4 5 8 7
-</pre>
+```
 
 <!--
 	The operation forEachOrdered processes elements in the order specified by the stream, regardless of whether the stream is executed in serial or parallel. However, when a stream is executed in parallel, the map operation processes elements of the stream specified by the Java runtime and compiler. Consequently, the order in which the lambda expression e -> { parallelStorage.add(e); return e; } adds elements to the List parallelStorage can vary every time the code is run. For deterministic and predictable results, ensure that lambda expression parameters in stream operations are not stateful.
@@ -3013,9 +3013,9 @@ Parallel stream:
 方法，因此列表 `parallelStorage` 是线程安全的。我们之前说过，集合不是线程安全的，这意味着复数线程不应同时访问同一个集合。
 假设你在创建 `parallelStorage` 时没有使用 `synchronizedList` 方法：
 
-<pre class="brush: java">
-List&lt;Integer> parallelStorage = new ArrayList&lt;>();
-</pre>
+```java
+List<Integer> parallelStorage = new ArrayList<>();
+```
 
 <!--
 	The example behaves erratically because multiple threads access and modify parallelStorage without a mechanism like synchronization to schedule when a particular thread may access the List instance. Consequently, the example could print output similar to the following:
@@ -3023,11 +3023,11 @@ List&lt;Integer> parallelStorage = new ArrayList&lt;>();
 这样，示例代码就会开始产生不正常的结果了，因为多个线程同时尝试访问和修改 `parallelStorage`，而又没有像线程同步这样的机制来计划哪个线程应该访问这个 `List` 实例。
 由此，示例代码可能会输出类似下面这样的结果：
 
-<pre>
+```
 Parallel stream:
 8 7 6 5 4 3 2 1
 null 3 5 4 7 8 1 2
-</pre>
+```
 
 ---
 
@@ -3238,9 +3238,9 @@ null 3 5 4 7 8 1 2
 在以前，将初始容量设定为质数会更好，但现在已经不适用了。在内部实现里，容量会被向上取整到 `2` 的幂。
 你可以通过 `HashSet` 的整型构造器来指定初始容量。下述代码创建了一个初始容量为 `64` 的 `HashSet`：
 
-<pre class="brush: java">
-Set&lt;String&gt; s = new HashSet&lt;String&gt;(64);
-</pre>
+```java
+Set<String> s = new HashSet<String>(64);
+```
 
 <!--
 	The HashSet class has one other tuning parameter called the load factor. If you care a lot about the space consumption of your HashSet,
@@ -3277,19 +3277,19 @@ Set&lt;String&gt; s = new HashSet&lt;String&gt;(64);
 在内部实现上，`EnumSet` 被表示为一个位向量（bit-vector），或者说一个 `long` 变量。`EnumSet` 支持基于枚举对象范围的遍历。
 比如，给定一个星期几的枚举类型，你可以只遍历工作日。`EnumSet` 提供的一个静态工厂方法使得这么做十分方便：
 
-<pre class="brush: java">
+```java
 for (Day d : EnumSet.range(Day.MONDAY, Day.FRIDAY))
         System.out.println(d);
-</pre>
+```
 
 <!--
 	Enum sets also provide a rich, typesafe replacement for traditional bit flags.
 -->
 除此之外，`EnumSet` 还可以作为传统位标识（bit flag）的类型安全的有效替代：
 
-<pre class="brush: java">
+```java
 EnumSet.of(Style.BOLD, Style.ITALIC)
-</pre>
+```
 
 <!--
 	CopyOnWriteArraySet is a Set implementation backed up by a copy-on-write array. All mutative operations, such as add, set, and remove,

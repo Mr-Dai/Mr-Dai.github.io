@@ -19,13 +19,13 @@ Groovy 内置了从 Groovy 对象到 JSON 之间相互转换的功能类，而�
 <!-- The class comes with a bunch of overloaded parse methods plus some special methods such as parseText, parseFile and others. For the next example we will use the parseText method. It parses a JSON String and recursively converts it to a list or map of objects. The other parse* methods are similar in that they return a JSON String but for different parameter types. -->
 该类包含了大量不同版本的 `parse` 方法以及如 `parseText`、`parseFile` 的特殊方法。在下一个例子中我们将使用 `parseText` 方法，该方法会对给定的 JSON `String` 进行解析并递归地将其转换为列表或映射。其他的 `parse*` 方法也是类似，同样会返回解析后的 Groovy 对象，只是它们接受不同类型的参数：
 
-<pre class="brush: groovy">
+```groovy
 def jsonSlurper = new JsonSlurper()
 def object = jsonSlurper.parseText('{ "name": "John Doe" } /* some comment */')
 
 assert object instanceof Map
 assert object.name == 'John Doe'
-</pre>
+```
 
 <!-- Notice the result is a plain map and can be handled like a normal Groovy object instance. JsonSlurper parses the given JSON as defined by the ECMA-404 JSON Interchange Standard plus support for JavaScript comments and dates. -->
 值得注意的是，解析的结果是一个普通的映射而且可以被当做普通的 Groovy 实例那样处理。`JsonSlurper` 支持对由 [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf) JSON 交换标准定义的 JSON 格式进行解析，同时还对 JavaScript 注释和日期格式提供了额外的支持。
@@ -33,19 +33,19 @@ assert object.name == 'John Doe'
 <!-- In addition to maps JsonSlurper supports JSON arrays which are converted to lists. -->
 除了映射，`JsonSlurper` 同样支持 JSON 数组并将其转换为列表。
 
-<pre class="brush: groovy">
+```groovy
 def jsonSlurper = new JsonSlurper()
 def object = jsonSlurper.parseText('{ "myList": [4, 8, 15, 16, 23, 42] }')
 
 assert object instanceof Map
 assert object.myList instanceof List
 assert object.myList == [4, 8, 15, 16, 23, 42]
-</pre>
+```
 
 <!-- The JSON standard supports the following primitive data types: string, number, object, true, false and null. JsonSlurper converts these JSON types into corresponding Groovy types. -->
 JSON 标准包含对如下几种基础类型的支持：字符串、数字、对象、`true`、`false` 和 `null`。`JsonSlurper` 会将这些 JSON 类型转换成对应的 Groovy 类型。
 
-<pre class="brush: groovy">
+```groovy
 def jsonSlurper = new JsonSlurper()
 def object = jsonSlurper.parseText '''
     { "simple": 123,
@@ -57,7 +57,7 @@ assert object instanceof Map
 assert object.simple.class == Integer
 assert object.fraction.class == BigDecimal
 assert object.exponential.class == BigDecimal
-</pre>
+```
 
 <!-- As JsonSlurper is returning pure Groovy object instances without any special JSON classes in the back, its usage is transparent. In fact, JsonSlurper results conform to GPath expressions. GPath is a powerful expression language that is supported by multiple slurpers for different data formats (XmlSlurper for XML being one example). -->
 鉴于 `JsonSlurper` 能够返回完全转换后的 Groovy 对象而无需显式借助其他的特殊 JSON 类，我们可以说 `JsonSlurper` 的使用体验是透明的。事实上，`JsonSlurper` 的结果遵从 GPath 表达式。GPath 是一门十分强大的表达式语言，包括 `JsonSlurper` 在内的其他不同数据格式的 `Slurper` 均支持该语言（如用于 XML 的 `XmlSlurper`）。
@@ -149,14 +149,14 @@ assert object.exponential.class == BigDecimal
 <!-- Changing the parser implementation is as easy as setting the JsonParserType with a call to JsonSlurper#setType(). -->
 改变解析器实现只需要调用 `JsonSlurper#setType()` 改变 `JsonParserType` 值即可：
 
-<pre class="brush: groovy">
+```groovy
 def jsonSlurper = new JsonSlurper(type: JsonParserType.INDEX_OVERLAY)
 def object = jsonSlurper.parseText('{ "myList": [4, 8, 15, 16, 23, 42] }')
 
 assert object instanceof Map
 assert object.myList instanceof List
 assert object.myList == [4, 8, 15, 16, 23, 42]
-</pre>
+```
 
 ## 2 JsonOutput
 
@@ -169,27 +169,27 @@ assert object.myList == [4, 8, 15, 16, 23, 42]
 <!-- The result of a toJson call is a String containing the JSON code. -->
 调用 `toJson` 方法的结果为包含结果 JSON 代码的 `String`。
 
-<pre class="brush: groovy">
+```groovy
 def json = JsonOutput.toJson([name: 'John Doe', age: 42])
 
 assert json == '{"name":"John Doe","age":42}'
-</pre>
+```
 
 <!-- JsonOutput does not only support primitive, maps or list data types to be serialized to JSON, it goes further and even has support for serialising POGOs, that is, plain-old Groovy objects. -->
 `JsonOutput` 并不支持基本数据类型，还支持映射和列表，甚至还能对 POGO 进行序列化，也就是普通的 Groovy 对象。
 
-<pre class="brush: groovy">
+```groovy
 class Person { String name }
 
 def json = JsonOutput.toJson([ new Person(name: 'John'), new Person(name: 'Max') ])
 
 assert json == '[{"name":"John"},{"name":"Max"}]'
-</pre>
+```
 
 <!-- As we saw in previous examples, the JSON output is not pretty printed per default. However, the prettyPrint method in JsonOutput comes to rescue for this task. -->
 在上一个例子中我们看到，输出的 JSON 字符串默认是没有任何换行或缩进之类的格式符号的。通过调用 `JsonOutput` 的 `prettyPrint` 方法即可完成此任务：
 
-<pre class="brush: groovy">
+```groovy
 def json = JsonOutput.toJson([name: 'John Doe', age: 42])
 
 assert json == '{"name":"John Doe","age":42}'
@@ -199,7 +199,7 @@ assert JsonOutput.prettyPrint(json) == '''\
     "name": "John Doe",
     "age": 42
 }'''.stripIndent()
-</pre>
+```
 
 <!-- prettyPrint takes a String as single parameter; therefore, it can be applied on arbitrary JSON String instances, not only the result of JsonOutput.toJson. -->
 `prettyPrint` 方法只接受一个 `String` 作为参数，因此它可用于任意的 JSON `String` 而不局限于 `JsonOutput.toJson` 的结果。

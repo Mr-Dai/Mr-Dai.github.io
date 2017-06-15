@@ -17,11 +17,11 @@ author: Robert Peng
 
 其中每个 `onXXX()` 方法在 `Activity` 类中的签名都是这样的：
 
-<pre class="brush: java">
+```java
 protected void onXXX() {
 	...
 }
-</pre>
+```
 
 在具体 `Activity` 中重载时记得加上 `@Override` 注解。除此之外，必须在方法体的一开始就调用对应的 `super.onXXX()`。
 

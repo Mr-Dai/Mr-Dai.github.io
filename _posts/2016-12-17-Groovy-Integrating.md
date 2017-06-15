@@ -28,24 +28,24 @@ Groovy 语言提供了多种在运行时将其整合至（Java 甚至 Groovy）�
 -->
 在运行时动态执行 Groovy 代码最简单的方式莫过于使用 `groovy.util.Eval` 类了，我们只需调用该类的 `me` 方法即可：
 
-<pre class="brush: groovy">
+```groovy
 import groovy.util.Eval
 
 assert Eval.me('33*3') == 99
 assert Eval.me('"foo".toUpperCase()') == 'FOO'
-</pre>
+```
 
 <!--
 	Eval supports multiple variants that accept parameters for simple evaluation:
 -->
 `Eval` 类还提供了许多其他方法来允许用户传入参数进行简单的运算：
 
-<pre class="brush: groovy">
+```groovy
 assert Eval.x(4, '2*x') == 8                // 注1
 assert Eval.me('k', 4, '2*k') == 8          // 注2
 assert Eval.xy(4, 5, 'x*y') == 20           // 注3
 assert Eval.xyz(4, 5, 6, 'x*y+z') == 26     // 注4
-</pre>
+```
 
 1. 包含一个名为 `x` 的参数的简单运算
 2. 包含一个自定义的名为 `k` 的参数的简单运算
@@ -66,7 +66,7 @@ assert Eval.xyz(4, 5, 6, 'x*y+z') == 26     // 注4
 -->
 比起 `Eval`，`groovy.lang.GroovyShell` 类提供了更好的执行脚本的方式，同时还提供了对脚本实例运行结果进行缓存的支持。比起像 `Eval` 一般运行脚本并返回结果，`GroovyShell` 类还提供了更多的做法：
 
-<pre class="brush: groovy">
+```groovy
 def shell = new GroovyShell()                           // 注1
 def result = shell.evaluate '3*5'                       // 注2
 def result2 = shell.evaluate(new StringReader('3*5'))   // 注3
@@ -74,7 +74,7 @@ assert result == result2
 def script = shell.parse '3*5'                          // 注4
 assert script instanceof groovy.lang.Script
 assert script.run() == 15                               // 注5
-</pre>
+```
 
 1. 创建了一个 `GroovyShell` 实例
 2. 可以像 `Eval` 那样直接执行脚本代码
@@ -89,7 +89,7 @@ assert script.run() == 15                               // 注5
 -->
 我们可以通过 `groovy.lang.Binding` 类来实现脚本与应用程序间的数据共享：
 
-<pre class="brush: groovy">
+```groovy
 def sharedData = new Binding()                          // 注1
 def shell = new GroovyShell(sharedData)                 // 注2
 def now = new Date()
@@ -99,7 +99,7 @@ sharedData.setProperty('date', now)                     // 注4
 String result = shell.evaluate('"At $date, $text"')     // 注5
 
 assert result == "At $now, I am shared data!"
-</pre>
+```
 
 1. 创建 `Binding` 实例用于存储共享数据
 2. 创建即将使用这些共享数据的 `GroovyShell` 实例
@@ -112,14 +112,14 @@ assert result == "At $now, I am shared data!"
 -->
 值得注意的是我们还可以在脚本中向 `Binding` 写入数据：
 
-<pre class="brush: groovy">
+```groovy
 def sharedData = new Binding()                          // 注1
 def shell = new GroovyShell(sharedData)                 // 注2
 
 shell.evaluate('foo=123')                               // 注3
 
 assert sharedData.getProperty('foo') == 123             // 注4
-</pre>
+```
 
 1. 创建 `Binding` 实例
 2. 创建即将使用这些共享数据的 `GroovyShell` 实例
@@ -131,7 +131,7 @@ assert sharedData.getProperty('foo') == 123             // 注4
 -->
 值得注意的是，如果你想要将数据写入到 `Binding` 中，你需要使用未声明的变量。像下面的例子那样使用 `def` 或 `explicit` 类型是不会将数据写入到 `Binding` 中的，因为这样做实际上是创建了一个**局部变量**：
 
-<pre class="brush: groovy">
+```groovy
 def sharedData = new Binding()
 def shell = new GroovyShell(sharedData)
 
@@ -142,7 +142,7 @@ try {
 } catch (MissingPropertyException e) {
     println "foo is defined as a local variable"
 }
-</pre>
+```
 
 <!--
 	You must be very careful when using shared data in a multithreaded environment. The Binding instance that you pass to GroovyShell is not thread safe, and shared by all scripts. 
@@ -154,7 +154,7 @@ try {
 -->
 我们倒是可以通过利用由 `parse` 方法返回的 `Script` 实例来绕过共享的 `Binding` 实例：
 
-<pre class="brush: groovy">
+```groovy
 def shell = new GroovyShell()
 
 def b1 = new Binding(x:3)                       // 注1
@@ -167,7 +167,7 @@ script.run()
 assert b1.getProperty('x') == 6
 assert b2.getProperty('x') == 8
 assert b1 != b2
-</pre>
+```
 
 1. 将变量 `x = 3` 保存到 `b1` 中
 2. 将变量 `x = 4` 保存到 `b2` 中
@@ -177,7 +177,7 @@ assert b1 != b2
 -->
 然而，你仍该意识到，这样做的时候你则是在共享同一个 `Script` 实例的使用，因此如果你想要让两个线程同时使用同样的脚本的话，这样的做法并不合适。在这种情况下，你应创建两个不同的 `Script` 实例：
 
-<pre class="brush: groovy">
+```groovy
 def shell = new GroovyShell()
 
 def b1 = new Binding(x:3)
@@ -193,7 +193,7 @@ def t2 = Thread.start { script2.run() }         // 注6
 assert b1.getProperty('x') == 6
 assert b2.getProperty('x') == 8
 assert b1 != b2
-</pre>
+```
 
 1. 创建用于 1 号线程的 `Script` 实例
 2. 创建用于 2 号线程的 `Script` 实例
@@ -215,7 +215,7 @@ assert b1 != b2
 -->
 我们了解到 `parse` 方法可以返回 `groovy.lang.Script` 实例，但它同样可以返回自定义的类，只要该类扩展了 `Script` 类。这么做能像下述的案例那样让 `Script` 实例支持更多的操作：
 
-<pre class="brush: groovy">
+```groovy
 abstract class MyScript extends Script {
     String name
 
@@ -223,14 +223,14 @@ abstract class MyScript extends Script {
         "Hello, $name!"
     }
 }
-</pre>
+```
 
 <!--
 	The custom class defines a property called name and a new method called greet. This class can be used as the script base class by using a custom configuration:
 -->
 这个自定义类定义了一个叫做 `name` 的属性以及一个叫做 `greet` 的新方法。通过一些自定义设置，我们可以使用这个类作为脚本的基类：
 
-<pre class="brush: groovy">
+```groovy
 import org.codehaus.groovy.control.CompilerConfiguration
 
 def config = new CompilerConfiguration()                                    // 注1
@@ -241,7 +241,7 @@ def script = shell.parse('greet()')                                         // �
 assert script instanceof MyScript
 script.setName('Michel')
 assert script.run() == 'Hello, Michel!'
-</pre>
+```
 
 1. 创建 `CompilerConfiguration` 实例
 2. 令其使用 `MyScript` 类作为脚本基类
@@ -265,7 +265,7 @@ assert script.run() == 'Hello, Michel!'
 -->
 通过使用 `GroovyClassLoader`，你可以载入类而不是脚本实例：
 
-<pre class="brush: groovy">
+```groovy
 import groovy.lang.GroovyClassLoader
 
 def gcl = new GroovyClassLoader()                                           // 注1
@@ -273,7 +273,7 @@ def clazz = gcl.parseClass('class Foo { void doIt() { println "ok" } }')    // �
 assert clazz.name == 'Foo'                                                  // 注3
 def o = clazz.newInstance()                                                 // 注4
 o.doIt()                                                                    // 注5
-</pre>
+```
 
 1. 创建一个 `GroovyClassLoader` 实例
 2. `parseClass` 方法会返回一个 `Class` 实例
@@ -286,7 +286,7 @@ o.doIt()                                                                    // �
 -->
 `GroovyClassLoader` 会维持对所有由其所创建的类的引用，而这很容易导致内存泄漏。具体来说，如果你使用一个 `String` 对象来让 `GroovyClassLoader` 对同样的脚本进行两次处理，你实际上会获得两个不同的类！
 
-<pre class="brush: groovy">
+```groovy
 import groovy.lang.GroovyClassLoader
 
 def gcl = new GroovyClassLoader()
@@ -295,7 +295,7 @@ def clazz2 = gcl.parseClass('class Foo { }')                                // �
 assert clazz1.name == 'Foo'                                                 // 注3
 assert clazz2.name == 'Foo'
 assert clazz1 != clazz2                                                     // 注4
-</pre>
+```
 
 1. 动态创建一个名为 `Foo` 的类
 2. 使用第二次 `parseClass` 方法调用创建一个一模一样的类
@@ -307,14 +307,14 @@ assert clazz1 != clazz2                                                     // �
 -->
 原因在于 `GroovyClassLoader` 不会记录源代码文本。如果你希望它返回相同的 `Class` 实例，你则必须像下面的示例那样使用文件作为代码来源：
 
-<pre class="brush: groovy">
+```groovy
 def gcl = new GroovyClassLoader()
 def clazz1 = gcl.parseClass(file)                                           // 注1
 def clazz2 = gcl.parseClass(new File(file.absolutePath))                    // 注2
 assert clazz1.name == 'Foo'                                                 // 注3
 assert clazz2.name == 'Foo'
 assert clazz1 == clazz2                                                     // 注4
-</pre>
+```
 
 1. 从一个 `File` 中解析类
 2. 使用不同的 `File` 实例进行类解析，但两个 `File` 在物理上指向同一个文件
@@ -340,7 +340,7 @@ assert clazz1 == clazz2                                                     // �
 
 `ReloadingTest.groovy`
 
-<pre class="brush: groovy">
+```groovy
 class Greeter {
     String sayHello() {
         def greet = "Hello, world!"
@@ -349,14 +349,14 @@ class Greeter {
 }
 
 new Greeter()
-</pre>
+```
 
 <!--
 	then you can execute this code using a GroovyScriptEngine
 -->
 然后你就能用 `GroovyScriptEngine` 运行这个代码了：
 
-<pre class="brush: groovy">
+```groovy
 def binding = new Binding()
 def engine = new GroovyScriptEngine([tmpDir.toURI().toURL()] as URL[])        // 注1
 while (true) {
@@ -364,7 +364,7 @@ while (true) {
     println greeter.sayHello()                                                // 注3
     Thread.sleep(1000)
 }
-</pre>
+```
 
 1. 创建一个 `GroovyScriptEngine` 并指定其在我们的源文件夹中寻找源文件
 2. 运行脚本，返回一个 `Greeter` 实例
@@ -372,18 +372,18 @@ while (true) {
 
 这样，每秒你都会看到其打印一行信息：
 
-<pre>
+```
 Hello, world!
 Hello, world!
 ...
-</pre>
+```
 
 <!--
 	Without interrupting the script execution, now replace the contents of the ReloadingTest file with:
 -->
 **不要** 中断脚本的执行，现在我们将 `ReloadingTest.groovy` 文件的内容修改至如下：
 
-<pre class="brush: groovy">
+```groovy
 class Greeter {
     String sayHello() {
         def greet = "Hello, Groovy!"
@@ -392,17 +392,17 @@ class Greeter {
 }
 
 new Greeter()
-</pre>
+```
 
 你应该能看到打印的信息发生了如下的改变：
 
-<pre>
+```
 Hello, world!
 ...
 Hello, Groovy!
 Hello, Groovy!
 ...
-</pre>
+```
 
 <!--
 	But it is also possible to have a dependency on another script. To illustrate this, create the following file into the same directory, without interrupting the executing script:
@@ -411,15 +411,15 @@ Hello, Groovy!
 
 `Dependency.groovy`
 
-<pre class="brush: groovy">
+```groovy
 class Dependency {
 	String message = 'Hello, dependency 1'
 }
-</pre>
+```
 
 然后更新 `ReloadingTest.groovy` 脚本如下：
 
-<pre class="brush: groovy">
+```groovy
 import Dependency
 
 class Greeter {
@@ -430,34 +430,34 @@ class Greeter {
 }
 
 new Greeter()
-</pre>
+```
 
 这次，你会看到打印信息变成了这样：
 
-<pre>
+```
 Hello, Groovy!
 ...
 Hello, dependency 1!
 Hello, dependency 1!
 ...
-</pre>
+```
 
 最后，你还能在不修改 `ReloadingTest.groovy` 文件的情况下对 `Dependency.groovy` 文件进行修改：
 
-<pre class="brush: groovy">
+```groovy
 class Dependency {
     String message = 'Hello, dependency 2'
 }
-</pre>
+```
 
 之后你应该能观察到依赖文件被重新载入了：
 
-<pre>
+```
 Hello, dependency 1!
 ...
 Hello, dependency 2!
 Hello, dependency 2!
-</pre>
+```
 
 ### 1.5 CompilationUnit
 
@@ -495,12 +495,12 @@ Groovy 的 BSF 引擎由 `org.codehaus.groovy.bsf.GroovyEngine` 类所实现。�
 -->
 假设你已经把 Groovy 和 BSF 的 JAR 包放到了类路径中，你可以使用如下 Java 代码来运行一段 Groovy 脚本样例了：
 
-<pre class="brush: java">
+```java
 String myScript = "println('Hello World')\n  return [1, 2, 3]";
 BSFManager manager = new BSFManager();
 List answer = (List) manager.eval("groovy", "myScript.groovy", 0, 0, myScript);
 assertEquals(3, answer.size());
-</pre>
+```
 
 ### 2.2 传递参数
 
@@ -509,12 +509,12 @@ assertEquals(3, answer.size());
 -->
 BSF 还允许你在 Java 应用程序和脚本语言之间传递 Bean 对象。你可以通过注册/注销 Bean 类的方式使 BSF 得知其存在。之后你可以通过 BSF 提供的方法来对 Bean 类进行检索。除此之外，你还可以声明/反声明 Bean 类，如此一来便能注册该 Bean 类且使得脚本语言也能直接使用它们。当我们使用 Groovy 时通常会使用第二种方法，示例如下：
 
-<pre class="brush: java">
+```java
 BSFManager manager = new BSFManager();
 manager.declareBean("xyz", 4, Integer.class);
 Object answer = manager.eval("groovy", "test.groovy", 0, 0, "xyz + 1");
 assertEquals(5, answer);
-</pre>
+```
 
 ### 2.3 其他调用选项
 
@@ -523,17 +523,17 @@ assertEquals(5, answer);
 -->
 上面的案例中均使用了 `eval` 方法。除此之外 BSF 还提供了很多其他方法功能使用（详情可参阅 [BSF 文档](http://commons.apache.org/proper/commons-bsf/manual.html)）。其中包括 `apply` 方法，其允许你在脚本语言中定义一个匿名函数并将其应用于给定的参数。Groovy 则通过闭包来支持该功能。示例如下：
 
-<pre class="brush: java">
+```java
 BSFManager manager = new BSFManager();
-Vector&lt;String> ignoreParamNames = null;
-Vector&lt;Integer> args = new Vector&lt;Integer>();
+Vector<String> ignoreParamNames = null;
+Vector<Integer> args = new Vector<Integer>();
 args.add(2);
 args.add(5);
 args.add(1);
 Integer actual = (Integer) manager.apply("groovy", "applyTest", 0, 0,
         "def summer = { a, b, c -> a * 100 + b * 10 + c }", ignoreParamNames, args);
 assertEquals(251, actual.intValue());
-</pre>
+```
 
 ### 2.4 访问脚本引擎
 
@@ -542,14 +542,14 @@ assertEquals(251, actual.intValue());
 -->
 尽管在一般情况下你不会用到，但 BSF 提供了一些方法使你可以直接访问脚本引擎。脚本引擎的其中一个功能为对给定的对象调用方法。示例如下：
 
-<pre class="brush: java">
+```java
 BSFManager manager = new BSFManager();
 BSFEngine bsfEngine = manager.loadScriptingEngine("groovy");
 manager.declareBean("myvar", "hello", String.class);
 Object myvar = manager.lookupBean("myvar");
 String result = (String) bsfEngine.call(myvar, "reverse", new Object[0]);
 assertEquals("olleh", result);
-</pre>
+```
 
 ## 3 JSR-223 `javax.script` API
 
@@ -563,34 +563,34 @@ JSR-223 为一套从 Java 中调用脚本框架的标准 API。它从 Java6 开�
 -->
 你需要通过如下代码来初始化  JSR-223 引擎使其能从 Java 访问 Groovy：
 
-<pre class="brush: java">
+```java
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 ScriptEngineManager factory = new ScriptEngineManager();
 ScriptEngine engine = factory.getEngineByName("groovy");
-</pre>
+```
 
 然后你就能很轻松地运行 Groovy 脚本了：
 
-<pre class="brush: java">
+```java
 Integer sum = (Integer) engine.eval("(1..10).sum()");
 assertEquals(new Integer(55), sum);
-</pre>
+```
 
 你还能在 Java 和 Groovy 间共享变量：
 
-<pre class="brush: java">
+```java
 engine.put("first", "HELLO");
 engine.put("second", "world");
 String result = (String) engine.eval("first.toLowerCase() + ' ' + second.toUpperCase()");
 assertEquals("hello WORLD", result);
-</pre>
+```
 
 如下示例展示了如何调用一个可调用函数：
 
-<pre class="brush: java">
+```java
 import javax.script.Invocable;
 
 ScriptEngineManager factory = new ScriptEngineManager();
@@ -601,7 +601,7 @@ Invocable inv = (Invocable) engine;
 Object[] params = {5};
 Object result = inv.invokeFunction("factorial", params);
 assertEquals(new Integer(120), result);
-</pre>
+```
 
 <!--
 	The engine keeps per default hard references to the script functions. To change this you should set a engine level scoped attribute to the script context of the name #jsr223.groovy.engine.keep.globals with a String being phantom to use phantom references, weak to use weak references or soft to use soft references - casing is ignored. Any other string will cause the use of hard references.

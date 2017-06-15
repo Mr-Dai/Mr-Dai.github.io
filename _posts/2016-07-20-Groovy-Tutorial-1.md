@@ -36,7 +36,7 @@ Groovy 语言在设计时便考虑到要尽可能让语言本身令 Java 程序�
 <!-- The following code, written as Java code, can be compiled in both Java and Groovy, but it will behave differently: -->
 如下 Java 代码可以同时在 Java 环境和 Groovy 环境中编译运行，但却会有不同的行为：
 
-<pre class="brush: java">
+```java
 int method(String arg) {
     return 1;
 }
@@ -45,19 +45,19 @@ int method(Object arg) {
 }
 Object o = "Object";
 int result = method(o);
-</pre>
+```
 
 在 Java 中，你会有：
 
-<pre class="brush: java">
+```java
 assertEquals(2, result);
-</pre>
+```
 
 而在 Groovy 中则会有：
 
-<pre class="brush: java">
+```java
 assertEquals(1, result);
-</pre>
+```
 
 <!-- That is because Java will use the static information type, which is that o is declared as an Object, whereas Groovy will choose at runtime, when the method is actually called. Since it is called with a String, then the String version is called. -->
 这是因为 Java 会利用静态信息类型（变量 `o` 被声明为 `Object`）来挑选被调用的方法，而 Groovy 则会在方法被确实调用的运行时才进行选择。由于调用时所使用的实参是一个 `String`，那么 `String` 版本的方法就被调用了。
@@ -67,42 +67,42 @@ assertEquals(1, result);
 <!-- In Groovy, the { …​ } block is reserved for closures. That means that you cannot create array literals with this syntax: -->
 在 Groovy 中，`{...}` 块被保留用作定义闭包。也就是说，你不能像如下语句这样来创建数组字面量：
 
-<pre class="brush: java">
+```java
 int[] array = { 1, 2, 3 };
-</pre>
+```
 
 你需要这样：
 
-<pre class="brush: groovy">
+```groovy
 int[] array = [1, 2, 3]
-</pre>
+```
 
 ## 4 包可见性
 
 在 Groovy 中，不给出任何修饰符并不会使得一个类的域像 Java 那样仅在该包内可见：
 
-<pre class="brush: groovy">
+```groovy
 class Person {
     String name
 }
-</pre>
+```
 
 在 Groovy 中这样会创建出一个**属性**（Property），也就是一个 `private` 域和对应的 Getter 和 Setter 方法。
 
 通过为域添加上 `@PackageScope` 注解即可将其声明为包内可见：
 
-<pre class="brush: groovy">
+```groovy
 class Person {
     @PackageScope String name
 }
-</pre>
+```
 
 ## 5 ARM 块
 
 <!-- ARM (Automatic Resource Management) block from Java 7 are not supported in Groovy. Instead, Groovy provides various methods relying on closures, which have the same effect while being more idiomatic. For example: -->
 Groovy 不支持 Java7 的自动资源管理（Automatic Resource Management, ARM）代码块，而是提供了各种不同的利用了闭包的方法，使得我们可以使用更简洁的写法来达成同样的效果。例如：
 
-<pre class="brush: java">
+```java
 Path file = Paths.get("/path/to/file");
 Charset charset = Charset.forName("UTF-8");
 try (BufferedReader reader = Files.newBufferedReader(file, charset)) {
@@ -114,25 +114,25 @@ try (BufferedReader reader = Files.newBufferedReader(file, charset)) {
 } catch (IOException e) {
     e.printStackTrace();
 }
-</pre>
+```
 
 可被写作：
 
-<pre class="brush: groovy">
+```groovy
 new File('/path/to/file').eachLine('UTF-8') {
    println it
 }
-</pre>
+```
 
 或者，如果你想让它看起来更像 Java 的话，也可以这样写：
 
-<pre class="brush: groovy">
+```groovy
 new File('/path/to/file').withReader('UTF-8') { reader ->
    reader.eachLine {
        println it
    }
 }
-</pre>
+```
 
 ## 6 内部类
 
@@ -143,20 +143,20 @@ Groovy 的匿名内部类和嵌套类在某种程度上以 Java 为指导，但�
 
 如下为静态内部类的案例：
 
-<pre class="brush: groovy">
+```groovy
 class A {
     static class B {}
 }
 
 new A.B()
-</pre>
+```
 
 <!-- The usage of static inner classes is the best supported one. If you absolutely need an inner class, you should make it a static one. -->
 实际上，Groovy 对静态内部类的支持是最好的，因此如果你确实需要一个内部类的话，你应该将其声明为静态的。
 
 ### 6.2 匿名内部类
 
-<pre class="brush: groovy">
+```groovy
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -170,13 +170,13 @@ timer.schedule(new TimerTask() {
 }, 0)
 
 assert called.await(10, TimeUnit.SECONDS)
-</pre>
+```
 
 ### 6.3 创建非静态内部类的实例
 
 在 Java 中，你可以这样：
 
-<pre class="brush: java">
+```java
 public class Y {
     public class X {}
     public X foo() {
@@ -186,11 +186,11 @@ public class Y {
         return y.new X();
     }
 }
-</pre>
+```
 
 Groovy 并不支持像 `y.new X()` 这样的语法。你应该像如下代码那样，写成 `new X(y)`：
 
-<pre class="brush: groovy">
+```groovy
 public class Y {
     public class X {}
     public X foo() {
@@ -200,7 +200,7 @@ public class Y {
         return new X(y)
     }
 }
-</pre>
+```
 
 <!-- Caution though, Groovy supports calling methods with one parameter without giving an argument. The parameter will then have the value null. Basically the same rules apply to calling a constructor. There is a danger that you will write new X() instead of new X(this) for example. Since this might also be the regular way we have not yet found a good way to prevent this problem. -->
 值得注意的是，Groovy 允许你在调用只有一个参数的方法时不给出任何实参。如此一来参数值会被设置为 `null`。对构造器的调用同样遵循此规则。因此你有可能会写成 `new X()` 而不是 `new X(this)`。由于这样做在某种情况下也有可能是合理的，因此我们还没有找出一个很好的办法来避免这样的问题。
@@ -209,17 +209,17 @@ public class Y {
 
 Java8 支持 Lambda 表达式和方法引用：
 
-<pre class="brush: java">
+```java
 Runnable run = () -> System.out.println("Run");
 list.forEach(System.out::println);
-</pre>
+```
 
 Java8 的 Lambda 表达式在某种程度上可以被看作是匿名内部类。Groovy 不支持这样的语法，但支持闭包：
 
-<pre class="brush: groovy">
+```groovy
 Runnable run = { println 'run' }
 list.each { println it } // or list.each(this.&println)
-</pre>
+```
 
 ## 8 GString
 
@@ -235,16 +235,16 @@ list.each { println it } // or list.each(this.&println)
 <!-- Singly-quoted literals in Groovy are used for String, and double-quoted result in String or GString, depending whether there is interpolation in the literal. -->
 在 Groovy 中，带单引号的字符串字面量被用作 `String` 对象的创建，而带双引号的字符串字面量则会创建出 `GString` 或 `String` 对象，取决于字面两种是否包含插值占位符。
 
-<pre class="brush: groovy">
+```groovy
 assert 'c'.getClass()==String
 assert "c".getClass()==String
 assert "c${1}".getClass() in GString
-</pre>
+```
 
 <!-- Groovy will automatically cast a single-character String to char only when assigning to a variable of type char. When calling methods with arguments of type char we need to either cast explicitly or make sure the value has been cast in advance. -->
 只有当赋值给一个类型为 `char` 的变量时，Groovy 才会自动地将一个只包含一个字符的 `String` 转换为 `char` 类型。当你想调用一个参数类型为 `char` 的方法时，你需要显式地对类型进行转换或者预先进行类型转换。
 
-<pre class="brush: groovy">
+```groovy
 char a='a'
 assert Character.digit(a, 16)==10 : 'But Groovy does boxing'
 assert Character.digit((char) 'a', 16)==10
@@ -254,12 +254,12 @@ try {
   assert false: 'Need explicit cast'
 } catch(MissingMethodException e) {
 }
-</pre>
+```
 
 <!-- Groovy supports two styles of casting and in the case of casting to char there are subtle differences when casting a multi-char strings. The Groovy style cast is more lenient and will take the first character, while the C-style cast will fail with exception. -->
 Groovy 支持两种不同的类型转换语法，而当转换包含多个字符的字符串至 `char` 时，两种语法会有不同的表现。Groovy 风格的类型转换会更为智能，只以字符串的第一个字符作为转换结果，而 C 风格的强制类型转换则会直接抛出异常。
 
-<pre class="brush: groovy">
+```groovy
 // for single char strings, both are the same
 assert ((char) "c").class==Character
 assert ("c" as char).class==Character
@@ -272,14 +272,14 @@ try {
 }
 assert ('cx' as char) == 'c'
 assert 'cx'.asType(char) == 'c'	
-</pre>
+```
 
 ## 10 基本数据类型和包装类
 
 <!-- Because Groovy uses Objects for everything, it autowraps references to primitives. Because of this, it does not follow Java’s behavior of widening taking priority over boxing. Here’s an example using int -->
 由于在 Groovy 中所有东西都是对象，Groovy 会对对基本数据类型的引用进行[自动包装](http://docs.groovy-lang.org/latest/html/documentation/core-object-orientation.html#_primitive_types)。鉴于此，Groovy 不会像 Java 那样让类型扩充享有比装箱更高的优先级。例如：
 
-<pre class="brush: groovy">
+```groovy
 int i
 m(i)
 
@@ -290,7 +290,7 @@ void m(long l) {           // 注1
 void m(Integer i) {        // 注2
   println "in m(Integer)"
 }
-</pre>
+```
 
 <table style="width: 100%">
   <colgroup>

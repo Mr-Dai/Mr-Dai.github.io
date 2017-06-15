@@ -11,10 +11,10 @@ category: Java
 
 Printing or producing a simple `String` message has been really trivial in Java. Most of the time, we use concatenation to create `String` instance we want:
 
-<pre class="brush: java">
+```java
 int a = 3;
 String str = "Integer `a` has value `" + a + "`";
-</pre>
+```
 
 Though modern Java compiler uses `StringBuilder` to optimize statements like these, using concatention to construct `String` has its limitations, which include:
 
@@ -28,17 +28,17 @@ Fortunately, Java SE 5.0 brought back the venerable `printf` method from the C l
 
 `printf` method in Java is much like its counterpart in C. For example, the call
 
-<pre class="brush: java">
+```java
 System.out.pinrlnt("%8.2f", x);
-</pre>
+```
 
 prints `x` with a *field width* of 8 characters and a *precision* of 2 characters.
 
 You can supply multiple parameters to `printf`. For example:
 
-<pre class="brush: java">
+```java
 System.out.printf("Hello, %s. Next year, you'll be %d.", name, age);
-</pre>
+```
 
 The formatting patterns is written in a `String` constant, where *format specifiers* that start with a `%` character is replaced with the corresponding argument.
 A format specifier is composed of *flag* and/or *conversion character*. *Flags* are used to control the apperance of the formatted string, while the *conversion
@@ -174,10 +174,10 @@ character* that ends a format specifier indicates the type of the value to be fo
 		<td><code>159 9F</code></td>
 	</tr>
 	<tr>
-		<td><code>&lt;</code></td>
+		<td><code><</code></td>
 		<td>
 			Formats the same value as the previous secification; for example,<br>
-			<code>%d %&lt;x</code> prints the same number in decimal and hexadecimal.
+			<code>%d %<x</code> prints the same number in decimal and hexadecimal.
 		</td>
 		<td><code>159 9F</code></td>
 	</tr>
@@ -185,16 +185,16 @@ character* that ends a format specifier indicates the type of the value to be fo
 
 You can use the static `String.format` method to create a formatted string without printing it:
 
-<pre class="brush: java">
+```java
 String message = String.format("Hello, %s. Next year, you'll be %d.", name, age);
-</pre>
+```
 
 Conversion characters for `Date` formatting are also available, which start with `t`:
 
-<pre class="brush: java">
+```java
 System.out.printf("%tc", new Date());
 // Mon Fex 09 18:05:19 PST 2004
-</pre>
+```
 
 <table class="table">
 	<caption><strong>Date and Time Conversion Characters</strong></caption>
@@ -364,16 +364,16 @@ As you can see in the preceding table, some of the formates yield only a part of
 It would be a bit silly if you had to supply the day multiple times for format each part. For that reason, a format string can indicate
 the *index* of the argument to be formatted. The index must immediately follow the `%`, and it must be terminated by a `$`. For example:
 
-<pre class="brush: java">
+```java
 System.out.println("%1$s %2$tB %2$te, %2$tY", "Due date:", new Date());
 // Due date: February 9, 2004
-</pre>
+```
 
 Alternatively, you can use the `<` flag. It indicates that the same argument as in the preceding format specification should be used again.
 That is, the statement
 
-<pre class="brush: java">
-System.out.println("%s %tB %&lt;te, %&lt;tY", "Due date:", new Date());
-</pre>
+```java
+System.out.println("%s %tB %<te, %<tY", "Due date:", new Date());
+```
 
 yields the same output as the preceding statement.

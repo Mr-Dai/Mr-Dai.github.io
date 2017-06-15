@@ -18,17 +18,17 @@ org_url: "http://www.groovy-lang.org/grape.html"
 -->
 Grape 是 Groovy 自带的 JAR 依赖管理器，可以让你快速地将 Maven 库依赖添加到类路径中，让脚本的编写变得更加简单。在最简单的情形里，你只要把一句注解加入到你的脚本中即可：
 
-<pre class="brush: groovy">
+```groovy
 @Grab(group='org.springframework', module='spring-orm', version='3.2.5.RELEASE')
 import org.springframework.jdbc.core.JdbcTemplate
-</pre>
+```
 
 `@Grab` 还支持另一种简写形式：
 
-<pre class="brush: groovy">
+```groovy
 @Grab('org.springframework:spring-orm:3.2.5.RELEASE')
 import org.springframework.jdbc.core.JdbcTemplate
-</pre>
+```
 
 <!--
 	Note that we are using an annotated import here, which is the recommended way. You can also search for dependencies on mvnrepository.com and it will provide you the @Grab annotation form of the pom.xml entry.
@@ -42,10 +42,10 @@ import org.springframework.jdbc.core.JdbcTemplate
 -->
 并不是所有的依赖库都能在 Maven 中心库中找到。此时，你需要添加如下依赖：
 
-<pre class="brush: groovy">
+```groovy
 @GrabResolver(name='restlet', root='http://maven.restlet.org/')
 @Grab(group='org.restlet', module='org.restlet', version='1.1.6')
-</pre>
+```
 
 ### 1.3 Maven Classifier
 
@@ -54,9 +54,9 @@ import org.springframework.jdbc.core.JdbcTemplate
 -->
 某些 Maven 依赖需要添加 Classifier 才能被正确解析。你可以这样做：
 
-<pre class="brush: groovy">
+```groovy
 @Grab(group='net.sf.json-lib', module='json-lib', version='2.2.3', classifier='jdk15')
-</pre>
+```
 
 ### 1.4 排除间接依赖
 
@@ -65,10 +65,10 @@ import org.springframework.jdbc.core.JdbcTemplate
 -->
 有些时候，你可能已经依赖了一个有点不同但又相容的库，想要排除掉某个库的间接依赖。你可以这样做：
 
-<pre class="brush: groovy">
+```groovy
 @Grab('net.sourceforge.htmlunit:htmlunit:2.8')
 @GrabExclude('xml-apis:xml-apis')
-</pre>
+```
 
 ### 1.5 JDBC 驱动
 
@@ -77,18 +77,18 @@ import org.springframework.jdbc.core.JdbcTemplate
 -->
 鉴于 JDBC 驱动载入的方式，你需要对 Grape 进行特殊设置令其将 JDBC 驱动依赖附加到系统类加载器中，如下：
 
-<pre class="brush: groovy">
+```groovy
 @GrabConfig(systemClassLoader=true)
 @Grab(group='mysql', module='mysql-connector-java', version='5.1.6')
-</pre>
+```
 
 ### 1.6 在 Groovy Shell 中使用 Grape
 
 在 `groovysh` 中你需要使用如下方法调用：
 
-<pre class="brush: groovy">
+```groovy
 groovy.grape.Grape.grab(group:'org.springframework', module:'spring', version:'2.5.6')
-</pre>
+```
 
 ### 1.7 代理设置
 
@@ -97,18 +97,18 @@ groovy.grape.Grape.grab(group:'org.springframework', module:'spring', version:'2
 -->
 如果你的机器在一个防火墙之后，或者你希望让 Groovy/Grape 使用某个代理服务器，你可以在命令号中设置 `http.proxyHost` 和 `http.proxyPort` 系统属性：
 
-<pre>
+```
 groovy -Dhttp.proxyHost=yourproxy -Dhttp.proxyPort=8080 yourscript.groovy
-</pre>
+```
 
 <!--
 	Or you can make this system wide by adding these properties to your JAVA_OPTS environment variable:
 -->
 或者你也可以将这些设置放入到 `JAVA_OPTS` 环境变量中，使其在全系统上生效：
 
-<pre>
+```
 JAVA_OPTS = -Dhttp.proxyHost=yourproxy -Dhttp.proxyPort=8080
-</pre>
+```
 
 ### 1.8 日志输出
 
@@ -158,7 +158,7 @@ Grape 仍旧采用了 Ivy 的模块版本声明惯例，但修改了一些属性
 -->
 我们可以将 `groovy.lang.Grab` 注解放在代码中任何可放置注解的地方以告诉编译器该代码依赖特定的库。这会使得指定的库被放入到 Groovy 编译器的类加载器中。这些注解会在脚本中的其他类被解析之前先被发现并处理，因此引入的类是可以根据给出的 `@Grab` 注解被正确解析的。
 
-<pre class="brush: groovy">
+```groovy
 import com.jidesoft.swing.JideSplitButton
 @Grab(group='com.jidesoft', module='jide-oss', version='[2.2.1,2.3.0]')
 public class TestClassAnnotation {
@@ -166,7 +166,7 @@ public class TestClassAnnotation {
         return JideSplitButton.class.name
     }
 }
-</pre>
+```
 
 <!--
 	An appropriate grab(…​) call will be added to the static initializer of the class of the containing class (or script class in the case of an annotated script element).
@@ -180,23 +180,23 @@ public class TestClassAnnotation {
 -->
 如果需要在一个代码节点上放入多个 Grape 注解，你需要像下面的示例那样使用 `@Grapes` 注解：
 
-<pre class="brush: groovy">
+```groovy
 @Grapes([
    @Grab(group='commons-primitives', module='commons-primitives', version='1.0'),
    @Grab(group='org.ccil.cowan.tagsoup', module='tagsoup', version='0.9.7')])
 class Example {
 // ...
 }
-</pre>
+```
 
 <!--
 	Otherwise you’ll encounter the following error:
 -->
 否则你会遇到下面这样的错误：
 
-<pre>
+```
 Cannot specify duplicate annotation on the same member
-</pre>
+```
 
 ### 3.3 方法调用
 
@@ -205,13 +205,13 @@ Cannot specify duplicate annotation on the same member
 -->
 一般来讲对 `grab` 方法的调用应被放入到脚本的首部或者类的初始化代码中，以确保代码在对某些库产生实际依赖之前这些库已经被正确载入到类加载器中。下面的示例给出了两种常见的 `grab` 方法调用方式：
 
-<pre class="brush: groovy">
+```groovy
 import groovy.grape.Grape
 // random maven library
 Grape.grab(group:'com.jidesoft', module:'jide-oss', version:'[2.2.0,)')
 Grape.grab([group:'org.apache.ivy', module:'ivy', version:'2.0.0-beta1', conf:['default', 'optional']],
      [group:'org.apache.ant', module:'ant', version:'1.7.0'])
-</pre>
+```
 
 <!--
 	- Multiple calls to grab in the same context with the same parameters should be idempotent. However, if the same code is called with a different ClassLoader context then resolution may be re-run.

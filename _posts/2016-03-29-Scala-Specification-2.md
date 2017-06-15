@@ -75,7 +75,7 @@ Assume the following two definitions of objects named X in packages P and Q.
 -->
 考虑以下对处于包`P`和`Q`中同被称为`X`的对象的定义：
 
-<pre class="brush: scala">
+```scala
 package P {
   object X { val x = 1; val y = 2 }
 }
@@ -83,14 +83,14 @@ package P {
 package Q {
   object X { val x = true; val y = "" }
 }
-</pre>
+```
 
 <!--
 The following program illustrates different kinds of bindings and precedences between them.
 -->
 以下程序展示了不同的绑定以及它们的优先级。
 
-<pre class="brush: scala">
+```scala
 package P {                    // `X' 被包语句绑定
   import Console._               // `println' 被通配引入绑定
   object A {
@@ -119,4 +119,4 @@ package P {                    // `X' 被包语句绑定
     }
   }
 }
-</pre>
+```

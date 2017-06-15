@@ -19,23 +19,23 @@ org_url: "http://www.groovy-lang.org/syntax.html"
 <!-- Single line comments start with // and can be found at any position in the line. The characters following //, till the end of the line, are considered part of the comment -->
 单行注释由 `//` 起始，可存在于一行中的任意位置。从 `//` 开始到行末之间的字符均被视作注释的内容。
 
-<pre class="brush: groovy">
+```groovy
 // 这是一个独占一行的单行注释
 println "hello" // 该注释延伸至行末
-</pre>
+```
 
 ### 1.2 多行注释
 
 <!-- A multiline comment starts with /* and can be found at any position in the line. The characters following /* will be considered part of the comment, including new line characters, up to the first */ closing the comment. Multiline comments can thus be put at the end of a statement, or even inside a statement. -->
 多行注释由 `/*` 起始，可起始于一行中的任意位置。从 `/*` 开始到第一个遇到的 `*/` 之间的包括换行符在内的所有字符均被视作注释的内容。由此，多行注释可被放在语句的末尾或是语句之间。
 
-<pre class="brush: groovy">
+```groovy
 /* 一个独占了两行的
    多行注释          */
 println "hello" /* 一个从语句末尾开始的
                    多行注释              */
 println 1 /* 一 */ + 2 /* 二 */
-</pre>
+```
 
 ### 1.3 GroovyDoc 注释
 
@@ -56,7 +56,7 @@ Although the compiler will not complain about GroovyDoc comments not being assoc
 -->
 尽管即使 GroovyDoc 注释没能和这些语言元素关联在一起编译器也不会有任何反应，但将 GroovyDoc 注释放在这些元素的正上方是更好的做法。
 
-<pre class="brush: groovy">
+```groovy
 /**
  * 类的描述
  */
@@ -74,7 +74,7 @@ class Person {
        "Hello ${otherPerson}"
     }
 }
-</pre>
+```
 
 <!-- 
 GroovyDoc follows the same conventions as Java’s own JavaDoc. So you’ll be able to use the same tags as with JavaDoc.
@@ -88,10 +88,10 @@ Beside the single line comment, there is a special line comment, often called th
 -->
 除了一般的单行注释，还有一种被 Unix 系统称为 Shebang 行（译者注：She 和 Bang 分别对应于 `#` 和 `!` 符号） 的注释，它们使得在你安装了 Groovy 并将 `groovy` 命令放置在 `PATH` 中后能够从命令行中运行脚本。
 
-<pre class="brush: groovy">
+```groovy
 #!/usr/bin/env groovy
 println "Hello from the shebang line"
-</pre>
+```
 
 <!-- The # character must be the first character of the file. Any indentation would yield a compilation error. -->
 `#` 符号必须为脚本文件的第一个字符，任何缩进都会产生编译错误。
@@ -193,36 +193,36 @@ println "Hello from the shebang line"
 
 如下为部分合法标识符：
 
-<pre class="brush: groovy">
+```groovy
 def name
 def item3
 def with_underscore
 def $dollarStart
-</pre>
+```
 
 如下为部分非法标识符：
 
-<pre class="brush: groovy">
+```groovy
 def 3tier
 def a+b
 def a#b
-</pre>
+```
 
 当跟在一个句点（`.`）后时，所有关键字均为合法标识符：
 
-<pre class="brush: groovy">
+```groovy
 foo.as
 foo.assert
 foo.break
 foo.case
 foo.catch
-</pre>
+```
 
 ### 3.2 带引号的标识符
 
 带引号的标识符可出现在句点表达式的句点之后。例如，`person.name` 表达式中的 `name` 即可被引号包裹，写作 `person."name"` 或 `person.'name'`。如果某些标识符中包含 Java 语言规范不允许但在 Groovy 中被引号包裹时允许存在的字符时，这样的写法就十分有用了。这样的字符包括破折号、空格和感叹号。
 
-<pre class="brush: groovy">
+```groovy
 def map = [:]
 
 map."an identifier with a space and double quotes" = "ALLOWED"
@@ -230,27 +230,27 @@ map.'with-dash-signs-and-single-quotes' = "ALLOWED"
 
 assert map."an identifier with a space and double quotes" == "ALLOWED"
 assert map.'with-dash-signs-and-single-quotes' == "ALLOWED"
-</pre>
+```
 
 在后面讲述[字符串](#strings)的章节中我们还能了解到，Groovy 提供了好几种不同的字符串字面量，而所有的这些字符串都可以被放在句点后作为带引号的标识符：
 
-<pre class="brush: groovy">
+```groovy
 map.'single quote'
 map."double quote"
 map.'''triple single quote'''
 map."""triple double quote"""
 map./slashy string/
 map.$/dollar slashy string/$
-</pre>
+```
 
 值得注意的是，当使用 Groovy 的 GString（插值字符串）作为带引号的标识符时是和使用普通字符串有所区别的：插值字符串中的值将会被填充，而后再以插值的结果作为标识符进行处理：
 
-<pre class="brush: groovy">
+```groovy
 def firstname = "Homer"
 map."Simson-${firstname}" = "Homer Simson"
 
 assert map.'Simson-Homer' == "Homer Simson"
-</pre>
+```
 
 <h2 id="strings">4 字符串</h2>
 
@@ -262,9 +262,9 @@ assert map.'Simson-Homer' == "Homer Simson"
 <!-- Single quoted strings are a series of characters surrounded by single quotes: -->
 带单引号的字符串（Single Quoted String）为一组由单引号包围的字符：
 
-<pre class="brush: groovy">
+```groovy
 'a single quoted string'
-</pre>
+```
 
 
 <!-- Single quoted strings are plain java.lang.String and don’t support interpolation. -->
@@ -275,18 +275,18 @@ assert map.'Simson-Homer' == "Homer Simson"
 <!-- All the Groovy strings can be concatenated with the + operator: -->
 所有 Groovy 字符串可由 `+` 运算符进行拼接：
 
-<pre class="brush: groovy">
+```groovy
 assert 'ab' == 'a' + 'b'
-</pre>
+```
 
 ### 4.3 带三重单引号的字符串
 
 <!-- Triple single quoted strings are a series of characters surrounded by triplets of single quotes: -->
 带三重单引号的字符串（Triple Single Quoted String）是一串由三组单引号包围的字符：
 
-<pre class="brush: groovy">
+```groovy
 '''a triple single quoted string'''
-</pre>
+```
 
 <!-- Triple single quoted strings are plain java.lang.String and don’t support interpolation. -->
 带三重单引号的字符串实际上即为普通的 `java.lang.String` 且不支持插值操作。
@@ -294,11 +294,11 @@ assert 'ab' == 'a' + 'b'
 <!-- Triple single quoted strings are multiline. You can span the content of the string across line boundaries without the need to split the string in several pieces, without contatenation or newline escape characters: -->
 带三重单引号的字符串可包含多行。你无须将字符串分成若干块并利用字符串拼接或转义的换行符即可使字符串的内容横跨若干行。
 
-<pre class="brush: groovy">
+```groovy
 def aMultilineString = '''line one
 line two
 line three'''
-</pre>
+```
 
 <!-- If your code is indented, for example in the body of the method of a class, your string will contain the whitespace of the indentation. The Groovy Development Kit contains methods for stripping out the indentation with the String#stripIndent() method, and with the String#stripMargin() method that takes a delimiter character to identify the text to remove from the beginning of a string. -->
 如果你的代码中包含缩进，例如在类的方法体中时，你的字符串中也会包含缩进所使用的空白字符。GDK 支持使用 `String#stripIndent()` 方法来移除这些缩进，也可以使用 `String#stripMargin()` 方法通过给定的分隔符来移除字符串前面的字符。
@@ -306,18 +306,18 @@ line three'''
 <!-- When creating a string as follows: -->
 当你创建如下字符串时：
 
-<pre class="brush: groovy">
+```groovy
 def startingAndEndingWithANewline = '''
 line one
 line two
 line three
 '''
-</pre>
+```
 
 <!-- You will notice that the resulting string contains a newline character as first character. It is possible to strip that character by escaping the newline with a backslash: -->
 你会注意到所创建的字符串的第一个字符为换行符。你可以通过添加一个反斜杠将换行符进行转义以将该换行符从字符串中移除：
 
-<pre class="brush: groovy">
+```groovy
 def strippedFirstNewline = '''\
 line one
 line two
@@ -325,23 +325,23 @@ line three
 '''
 
 assert !strippedFirstNewline.startsWith('\n')
-</pre>
+```
 
 #### 4.3.1 对特殊字符进行转义
 
 <!-- You can escape single quotes with the the backslash character to avoid terminating the string literal: -->
 你可以对单引号进行转义以免该单引号中断了字符串字面量：
 
-<pre class="brush: groovy">
+```groovy
 'an escaped single quote: \' needs a backslash'
-</pre>
+```
 
 <!-- And you can escape the escape character itself with a double backslash: -->
 你也可以通过输入两个连续的反斜杠来对转义符进行转义：
 
-<pre class="brush: groovy">
+```groovy
 'an escaped escape character: \\ needs a double backslash'
-</pre>
+```
 
 <!-- Some special characters also use the backslash as escape character: -->
 某些特殊字符同样使用了反斜杠来作为转义符：
@@ -393,18 +393,18 @@ assert !strippedFirstNewline.startsWith('\n')
 <!-- For example, the Euro currency symbol can be represented with: -->
 例如，欧元货币符号可以这样输入：
 
-<pre class="brush: groovy">
+```groovy
 'The Euro currency symbol: \u20AC'
-</pre>
+```
 
 ### 4.4 带双引号的字符串
 
 <!-- Double quoted strings are a series of characters surrounded by double quotes: -->
 带双引号的字符串为一组由双引号包围的字符：
 
-<pre class="brush: groovy">
+```groovy
 "a double quoted string"
-</pre>
+```
 
 <!-- Double quoted strings are plain java.lang.String if there’s no interpolated expression, but are groovy.lang.GString instances if interpolation is present.
 To escape a double quote, you can use the backslash character: -->
@@ -412,9 +412,9 @@ To escape a double quote, you can use the backslash character: -->
 
 你可以使用反斜杠对双引号进行转义：
 
-<pre class="brush: groovy">
+```groovy
 "A double quote: \""
-</pre>
+```
 
 #### 4.4.1 字符串插值
 
@@ -424,20 +424,20 @@ To escape a double quote, you can use the backslash character: -->
 <!-- Here, we have a string with a placeholder referencing a local variable: -->
 这里，我们创建了一个字符串，其中包含了一个引用了局部变量的占位符：
 
-<pre class="brush: groovy">
+```groovy
 def name = 'Guillaume' // a plain string
 def greeting = "Hello ${name}"
 
 assert greeting.toString() == 'Hello Guillaume'
-</pre>
+```
 
 <!-- But any Groovy expression is valid, as we can see in this example with an arithmetic expression: -->
 但实际上在占位符中使用任何 Groovy 表达式都是合法的。在下面的例子中我们可以看到可以使用代数表达式：
 
-<pre class="brush: groovy">
+```groovy
 def sum = "The sum of 2 and 3 equals ${2 + 3}"
 assert sum.toString() == 'The sum of 2 and 3 equals 5'
-</pre>
+```
 
 
 <!-- Not only expressions are actually allowed in between the ${} placeholder. Statements are also allowed, but a statement’s value is just null. So if several statements are inserted in that placeholder, the last one should somehow return a meaningful value to be inserted. For instance, "The sum of 1 and 2 is equal to ${def a = 1; def b = 2; a + b}" is supported and works as expected but a good practice is usually to stick to simple expressions inside GString placeholders. -->
@@ -447,26 +447,26 @@ assert sum.toString() == 'The sum of 2 and 3 equals 5'
 
 除了 `${}` 占位符，我们还可以使用以 `$` 符号起始的句点表达式：
 
-<pre class="brush: groovy">
+```groovy
 def person = [name: 'Guillaume', age: 36]
 assert "$person.name is $person.age years old" == 'Guillaume is 36 years old'
-</pre>
+```
 
 <!-- But only dotted expressions of the form a.b, a.b.c, etc, are valid, but expressions that would contain parentheses like method calls, curly braces for closures, or arithmetic operators would be invalid. Given the following variable definition of a number: -->
 但只有形如 `a.b` 或 `a.b.c` 等的句点表达式可以使用这种写法，如方法调用、闭包等带括号或带代数运算符的表达式是不能这样写的。假设我们定义了如下的数字变量：
 
-<pre class="brush: groovy">
+```groovy
 def number = 3.14
-</pre>
+```
 
 <!-- The following statement will throw a groovy.lang.MissingPropertyException because Groovy believes you’re trying to access the toString property of that number, which doesn’t exist: -->
 如下语句将会抛出一个 `groovy.lang.MissingPropertyException` 因为 Groovy 以为你想要访问该变量的 `toString` 属性，而数字变量本身不包含这样一个属性：
 
-<pre class="brush: groovy">
+```groovy
 shouldFail(MissingPropertyException) {
     println "$number.toString()"
 }
-</pre>
+```
 
 <!-- You can think of "$number.toString()" as being interpreted by the parser as "${number.toString}()". -->
 你可能会以为 `"$number.toString()"` 会被解析器理解为 `"${number.toString}()"`。
@@ -474,22 +474,22 @@ shouldFail(MissingPropertyException) {
 <!-- If you need to escape the $ or ${} placeholders in a GString so they appear as is without interpolation, you just need to use a \ backslash character to escape the dollar sign: -->
 如果你想要对 GString 中的 `$` 或 `${}` 占位符进行转义使其不要触发插值操作，你只需要使用一个反斜杠符号对 `$` 符号转义即可：
 
-<pre class="brush: groovy">
+```groovy
 assert '${name}' == "\${name}"
-</pre>
+```
 
 #### 4.4.2 使用闭包表达式进行插值
 
 <!-- So far, we’ve seen we could interpolate arbitrary expressions inside the ${} placeholder, but there is a special case and notation for closure expressions. When the placeholder contains an arrow, ${→}, the expression is actually a closure expression — you can think of it as a closure with a dollar prepended in front of it: -->
 目前来讲，我们了解到我们可以向 `${}` 占位符中插入任意的表达式，但如果要插入闭包表达式的话则需要使用一些特殊的符号。当占位符中包含一个箭头符号时，`${→}`，该表达式实际上是一个闭包表达式 —— 你可以将其想象成一个前面带着一个美金符号的闭包：
 
-<pre class="brush: groovy">
+```groovy
 def sParameterLessClosure = "1 + 2 == ${-> 3}"  // 注1
 assert sParameterLessClosure == '1 + 2 == 3'
 
-def sOneParamClosure = "1 + 2 == ${ w -> w &lt;&lt; 3}"  // 注2 
+def sOneParamClosure = "1 + 2 == ${ w -> w << 3}"  // 注2 
 assert sOneParamClosure == '1 + 2 == 3'
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -502,7 +502,7 @@ assert sOneParamClosure == '1 + 2 == 3'
 	</tr>
 	<tr>
 		<td>2</td>
-		<td>该闭包需要传入一个 <code>java.io.StringWriter</code> 参数，你可以使用 <code>&lt;&lt;</code> 左移运算符向其中写入内容。在这两个例子中，两个占位符表达式实际上都是闭包。</td>
+		<td>该闭包需要传入一个 <code>java.io.StringWriter</code> 参数，你可以使用 <code><<</code> 左移运算符向其中写入内容。在这两个例子中，两个占位符表达式实际上都是闭包。</td>
 	</tr>
 </table>
 
@@ -511,7 +511,7 @@ assert sOneParamClosure == '1 + 2 == 3'
 
 我们来考虑下面这个案例：
 
-<pre class="brush: groovy">
+```groovy
 def number = 1    // 注1
 def eagerGString = "value == ${number}"
 def lazyGString = "value == ${ -> number }"
@@ -522,7 +522,7 @@ assert lazyGString ==  "value == 1"   // 注3
 number = 2   // 注4
 assert eagerGString == "value == 1"   // 注5
 assert lazyGString ==  "value == 2"   // 注6
-</pre>
+```
 
 <table>
 	<colgroup>
@@ -563,7 +563,7 @@ assert lazyGString ==  "value == 2"   // 注6
 <!-- When a method (whether implemented in Java or Groovy) expects a java.lang.String, but we pass a groovy.lang.GString instance, the toString() method of the GString is automatically and transparently called. -->
 如果一个方法（无论是 Java 方法还是 Groovy 方法）需要一个 `java.lang.String` 作为参数，而我们传入了一个 `groovy.lang.GString` 对象的话，`GString` 的 `toString()` 方法就会被隐式调用。
 
-<pre class="brush: groovy">
+```groovy
 String takeString(String message) {      // 注4     
     assert message instanceof String     // 注5
     return message
@@ -575,7 +575,7 @@ assert message instanceof GString           // 注2
 def result = takeString(message)            // 注3
 assert result instanceof String
 assert result == 'The message is hello'
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -609,19 +609,19 @@ assert result == 'The message is hello'
 <!-- Although interpolated strings can be used in lieu of plain Java strings, they differ with strings in a particular way: their hashCodes are different. Plain Java strings are immutable, whereas the resulting String representation of a GString can vary, depending on its interpolated values. Even for the same resulting string, GStrings and Strings don’t have the same hashCode. -->
 尽管插值字符串可用于代替普通的 Java 字符串，但它们实际上有一点不同：它们的 `hashCode` 是不同的。普通的 Java 字符串是不可变的，而同一个 `GString` 的 `String` 表示则可能发生变化，取决于其被插入的值。除此之外，即使两个对象拥有相同的内容，`GString` 和 `String` 的 `hashCode` 也是不同的：
 
-<pre class="brush: groovy">
+```groovy
 assert "one: ${1}".hashCode() != "one: 1".hashCode()
-</pre>
+```
 
 <!-- GString and Strings having different hashCode values, using GString as Map keys should be avoided, especially if we try to retrieve an associated value with a String instead of a GString. -->
 正是由于 `GString` 和 `String` 有着不同的 `hashCode`，我们不应使用 `GString` 作为 `Map` 的键，尤其是当我们需要在后面使用 `String` 来获取关联的值的时候。
 
-<pre class="brush: groovy">
+```groovy
 def key = "a"
 def m = ["${key}": "letter ${key}"]     // 注1
 
 assert m["a"] == null                   // 注2
-</pre>
+```
 
 <table>
 	<colgroup>
@@ -643,7 +643,7 @@ assert m["a"] == null                   // 注2
 <!-- Triple double quoted strings behave like double quoted strings, with the addition that they are multiline, like the triple single quoted strings. -->
 带三重双引号的字符串和带双引号的字符串类似，只是它们也像带三重单引号的字符串那样，可以包含多行：
 
-<pre class="brush: groovy">
+```groovy
 def name = 'Groovy'
 def template = """
     Dear Mr ${name},
@@ -656,7 +656,7 @@ def template = """
 """
 
 assert template.toString().contains('Groovy')
-</pre>
+```
 
 <!-- Neither double quotes nor single quotes need be escaped in triple double quoted strings. -->
 在这样的字符串中，双引号和单引号均不需要转义。
@@ -666,47 +666,47 @@ assert template.toString().contains('Groovy')
 <!-- Beyond the usual quoted strings, Groovy offers slashy strings, which use / as delimiters. Slashy strings are particularly useful for defining regular expressions and patterns, as there is no need to escape backslashes. -->
 除了普通的带引号的字符串，Groovy 还提供了使用 `/` 作为分隔符的斜杠字符串。斜杠字符串在用来定义正则表达式或正则模式时十分有用，因为在这样的字符串中不需要对反斜杠进行转义：
 
-<pre class="brush: groovy">
+```groovy
 def fooPattern = /.*foo.*/
 assert fooPattern == '.*foo.*'
-</pre>
+```
 
 只有斜杠符本身需要用反斜杠来进行转义：
 
-<pre class="brush: groovy">
+```groovy
 def escapeSlash = /The character \/ is a forward slash/
 assert escapeSlash == 'The character / is a forward slash'
-</pre>
+```
 
 （译者注：可能无法用这种写法来定义一个以反斜杠结尾的字符串）
 
 斜杠字符串可包含多行：
 
-<pre class="brush: groovy">
+```groovy
 def multilineSlashy = /one
     two
     three/
 
 assert multilineSlashy.contains('\n')
-</pre>
+```
 
 斜杠字符串也可以进行插值（也就是说它也是一个 `GString`）：
 
-<pre class="brush: groovy">
+```groovy
 def color = 'blue'
 def interpolatedSlashy = /a ${color} car/
 
 assert interpolatedSlashy == 'a blue car'
-</pre>
+```
 
 有几点需要注意一下。
 
 <!-- An empty slashy string cannot be represented with a double forward slash, as it’s understood by the Groovy parser as a line comment. That’s why the following assert would actually not compile as it would look like a non-terminated statement: -->
 当你想定义一个空白的斜杠字符串时，你不能将其写作两个连续的斜杠符，因为 Groovy 解析器会将其认作单行注释。这也是为何如下断言语句无法通过编译，因为编译器认为这个语句不完整：
 
-<pre class="brush: groovy">
+```groovy
 assert '' == //
-</pre>
+```
 
 <!-- As slashy strings were mostly designed to make regexp easier so a few things that are errors in GStrings like $() will work with slashy strings. -->
 由于斜杠字符串主要是设计来让编写正则表达式变得更加容易，因此一些如 `$()` 这样的在 `GString` 中错误的写法实际上是可以被放入到斜杠字符串中的。
@@ -716,7 +716,7 @@ assert '' == //
 <!-- Dollar slashy strings are multiline GStrings delimited with an opening $/ and and a closing /$. The escaping character is the dollar sign, and it can escape another dollar, or a forward slash. But both dollar and forward slashes don’t need to be escaped, except to escape the dollar of a string subsequence that would start like a GString placeholder sequence, or if you need to escape a sequence that would start like a closing dollar slashy string delimiter. -->
 美金斜杠字符串为使用 `$/` 起始且使用 `/$` 结尾的多行 `GString`。这样的字符串使用美金符号作为转义符，而且可用于对斜杠或另一个美金符号进行转义。然而在这样的字符串中，斜杠和美金符号都不需要进行转义，除非某个美金符号与后面的字符子串能够组合成一个占位符或者你的字符串中需要包含一个 `/$` 终止符。
 
-<pre class="brush: groovy">
+```groovy
 def name = "Guillaume"
 def date = "April, 1st"
 
@@ -742,7 +742,7 @@ assert [
     '$/ escaped forward slash',
     '/$ escaped dollar slashy string delimiter'
 ].each { dollarSlashy.contains(it) }
-</pre>
+```
 
 ### 4.8 字符串总结表
 
@@ -803,7 +803,7 @@ assert [
 <!-- Unlike Java, Groovy doesn’t have an explicit character literal. However, you can be explicit about making a Groovy string an actual character, by three different means: -->
 和 Java 不同的是，Groovy 无法显式地创建字符字面量。不过，你可以通过三种不同的方式来将 Groovy 字符串变成字符：
 
-<pre class="brush: groovy">
+```groovy
 char c1 = 'A' // 注1
 assert c1 instanceof Character
 
@@ -812,7 +812,7 @@ assert c2 instanceof Character
 
 def c3 = (char)'C' // 注3
 assert c3 instanceof Character
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -854,7 +854,7 @@ Groovy 支持各种不同种类的整型数或自然数字面量，所有的字�
 
 通过如下的声明方式即可分别创建上述类型的整型数：
 
-<pre class="brush: groovy">
+```groovy
 // primitive types
 byte  b = 1
 char  c = 2
@@ -864,14 +864,14 @@ long  l = 5
 
 // infinite precision
 BigInteger bi =  6
-</pre>
+```
 
 <!-- If you use optional typing by using the def keyword, the type of the integral number will vary: it’ll adapt to the capacity of the type that can hold that number. -->
 如果你使用了 `def` 关键字并不给定类型，整形数的类型则取决于不同类型的容量大小以及具体给定的数值大小。
 
 对于正整数而言：
 
-<pre class="brush: groovy">
+```groovy
 def a = 1
 assert a instanceof Integer
 
@@ -890,11 +890,11 @@ assert d instanceof Long
 // Long.MAX_VALUE + 1
 def e = 9223372036854775808
 assert e instanceof BigInteger
-</pre>
+```
 
 同理，对于负整数而言：
 
-<pre class="brush: groovy">
+```groovy
 def na = -1
 assert na instanceof Integer
 
@@ -913,7 +913,7 @@ assert nd instanceof Long
 // Long.MIN_VALUE - 1
 def ne = -9223372036854775809
 assert ne instanceof BigInteger
-</pre>
+```
 
 #### 5.1.1 其他不以 10 为基的数值表示方法
 
@@ -923,7 +923,7 @@ assert ne instanceof BigInteger
 
 二进制数字以 `0b` 起始：
 
-<pre class="brush: groovy">
+```groovy
 int xInt = 0b10101111
 assert xInt == 175
 
@@ -941,14 +941,14 @@ assert xBigInteger == 3873g
 
 int xNegativeInt = -0b10101111
 assert xNegativeInt == -175
-</pre>
+```
 
 ##### 八进制字面量
 
 <!-- Octal numbers are specified in the typical format of 0 followed by octal digits. -->
 八进制字面量以 `0` 起始：
 
-<pre class="brush: groovy">
+```groovy
 int xInt = 077
 assert xInt == 63
 
@@ -966,13 +966,13 @@ assert xBigInteger == 585g
 
 int xNegativeInt = -077
 assert xNegativeInt == -63
-</pre>
+```
 
 ##### 十六进制字面量
 
 十六进制数字以 `0x` 起始：
 
-<pre class="brush: groovy">
+```groovy
 int xInt = 0x77
 assert xInt == 119
 
@@ -993,7 +993,7 @@ assert xDouble == 1.0d
 
 int xNegativeInt = -0x77
 assert xNegativeInt == -119
-</pre>
+```
 
 ### 5.2 小数字面量
 
@@ -1005,24 +1005,24 @@ assert xNegativeInt == -119
 
 你可以通过如下方式来分别声明上述各个类型的小数：
 
-<pre class="brush: groovy">
+```groovy
 // primitive types
 float  f = 1.234
 double d = 2.345
 
 // infinite precision
 BigDecimal bd =  3.456
-</pre>
+```
 
 小数还可以使用 `e` 或 `E` 指数符号并接上一个可选的正负符以及代表指数值整型数值：
 
-<pre class="brush: groovy">
+```groovy
 assert 1e3  ==  1_000.0
 assert 2E4  == 20_000.0
 assert 3e+1 ==     30.0
 assert 4E-2 ==      0.04
 assert 5e-1 ==      0.5
-</pre>
+```
 
 <!-- Conveniently for exact decimal number calculations, Groovy choses java.lang.BigDecimal as its decimal number type. In addition, both float and double are supported, but require an explicit type declaration, type coercion or suffix. Even if BigDecimal is the default for decimal numbers, such literals are accepted in methods or closures taking float or double as parameter types. -->
 为了更好地支持精确的小数运算，Groovy 默认使用 `java.lang.BigDecimal` 作为小数的类型。除此之外，你仍然可以使用 `float` 或 `double` 作为小数数值的类型，但这需要你显式的声明变量的类型，或对其进行类型转换或给定特定的后缀。尽管如此，类型为 `java.lang.BigDecimal` 的字面量仍然可以被用于参数类型为 `float` 或 `double` 的闭包和方法。
@@ -1034,7 +1034,7 @@ assert 5e-1 ==      0.5
 <!-- When writing long literal numbers, it’s harder on the eye to figure out how some numbers are grouped together, for example with groups of thousands, of words, etc. By allowing you to place underscore in number literals, it’s easier to spot those groups: -->
 在编写很长的数字字面量时，人眼很难判断如何组合这些数字。Groovy 允许你在数字字面量中放入下划线以更好地区分开不同组的数字：
 
-<pre class="brush: groovy">
+```groovy
 long creditCardNumber = 1234_5678_9012_3456L
 long socialSecurityNumbers = 999_99_9999L
 double monetaryAmount = 12_345_132.12
@@ -1043,7 +1043,7 @@ long hexWords = 0xFFEC_DE5E
 long maxLong = 0x7fff_ffff_ffff_ffffL
 long alsoMaxLong = 9_223_372_036_854_775_807L
 long bytes = 0b11010010_01101001_10010100_10010010
-</pre>
+```
 
 ### 5.4 数字类型后缀
 
@@ -1081,7 +1081,7 @@ long bytes = 0b11010010_01101001_10010100_10010010
 	</tr>
 </table>
 
-<pre class="brush: groovy">
+```groovy
 assert 42I == new Integer('42')
 assert 42i == new Integer('42') // lowercase i more readable
 assert 123L == new Long("123") // uppercase L more readable
@@ -1095,7 +1095,7 @@ assert 1.23E23D == new Double('1.23E23')
 assert 0b1111L.class == Long // binary
 assert 0xFFi.class == Integer // hexadecimal
 assert 034G.class == BigInteger // octal
-</pre>
+```
 
 ### 5.5 数学运算
 
@@ -1271,7 +1271,7 @@ Groovy 的乘方运算使用如下规则来确定结果的类型：
 
 如下示例展示了上述的规则：
 
-<pre class="brush: groovy">
+```groovy
 // base and exponent are ints and the result can be represented by an Integer
 assert    2    **   3    instanceof Integer    //  8
 assert   10    **   9    instanceof Integer    //  1_000_000_000
@@ -1309,7 +1309,7 @@ assert    5.6d **   2    instanceof Double     //  31.359999999999996
 // and the result can only be represented as a Double value
 assert    7.8  **   1.9  instanceof Double     //  49.542708423868476
 assert    2    **   0.1f instanceof Double     //  1.0717734636432956
-</pre>
+```
 
 ## 6 布尔类型
 
@@ -1319,11 +1319,11 @@ assert    2    **   0.1f instanceof Double     //  1.0717734636432956
 <!-- Boolean values can be stored in variables, assigned into fields, just like any other data type: -->
 正如其他数据类型，布尔值同样可以被赋值给域或储存在变量中：
 
-<pre class="brush: groovy">
+```groovy
 def myBooleanVariable = true
 boolean untypedBooleanVar = false
 booleanField = true
-</pre>
+```
 
 <!-- true and false are the only two primitive boolean values. But more complex boolean expressions can be represented using logical operators. -->
 `true` 和 `false` 为仅有的两个布尔值，但使用[逻辑运算符]可以写出更为复杂的布尔表达式。
@@ -1336,12 +1336,12 @@ booleanField = true
 <!-- Groovy uses a comma-separated list of values, surrounded by square brackets, to denote lists. Groovy lists are plain JDK java.util.List, as Groovy doesn’t define its own collection classes. The concrete list implementation used when defining list literals are java.util.ArrayList by default, unless you decide to specify otherwise, as we shall see later on. -->
 Groovy 使用由逗号分隔且由中括号包围的值来表示列表。由于 Groovy 并未定义自己的集合类，因此 Groovy 的列表实际上就是 JDK 中的 `java.util.List`。若无额外显式声明，Groovy 将默认使用 `java.util.ArrayList` 作为具体的列表实现类。
 
-<pre class="brush: groovy">
+```groovy
 def numbers = [1, 2, 3]         // 注1
 
 assert numbers instanceof List  // 注2
 assert numbers.size() == 3      // 注3
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -1365,9 +1365,9 @@ assert numbers.size() == 3      // 注3
 <!-- In the above example, we used a homogeneous list, but you can also create lists containing values of heterogeneous types: -->
 上面的例子中创建的列表只包含同类型的元素，但你同样可以创建包含不同类型元素的列表：
 
-<pre class="brush: groovy">
+```groovy
 def heterogeneous = [1, "a", true]  // 注1
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -1383,7 +1383,7 @@ def heterogeneous = [1, "a", true]  // 注1
 <!-- You can access elements of the list with the [] subscript operator (both for reading and setting values) with positive indices or negative indices to access elements from the end of the list, as well as with ranges, and use the << leftShift operator to append elements to a list: -->
 你可以使用下标运算符 `[]` 来访问列表中的元素（可读取或写入），而当所使用的下标值为负数时则可从列表尾部开始访问元素。你还可以使用一个数值范围来获取一个子列表，或使用 `<<` 左移运算符来向列表追加元素：
 
-<pre class="brush: groovy">
+```groovy
 def letters = ['a', 'b', 'c', 'd']
 
 assert letters[0] == 'a'     // 注1
@@ -1395,13 +1395,13 @@ assert letters[-2] == 'c'
 letters[2] = 'C'             // 注3
 assert letters[2] == 'C'
 
-letters &lt;&lt; 'e'               // 注4
+letters << 'e'               // 注4
 assert letters[ 4] == 'e'
 assert letters[-1] == 'e'
 
 assert letters[1, 3] == ['b', 'd']         // 注5
 assert letters[2..4] == ['C', 'd', 'e']    // 注6
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -1422,7 +1422,7 @@ assert letters[2..4] == ['C', 'd', 'e']    // 注6
 	</tr>
 	<tr style="border-bottom: 1px dashed">
 		<td>4</td>
-		<td>使用 <code>&lt;&lt;</code> 左移运算符向列表的末尾添加新元素</td>
+		<td>使用 <code><<</code> 左移运算符向列表的末尾添加新元素</td>
 	</tr>
 	<tr style="border-bottom: 1px dashed">
 		<td>5</td>
@@ -1439,10 +1439,10 @@ As lists can be heterogeneous in nature, lists can also contain other lists to c
  -->
 由于列表可以包含不同类型的元素，列表也可以包含其他列表来构建出一个多维度列表：
 
-<pre class="brush: groovy">
+```groovy
 def multi = [[0, 1], [2, 3]]     // 注1
 assert multi[1][0] == 2          // 注2 
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -1464,7 +1464,7 @@ assert multi[1][0] == 2          // 注2
 <!-- Groovy reuses the list notation for arrays, but to make such literals arrays, you need to explicitely define the type of the array through coercion or type declaration. -->
 Groovy 使用与列表相同的写法来定义数组，但为了使其确实产生出数组，你需要通过类型转换或显式的类型声明来将其类型定义为数组。
 
-<pre class="brush: groovy">
+```groovy
 String[] arrStr = ['Ananas', 'Banana', 'Kiwi']  // 注1
 
 assert arrStr instanceof String[]    // 注2
@@ -1474,7 +1474,7 @@ def numArr = [1, 2, 3] as int[]      // 注3
 
 assert numArr instanceof int[]       // 注4
 assert numArr.size() == 3
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -1501,14 +1501,14 @@ assert numArr.size() == 3
 
 你也可以创建多维数组：
 
-<pre class="brush: groovy">
+```groovy
 def matrix3 = new Integer[3][3]         // 注1
 assert matrix3.size() == 3
 
 Integer[][] matrix2                     // 注2
 matrix2 = [[1, 2], [3, 4]]
 assert matrix2 instanceof Integer[][]
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -1527,13 +1527,13 @@ assert matrix2 instanceof Integer[][]
 
 访问数组元素的方式与列表相同：
 
-<pre class="brush: groovy">
+```groovy
 String[] names = ['Cédric', 'Guillaume', 'Jochen', 'Paul']
 assert names[0] == 'Cédric'     // 注1
 
 names[2] = 'Blackdrag'          // 注2
 assert names[2] == 'Blackdrag'
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -1558,7 +1558,7 @@ Groovy 不支持 Java 的数组初始化语法，因为大括号会被误解为 
 <!-- Sometimes called dictionaries or associative arrays in other languages, Groovy features maps. Maps associate keys to values, separating keys and values with colons, and each key/value pairs with commas, and the whole keys and values surrounded by square brackets. -->
 尽管在其他语言中又被称为字典或关联数组，Groovy 则支持映射。映射将键与值相互关联，键值使用冒号分隔，而不同的键值对之间使用逗号分隔，最终用中括号包围这些键值对即可定义一个映射。
 
-<pre class="brush: groovy">
+```groovy
 def colors = [red: '#FF0000', green: '#00FF00', blue: '#0000FF']   // 注1
 
 assert colors['red'] == '#FF0000'    // 注2
@@ -1571,7 +1571,7 @@ assert colors.pink == '#FF00FF'
 assert colors['yellow'] == '#FFFF00'
 
 assert colors instanceof java.util.LinkedHashMap
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -1607,30 +1607,30 @@ Groovy creates maps that are actually instances of java.util.LinkedHashMap. -->
 <!-- If you try to access a key which is not present in the map: -->
 如果你尝试访问映射中不存在的键：
 
-<pre class="brush: groovy">
+```groovy
 assert colors.unknown == null
-</pre>
+```
 
 你所能获得的结果将为 `null`。
 
 在上面的例子中，我们使用字符串作为键，但你也可以使用其他类型的值来作为键：
 
-<pre class="brush: groovy">
+```groovy
 def numbers = [1: 'one', 2: 'two']
 
 assert numbers[1] == 'one'
-</pre>
+```
 
 <!-- Here, we used numbers as keys, as numbers can unambiguously be recognized as numbers, so Groovy will not create a string key like in our previous examples. But consider the case you want to pass a variable in lieu of the key, to have the value of that variable become the key: -->
 这里我们使用数字来作为键，那么 Groovy 就不会像之前那样创建字符串来作为键了。但假设你想要将一个变量的值作为键
 
-<pre class="brush: groovy">
+```groovy
 def key = 'name'
 def person = [key: 'Guillaume']      // 注1
 
 assert !person.containsKey('name')   // 注2
 assert person.containsKey('key')     // 注3
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>
@@ -1654,12 +1654,12 @@ assert person.containsKey('key')     // 注3
 <!-- When you need to pass variable values as keys in your map definitions, you must surround the variable or expression with parentheses: -->
 当你想将变量的值作为你的定义映射时的键时，你需要将变量或表达式用括号包起来：
 
-<pre class="brush: groovy">
+```groovy
 person = [(key): 'Guillaume']        // 注1
 
 assert person.containsKey('name')    // 注2
 assert !person.containsKey('key')    // 注3
-</pre>
+```
 
 <table style="width: 100%">
 	<colgroup>

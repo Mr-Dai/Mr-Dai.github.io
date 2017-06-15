@@ -34,7 +34,7 @@ category: Java
 
 我们先来看看位于整个类型结构根部的 [Iterable][] 接口。其源代码如下：
 
-<pre class="brush: java">
+```java
 package java.lang;
 
 import java.util.Iterator;
@@ -49,11 +49,11 @@ import java.util.function.Consumer;
  *
  * @since 1.5
  */
-public interface Iterable&lt;T> {
+public interface Iterable<T> {
     /**
      * Returns an iterator over elements of type {@code T}.                   * 返回遍历元素的迭代器
      */
-    Iterator&lt;T> iterator();
+    Iterator<T> iterator();
 
     /**
      * Performs the given action for each element of the `Iterable`           * 将给定的操作应用于`Iterable`的每个元素，
@@ -65,26 +65,26 @@ public interface Iterable&lt;T> {
      *
      * @implSpec
      * The default implementation behaves as if:                              * 默认实现的行为与如下代码类似：
-     * &lt;pre>
+     * <pre>
      *     for (T t : this)
      *         action.accept(t);
-     * &lt;/pre>
+     * </pre>
      *
      * @throws NullPointerException if the specified action is null           * 若给定的操作为`null`，抛出`NullPointerException`
      * @since 1.8
      */
-    default void forEach(Consumer&lt;? super T> action) {
+    default void forEach(Consumer<? super T> action) {
         Objects.requireNonNull(action);
         for (T t : this) {
             action.accept(t);
         }
     }
 
-    default Spliterator&lt;T> spliterator() {
+    default Spliterator<T> spliterator() {
         return Spliterators.spliteratorUnknownSize(iterator(), 0);
     }
 }
-</pre>
+```
 
 总结一下，`Iterable`接口声明了`iterator`、`forEach`和`spliterator`三个方法，其中`forEach`和`spliterator`方法已经给出了默认实现，
 实现类只需要实现`iterator`方法即可。
@@ -93,7 +93,7 @@ public interface Iterable&lt;T> {
 
 接下来我们看看继承了`Iterable`的 [Collection][] 接口：
 
-<pre class="brush: java">
+```java
 package java.util;
 
 import ...
@@ -189,7 +189,7 @@ import ...
  * specific synchronization protocol, then it must override default
  * implementations to apply that protocol.
  *
- * @param &lt;E> the type of elements in this collection
+ * @param <E> the type of elements in this collection
  *
  * @author  Josh Bloch
  * @author  Neal Gafter
@@ -209,7 +209,7 @@ import ...
  * @since 1.2
  */
 
-public interface Collection&lt;E> extends Iterable&lt;E> {
+public interface Collection<E> extends Iterable<E> {
     // Query Operations
 
     /**
@@ -254,7 +254,7 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      *
      * @return an <tt>Iterator</tt> over the elements in this collection
      */
-    Iterator&lt;E> iterator();
+    Iterator<E> iterator();
 
     /**
      * Returns an array containing all of the elements in this collection.
@@ -307,7 +307,7 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      * Note that <tt>toArray(new Object[0])</tt> is identical in function to
      * <tt>toArray()</tt>.
      *
-     * @param &lt;T> the runtime type of the array to contain the collection
+     * @param <T> the runtime type of the array to contain the collection
      * @param a the array into which the elements of this collection are to be
      *        stored, if it is big enough; otherwise, a new array of the same
      *        runtime type is allocated for this purpose.
@@ -317,7 +317,7 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      *         this collection
      * @throws NullPointerException if the specified array is null
      */
-    &lt;T> T[] toArray(T[] a);
+    <T> T[] toArray(T[] a);
 
     // Modification Operations
 
@@ -399,7 +399,7 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      *         or if the specified collection is null.
      * @see    #contains(Object)
      */
-    boolean containsAll(Collection&lt;?> c);
+    boolean containsAll(Collection<?> c);
 
     /**
      * Adds all of the elements in the specified collection to this collection
@@ -425,7 +425,7 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      *         this time due to insertion restrictions
      * @see #add(Object)
      */
-    boolean addAll(Collection&lt;? extends E> c);
+    boolean addAll(Collection<? extends E> c);
 
     /**
      * Removes all of this collection's elements that are also contained in the
@@ -450,7 +450,7 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    boolean removeAll(Collection&lt;?> c);
+    boolean removeAll(Collection<?> c);
 
     /**
      * Removes all of the elements of this collection that satisfy the given
@@ -474,7 +474,7 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      *         supported.
      * @since 1.8
      */
-    default boolean removeIf(Predicate&lt;? super E> filter) {
+    default boolean removeIf(Predicate<? super E> filter) {
         Objects.requireNonNull(filter);
         boolean removed = false;
         final Iterator<E> each = iterator();
@@ -509,7 +509,7 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      * @see #remove(Object)
      * @see #contains(Object)
      */
-    boolean retainAll(Collection&lt;?> c);
+    boolean retainAll(Collection<?> c);
 
     /**
      * Removes all of the elements from this collection (optional operation).
@@ -594,9 +594,9 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      * and should override the {@link #stream()} and {@link #parallelStream()}
      * methods to create streams using a {@code Supplier} of the spliterator,
      * as in:
-     * &lt;pre>
-     *     Stream&lt;E> s = StreamSupport.stream(() -> spliterator(), spliteratorCharacteristics)
-     * &lt;/pre>
+     * <pre>
+     *     Stream<E> s = StreamSupport.stream(() -> spliterator(), spliteratorCharacteristics)
+     * </pre>
      * <p>These requirements ensure that streams produced by the
      * {@link #stream()} and {@link #parallelStream()} methods will reflect the
      * contents of the collection as of initiation of the terminal stream
@@ -626,7 +626,7 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      * @since 1.8
      */
     @Override
-    default Spliterator&lt;E> spliterator() {
+    default Spliterator<E> spliterator() {
         return Spliterators.spliterator(this, 0);
     }
 
@@ -645,7 +645,7 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      * @return a sequential {@code Stream} over the elements in this collection
      * @since 1.8
      */
-    default Stream&lt;E> stream() {
+    default Stream<E> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
 
@@ -666,17 +666,17 @@ public interface Collection&lt;E> extends Iterable&lt;E> {
      * collection
      * @since 1.8
      */
-    default Stream&lt;E> parallelStream() {
+    default Stream<E> parallelStream() {
         return StreamSupport.stream(spliterator(), true);
     }
 }
-</pre>
+```
 
 ## Set 接口
 
 接下来 [Set][] 接口固然是我们开始的地方了。我们可以直接通过阅读源代码来了解`Set`接口为我们提供的基本操作：
 
-<pre class="brush: java">
+```java
 package java.util;
 
 /**
@@ -723,7 +723,7 @@ package java.util;
  *
  * This interface is a member of the Java Collections Framework.
  */
-public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
+public interface Set<E> extends Collection<E> {
     // 查询操作
 
     /**
@@ -746,10 +746,10 @@ public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
      *
      * @throws ClassCastException if the type of the specified element     * （可选）若给定的元素类型与该集不相容，
      *         is incompatible with this set                               *         抛出`ClassCastException`
-     * (&lt;a href="Collection.html#optional-restrictions">optional</a>)
+     * (<a href="Collection.html#optional-restrictions">optional</a>)
      * @throws NullPointerException if the specified element is null and   * （可选）若给定的元素为`null`且该集不允许包含`null`
      *         this set does not permit null elements                      *         抛出`NullPointerException`
-     * (&lt;a href="Collection.html#optional-restrictions">optional</a>)
+     * (<a href="Collection.html#optional-restrictions">optional</a>)
      */
     boolean contains(Object o);
 
@@ -759,7 +759,7 @@ public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
      * (unless this set is an instance of some class                       * 除非该集所属的类提供了这样的功能。
      * that provides a guarantee).
      */
-    Iterator&lt;E&gt; iterator();
+    Iterator<E> iterator();
 
     /**
      * Returns an array containing all of the elements in this set.        * 返回一个包含集中所有元素的数组。
@@ -804,7 +804,7 @@ public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
      * The following code can be used to dump the set                      * 如下代码可用于将该集放入到一个新创建的
      * into a newly allocated array of `String`:                           * `String`数组中：
      *
-     * &lt;pre>String[] y = x.toArray(new String[0]);&lt;/pre>
+     * <pre>String[] y = x.toArray(new String[0]);</pre>
      *
      * Note that `toArray(new Object[0])`                                  * 注意，语句`toArray(new Object[0])`
      * is identical in function to `toArray()`.                            * 在功能上与`toArray()`相同
@@ -814,7 +814,7 @@ public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
      *         of every element in this set                                * 抛出`ArrayStoreException`
      * @throws NullPointerException if the specified array is null         * 如果给定的数组为`null`，抛出`NullPointerException`
      */
-    &lt;T&gt; T[] toArray(T[] a);
+    <T> T[] toArray(T[] a);
 
     // 修改操作
 
@@ -854,10 +854,10 @@ public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
     boolean remove(Object o);
 
     // 批量操作
-    boolean containsAll(Collection&lt;?&gt; c);
-    boolean addAll(Collection&lt;? extends E&gt; c);
-    boolean retainAll(Collection&lt;?&gt; c);
-    boolean removeAll(Collection&lt;?&gt; c);
+    boolean containsAll(Collection<?> c);
+    boolean addAll(Collection<? extends E> c);
+    boolean retainAll(Collection<?> c);
+    boolean removeAll(Collection<?> c);
     void clear();
 
     // 比较与哈希
@@ -865,11 +865,11 @@ public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
     int hashCode();
 
     @Override
-    default Spliterator&lt;E&gt; spliterator() {
+    default Spliterator<E> spliterator() {
         return Spliterators.spliterator(this, Spliterator.DISTINCT);
     }
 }
-</pre>
+```
 
 并没有什么特别的函数，大部分函数的用处只要是用过`Set`的读者应该都了解。方法的具体功能可参考`Set`的
 [JavaDoc](http://docs.oracle.com/javase/8/docs/api/java/util/Set.html)。
@@ -877,7 +877,7 @@ public interface Set&lt;E&gt; extends Collection&lt;E&gt; {
 
 <h2 class="jump">set类之HashSet实现类</h2>
 <p>我们直接通过阅读最简单的Set实现类HashSet来加深大家对Set的理解：</p>
-<pre class="brush: java">
+```java
 package java.util;
 
 import java.io.InvalidObjectException;
@@ -930,13 +930,13 @@ import java.io.InvalidObjectException;
  * Java Collections Framework.
  */
 
-public class HashSet&lt;E&gt;
-    extends AbstractSet&lt;E&gt;
-    implements Set&lt;E&gt;, Cloneable, java.io.Serializable
+public class HashSet<E>
+    extends AbstractSet<E>
+    implements Set<E>, Cloneable, java.io.Serializable
 {
     static final long serialVersionUID = -5024744406713321676L;
 
-    private transient HashMap&lt;E,Object&gt; map;
+    private transient HashMap<E,Object> map;
     // 可以看到，HashSet的实现就是完全基于HashMap的，因为
     // HashMap保证了它的key唯一
 
@@ -950,13 +950,13 @@ public class HashSet&lt;E&gt;
      */
     // HashMap的默认容量为16，默认载入因子为0.75 （详见HashMap源代码）
     public HashSet() {
-        map = new HashMap&lt;&gt;();
+        map = new HashMap<>();
     }
 
     /**
      * ...
      */
-    public HashSet(Collection&lt;? extends E&gt; c) {
+    public HashSet(Collection<? extends E> c) {
         ...
     }
 
@@ -988,7 +988,7 @@ public class HashSet&lt;E&gt;
      * @return an Iterator over the elements in this set
      * @see ConcurrentModificationException
      */
-    public Iterator&lt;E&gt; iterator() {
+    public Iterator<E> iterator() {
         // 该方法返回的iterator并不保证元素的遍历次序，有可能先后返回的同一个集合的两个iterator有完全不同的遍历次序
         return map.keySet().iterator();
     }
@@ -1018,7 +1018,7 @@ public class HashSet&lt;E&gt;
     }
 
     /**
-     * Returns a shallow copy of this &lt;tt&gt;HashSet&lt;/tt&gt; instance: the elements
+     * Returns a shallow copy of this <tt>HashSet</tt> instance: the elements
      * themselves are not cloned.
      *
      * 这只是对HashSet的一个浅复制，元素本身没有被复制。
@@ -1027,8 +1027,8 @@ public class HashSet&lt;E&gt;
     @SuppressWarnings("unchecked")
     public Object clone() {
         try {
-            HashSet&lt;E&gt; newSet = (HashSet&lt;E&gt;) super.clone();
-            newSet.map = (HashMap&lt;E, Object&gt;) map.clone();
+            HashSet<E> newSet = (HashSet<E>) super.clone();
+            newSet.map = (HashMap<E, Object>) map.clone();
             return newSet;
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e);
@@ -1061,21 +1061,21 @@ public class HashSet&lt;E&gt;
 
         // Read capacity and verify non-negative.
         int capacity = s.readInt();
-        if (capacity &lt; 0) {
+        if (capacity < 0) {
             throw new InvalidObjectException("Illegal capacity: " +
                                              capacity);
         }
 
         // Read load factor and verify positive and non NaN.
         float loadFactor = s.readFloat();
-        if (loadFactor &lt;= 0 || Float.isNaN(loadFactor)) {
+        if (loadFactor <= 0 || Float.isNaN(loadFactor)) {
             throw new InvalidObjectException("Illegal load factor: " +
                                              loadFactor);
         }
 
         // Read size and verify non-negative.
         int size = s.readInt();
-        if (size &lt; 0) {
+        if (size < 0) {
             throw new InvalidObjectException("Illegal size: " +
                                              size);
         }
@@ -1086,23 +1086,23 @@ public class HashSet&lt;E&gt;
                 HashMap.MAXIMUM_CAPACITY);
 
         // Create backing HashMap
-        map = (((HashSet&lt;?&gt;)this) instanceof LinkedHashSet ?
-               new LinkedHashMap&lt;E,Object&gt;(capacity, loadFactor) :
-               new HashMap&lt;E,Object&gt;(capacity, loadFactor));
+        map = (((HashSet<?>)this) instanceof LinkedHashSet ?
+               new LinkedHashMap<E,Object>(capacity, loadFactor) :
+               new HashMap<E,Object>(capacity, loadFactor));
 
         // Read in all elements in the proper order.
-        for (int i=0; i&lt;size; i++) {
+        for (int i=0; i<size; i++) {
             @SuppressWarnings("unchecked")
                 E e = (E) s.readObject();
             map.put(e, PRESENT);
         }
     }
 
-    public Spliterator&lt;E&gt; spliterator() {
-        return new HashMap.KeySpliterator&lt;E,Object&gt;(map, 0, -1, 0, 0);
+    public Spliterator<E> spliterator() {
+        return new HashMap.KeySpliterator<E,Object>(map, 0, -1, 0, 0);
     }
 }
-</pre>
+```
 
 <p>
 综上，我们即可得出结论：HashSet的实现完全基于HashMap保证key唯一的特性，HashSet以其元素作为HashMap的键，以一个private static的dummy作为HashMap的value（因为value根本不重要）。
@@ -1111,7 +1111,7 @@ public class HashSet&lt;E&gt;
 <h2 class="jump">set类之TreeSet实现类</h2>
 <p>刚刚我们了解到，HashSet完全基于HashMap键唯一的特性来对元素去重，而HashMap的键判重和查询是基于哈希函数的，因此HashSet的add、remove、contains和size的时间复杂度为o(1)，而遍历的时间复杂度为o(m+n)</p>
 <p>为了实现判重，还有一种算法是基于树的算法，对应的则为TreeSet。那么你也许会觉得，TreeSet会不会也是完全基于TreeMap的呢？呵呵，你答对了。</p>
-<pre class="brush: java">
+```java
 package java.util;
 
 /**
@@ -1138,56 +1138,56 @@ package java.util;
  * Java Collections Framework.
  */
 
-public class TreeSet&lt;E&gt; extends AbstractSet&lt;E&gt;
-    implements NavigableSet&lt;E&gt;, Cloneable, java.io.Serializable
+public class TreeSet<E> extends AbstractSet<E>
+    implements NavigableSet<E>, Cloneable, java.io.Serializable
 {
     /**
      * The backing map.
      */
-    private transient NavigableMap&lt;E,Object&gt; m;
+    private transient NavigableMap<E,Object> m;
     // TreeSet所基于的NaviableMap，默认为TreeMap
 
     // Dummy value to associate with an Object in the backing Map
     private static final Object PRESENT = new Object();
 
     // 自定义TreeSet所基于的NavigableMap
-    TreeSet(NavigableMap&lt;E,Object&gt; m) {
+    TreeSet(NavigableMap<E,Object> m) {
         this.m = m;
     }
 
     // 默认基于TreeMap
     public TreeSet() {
-        this(new TreeMap&lt;E,Object&gt;());
+        this(new TreeMap<E,Object>());
     }
 
     // 指定comparamtor
-    public TreeSet(Comparator&lt;? super E&gt; comparator) {
-        this(new TreeMap&lt;&gt;(comparator));
+    public TreeSet(Comparator<? super E> comparator) {
+        this(new TreeMap<>(comparator));
     }
 
     // 深复制拷贝构造
-    public TreeSet(Collection&lt;? extends E&gt; c) {
+    public TreeSet(Collection<? extends E> c) {
         this();
         addAll(c);
     }
     
     // 深复制拷贝构造
-    public TreeSet(SortedSet&lt;E&gt; s) {
+    public TreeSet(SortedSet<E> s) {
         this(s.comparator());
         addAll(s);
     }
 
     // 和HashSet的iterator有同样的特性
-    public Iterator&lt;E&gt; iterator() {
+    public Iterator<E> iterator() {
         return m.navigableKeySet().iterator();
     }
 
     // 降序
-    public Iterator&lt;E&gt; descendingIterator() {
+    public Iterator<E> descendingIterator() {
         return m.descendingKeySet().iterator();
     }
-    public NavigableSet&lt;E&gt; descendingSet() {
-        return new TreeSet&lt;&gt;(m.descendingMap());
+    public NavigableSet<E> descendingSet() {
+        return new TreeSet<>(m.descendingMap());
     }
 
     public int size() {
@@ -1214,15 +1214,15 @@ public class TreeSet&lt;E&gt; extends AbstractSet&lt;E&gt;
         m.clear();
     }
 
-    public  boolean addAll(Collection&lt;? extends E&gt; c) {
+    public  boolean addAll(Collection<? extends E> c) {
         // Use linear-time version if applicable
-        if (m.size()==0 && c.size() &gt; 0 &&
+        if (m.size()==0 && c.size() > 0 &&
             c instanceof SortedSet &&
             m instanceof TreeMap) {
-            SortedSet&lt;? extends E&gt; set = (SortedSet&lt;? extends E&gt;) c;
-            TreeMap&lt;E,Object&gt; map = (TreeMap&lt;E, Object&gt;) m;
-            Comparator&lt;?&gt; cc = set.comparator();
-            Comparator&lt;? super E&gt; mc = map.comparator();
+            SortedSet<? extends E> set = (SortedSet<? extends E>) c;
+            TreeMap<E,Object> map = (TreeMap<E, Object>) m;
+            Comparator<?> cc = set.comparator();
+            Comparator<? super E> mc = map.comparator();
             if (cc==mc || (cc != null && cc.equals(mc))) {
                 map.addAllForTreeSet(set, PRESENT);
                 return true;
@@ -1232,28 +1232,28 @@ public class TreeSet&lt;E&gt; extends AbstractSet&lt;E&gt;
     }
 
     // 子集
-    public NavigableSet&lt;E&gt; subSet(E fromElement, boolean fromInclusive,
+    public NavigableSet<E> subSet(E fromElement, boolean fromInclusive,
                                   E toElement,   boolean toInclusive) {
-        return new TreeSet&lt;&gt;(m.subMap(fromElement, fromInclusive,
+        return new TreeSet<>(m.subMap(fromElement, fromInclusive,
                                        toElement,   toInclusive));
     }
-    public NavigableSet&lt;E&gt; headSet(E toElement, boolean inclusive) {
-        return new TreeSet&lt;&gt;(m.headMap(toElement, inclusive));
+    public NavigableSet<E> headSet(E toElement, boolean inclusive) {
+        return new TreeSet<>(m.headMap(toElement, inclusive));
     }
-    public NavigableSet&lt;E&gt; tailSet(E fromElement, boolean inclusive) {
-        return new TreeSet&lt;&gt;(m.tailMap(fromElement, inclusive));
+    public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
+        return new TreeSet<>(m.tailMap(fromElement, inclusive));
     }
-    public SortedSet&lt;E&gt; subSet(E fromElement, E toElement) {
+    public SortedSet<E> subSet(E fromElement, E toElement) {
         return subSet(fromElement, true, toElement, false);
     }
-    public SortedSet&lt;E&gt; headSet(E toElement) {
+    public SortedSet<E> headSet(E toElement) {
         return headSet(toElement, false);
     }
-    public SortedSet&lt;E&gt; tailSet(E fromElement) {
+    public SortedSet<E> tailSet(E fromElement) {
         return tailSet(fromElement, true);
     }
 
-    public Comparator&lt;? super E&gt; comparator() {
+    public Comparator<? super E> comparator() {
         return m.comparator();
     }
 
@@ -1280,25 +1280,25 @@ public class TreeSet&lt;E&gt; extends AbstractSet&lt;E&gt;
     }
 
     public E pollFirst() {
-        Map.Entry&lt;E,?&gt; e = m.pollFirstEntry();
+        Map.Entry<E,?> e = m.pollFirstEntry();
         return (e == null) ? null : e.getKey();
     }
     public E pollLast() {
-        Map.Entry&lt;E,?&gt; e = m.pollLastEntry();
+        Map.Entry<E,?> e = m.pollLastEntry();
         return (e == null) ? null : e.getKey();
     }
 
     // 浅复制
     @SuppressWarnings("unchecked")
     public Object clone() {
-        TreeSet&lt;E&gt; clone;
+        TreeSet<E> clone;
         try {
-            clone = (TreeSet&lt;E&gt;) super.clone();
+            clone = (TreeSet<E>) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new InternalError(e);
         }
 
-        clone.m = new TreeMap&lt;&gt;(m);
+        clone.m = new TreeMap<>(m);
         return clone;
     }
 
@@ -1325,10 +1325,10 @@ public class TreeSet&lt;E&gt; extends AbstractSet&lt;E&gt;
 
         // Read in Comparator
         @SuppressWarnings("unchecked")
-            Comparator&lt;? super E&gt; c = (Comparator&lt;? super E&gt;) s.readObject();
+            Comparator<? super E> c = (Comparator<? super E>) s.readObject();
 
         // Create backing TreeMap
-        TreeMap&lt;E,Object&gt; tm = new TreeMap&lt;&gt;(c);
+        TreeMap<E,Object> tm = new TreeMap<>(c);
         m = tm;
 
         // Read in size
@@ -1337,7 +1337,7 @@ public class TreeSet&lt;E&gt; extends AbstractSet&lt;E&gt;
         tm.readTreeSet(size, s, PRESENT);
     }
 }
-</pre>
+```
 
 <p>综上：Set开发者们很懒</p>
 
@@ -1345,14 +1345,14 @@ public class TreeSet&lt;E&gt; extends AbstractSet&lt;E&gt;
 <p>实际上，EnumSet和EnumMap的Enum并不对应于查找方法中的枚举查找，而是对应于Java的enum枚举类型。</p>
 <p>在这里，我并不打算贴EnumSet和EnumMap的源代码。它们的源代码并无太大的意义。它们的存在仅用于为以enum为元素的集合和以enum为键的map提供更高性能的实现。</p>
 <p>我们将枚举类型放入普通的HashSet中，很可能我们会为这些enum附上对应的int值再放入HashSet，这样每个枚举常量就需要占4个字节。这里以EnumSet的简单子类（EnumSet是一个虚类）RegularEnumSet为例，其add方法源代码如下：</p>
-<pre class="brush: java">
+```java
 public boolean add(E e) {
   typeCheck(e);
 
   long oldElements = elements;
-  elements |= (1L &lt;&lt; ((Enum)e).ordinal());
+  elements |= (1L << ((Enum)e).ordinal());
   return elements != oldElements;
 }
-</pre>
+```
 <p>从上述代码可以看出，RegularEnumSet维护一个长度为64的位向量，每一位的0或1代表着对应位置的enum常量（其ordinal值由其声明为enum类型时在声明语句中的序号所决定，由0开始数起）是否已加入到EnumSet中。由此，EnumSet对枚举类判重总共只需要8个字节，而基于int的HashSet只要放入两个以上的枚举类就超过了这个大小了，更不用提HashSet的插入效率肯定远远比不上EnumSet的位运算。</p>
 <p>因此，EnumSet和EnumMap本身的算法并不特别，它们提供为key为枚举类型的map或内容为枚举类型的set提供高效的实现，当应用场景吻合时应尽量使用EnumMap和EnumSet。</p>
