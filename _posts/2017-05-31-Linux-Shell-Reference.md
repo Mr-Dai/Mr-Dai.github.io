@@ -1,6 +1,7 @@
 ---
 layout: post_original
 title: Linux Shell Reference
+category: Linux
 author: Robert Peng
 ---
 
