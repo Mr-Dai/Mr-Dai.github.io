@@ -9,6 +9,5 @@ kramdown:
 repository: Mr-Dai/Mr-Dai.github.io
 
 incremental: true
-profile: true
 strict_front_matter: true
 
