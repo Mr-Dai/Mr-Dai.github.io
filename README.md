@@ -4,9 +4,9 @@ Github Pages Repo of my personal blog <http://mr-dai.github.io>.
 
 ## Future Tasks
 
-- [ ] 加入《Go 标准库参考指南》：`fmt`、`strconv`、`hash/fnv`、`sync`、`atomic`、`net`、`net/rpc`、`os`、`bufio`、`encoding/json`、`log`、`sort`、`testing`、`strings`
-- [ ] 调整博客外观：修改字体，放大字体，调整段间距，将代码高亮改为浅色系主题
-- [ ] 加入《Python 标准库参考指南》：`collections`、`argparse`、`optparse`、`shelve`、`logging`
+- [ ] 博客迁移至 Hexo [NexT](https://github.com/iissnan/hexo-theme-next) 主题
+  - [x] 维护所有旧文章（转换为 Markdown，修正格式，验证链接有效）
+  - [ ] 调整 Hexo 主题以满足需求（高亮文字、系列文章支持、文章链接支持）
+  - [ ] Travis CI 自动构建
 - [ ] 重写剩余 MongoDB 博文（Replica Set、Sharding、集群搭建指南）
-- [ ] 将《MongoDB CRUD Cookbook》一文翻译为中文
-- [ ] 向《MongoDB CRUD Cookbook》一文中加入所有查询运算符的总结
+- [ ] 自动化测试（链接有效性、文章格式）
