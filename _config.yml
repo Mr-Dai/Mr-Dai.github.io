@@ -61,3 +61,7 @@ deploy:
   type: git
   repo: git@github.com:Mr-Dai/Mr-Dai.github.io.git
   branch: master
+
+marked:
+  gfm: true
+  breaks: false
