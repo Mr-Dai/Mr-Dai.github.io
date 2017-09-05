@@ -3,6 +3,7 @@ title: Google MapReduce 总结
 category: MIT 6.824
 tags:
  - Go
+ - 分布式计算平台
  - MapReduce
  - MIT 6.824
 date: 2017-09-03
