@@ -4,7 +4,7 @@ tags:
  - Linux
  - Bash
  - Shell
-date: 2017-08-16
+date: 2017-09-07
 ---
 
 我写这篇文章主要是用来作为我的 Linux Bash 工具书的，希望这篇文章对你也能起到同样的效果。随着我学习到更多有关 Linux Bash 的知识，我会不断地更新这篇文章。
@@ -13,12 +13,11 @@ date: 2017-08-16
 
 本文的内容假设你对 Linux 和 Linux 命令行有基本的了解。如果你没有的话，你可以去看看[这篇教程](http://linuxcommand.org/lc3_learning_the_shell.php)。
 
-本文的内容分为四个主要部分：
+本文的内容分为三个主要部分：
 
 1. Linux Shell 脚本编程
 2. Linux Bash 内置命令
-3. 常见的重量级 Linux 命令工具，包括 `curl` 、 `sed` 、 `awk` 和 `grep`
-4. 其他常见的轻量级 Linux 命令工具
+3. 常见的轻量级 Linux 命令工具
 
 让我们开始吧
 
@@ -140,9 +139,7 @@ fi
 
 通常，我们会使用类似 `[ "$#" -e 1 ]` 这样的简写方式来使用 `test` 命令，声明数值比较或是其他在 Linux 中常见的条件，例如指定路径指向的是一个文件或是一个目录。该简写等价于 `test "$#" -e 1`。请查阅 `help test` 来了解除 `-e` 以外的条件运算。
 
-<p class="info">
-在某些 Shell 上（包括 Bash、Zsh 和 Ksh），你还可以以双中括号的形式声明条件，如 `[[ a != b ]]`。这种写法并非由 POSIX 标准给出，且只被一部分 Shell 支持。这样的写法比起原生的 `test` 命令更加安全，原因在于它不会在执行前对给定的参数进行展开，但这样的写法无疑会导致你的脚本的可移植性下降。请查阅 `help [[` 和[这篇文章](http://mywiki.wooledge.org/BashFAQ/031)了解更多有关内容。
-</p>
+> 在某些 Shell 上（包括 Bash、Zsh 和 Ksh），你还可以以双中括号的形式声明条件，如 `[[ a != b ]]`。这种写法并非由 POSIX 标准给出，且只被一部分 Shell 支持。这样的写法比起原生的 `test` 命令更加安全，原因在于它不会在执行前对给定的参数进行展开，但这样的写法无疑会导致你的脚本的可移植性下降。请查阅 `help [[` 和[这篇文章](http://mywiki.wooledge.org/BashFAQ/031)了解更多有关内容。
 
 你还可以使用 `&&` 和 `||` 来对多个 `test` 命令的结果进行组合。这些运算符同样支持在其他编程语言中常见的短路功能，而这样的功能可以被用来将某些简单的条件检查语句变得更加简短。例如，`[ 2 -gt 1 ] && echo 'ok'` 等价于如下代码片段：
 
@@ -234,9 +231,7 @@ exec: exec [-cl] [-a name] [command [arguments ...]] [redirection ...]
 
 除此以外，`exec` 命令还允许你在不指定具体命令的情况下指定重定向，这种情况下重定向操作将直接作用于当前 Shell。很多时候，你可以在你的脚本文件中使用 `exec 1> out 2>&1` 命令，这样该脚本文件后续的输出就会被导向到指定的文件中。
 
-<p class="warn">
-尝试在当前 Shell 中使用 `exec` 对标准输出进行重定向时一定要小心，这有可能导致很多程序无法正常运行。建议在执行前先使用如 `exec 3>&1` 命令将标准输出保存到其他文件描述符中，以便后续恢复。
-</p>
+> **警告**：尝试在当前 Shell 中使用 `exec` 对标准输出进行重定向时一定要小心，这有可能导致很多程序无法正常运行。建议在执行前先使用如 `exec 3>&1` 命令将标准输出保存到其他文件描述符中，以便后续恢复。
 
 ### set
 
@@ -332,3 +327,49 @@ set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]
 
 - 使用 `--` 时，若后续未给出参数，则当前位置参数会被清空
 - 使用 `-` 时，`-x` 和 `-v` 选项会被关闭
+
+## 第三部分：小型命令行工具
+
+### rename
+
+我们通过 `man rename` 可以查看 `rename` 的简单描述：
+
+```
+NAME
+       rename - renames multiple files
+
+SYNOPSIS
+       rename [ -v ] [ -n ] [ -f ] perlexpr [ files ]
+
+OPTIONS
+       -v, --verbose
+               Verbose: print names of files successfully renamed.
+
+       -n, --no-act
+               No Action: show what files would have been renamed.
+
+       -f, --force
+               Force: overwrite existing files.
+```
+
+由此可见，`rename` 命令接收两类位置参数：第一个位置参数为 Perl 正则表达式，用于表达文件名变换规则；第二个参数为若干个文件名，在 Bash Shell 下我们可以利用 Blob 表达式的展开来方便地指定我们需要重命名的文件。
+
+支持的选项主要包括如下三个：
+
+- `-v`、`--verbose`：打印成功重命名的文件名称
+- `-n`、`--no-act`：不执行重命名操作，只打印会被重命名的文件
+- `-f`、`--force`：重命名时覆盖已存在的文件
+
+总体而言是很好理解的三个选项。这个命令唯一的疑点就在于 Perl 表达式的语法了。
+
+在[这个页面](https://www.computerhope.com/unix/rename.htm)中有对 `rename` 可用的 Perl 正则表达式语法有简单的介绍。
+
+简单而言，Perl 正则表达式主要用于进行字符串替换，具体的组成如下：
+
+```
+<s|y>/<match_expr>/<sub_expr>/[g][i]
+```
+
+其中第一个匹配表达式用于匹配给定字符串中的某个部分，而第二个转换表达式则表示如何转换匹配到的子字符串。两个表达式都支持各种常见的正则表达式元素，同时加入了一些简单的语法来更好地完成替换动作。
+
+Perl 正则表达式包含替换（Substitution）和转译（Translation）两种执行模式，分别对应首字母 `s` 和 `y`。除此以外，通过结尾的修饰符 `g` 和 `i` 也可以选择全局匹配（正则表达式默认只匹配第一个匹配的子字符串）和大小写不敏感匹配。
