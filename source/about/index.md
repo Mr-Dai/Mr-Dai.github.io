@@ -5,4 +5,8 @@ type: about
 comments: false
 ---
 
-Java、Python、Go、JavaScript，爱研究源码和运行时。仍在寻找属于自己的钻研方向。
+日常咸鱼，热爱技术。
+
+主要编程语言：Python、Go
+
+主要研究方向：分布式系统、Linux、容器
