@@ -7,6 +7,8 @@ tags:
 date: 2015-11-23
 ---
 
+本文将介绍如何使用 MongoDB 提供的 Replica Set 和 Shards 功能构建一个分布式 MongoDB 集群。
+
 <!-- more -->
 
 ## Replica Set 部署

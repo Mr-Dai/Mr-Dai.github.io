@@ -9,7 +9,7 @@ tags:
 date: 2017-09-03
 ---
 
-这篇文章是本人在按照 MIT 6.824 的课程安排学习 Google MapReduce 并完成对应 Lab 的基础之上总结而成。本文首先会详细介绍 Google MapReduce 的原理，再详细介绍如何完成 课程对应的 MapReduce Lab。部分有关 Google MapReduce 和具体代码实现的细节不会在本文中提及，读者可自行查阅 Google MapReduce 的论文原文以及本人的 [MIT 6.824 Lab 代码仓库](https://github.com/Mr-Dai/MIT-6.824)。
+这篇文章是本人在按照 MIT 6.824 的课程安排学习 Google MapReduce 并完成对应 Lab 的基础之上总结而成。本文首先会详细介绍 Google MapReduce 的原理，再详细介绍如何完成课程对应的 MapReduce Lab。部分有关 Google MapReduce 和具体代码实现的细节不会在本文中提及，读者可自行查阅 Google MapReduce 的论文原文以及本人的 [MIT 6.824 Lab 代码仓库](https://github.com/Mr-Dai/MIT-6.824)。
 
 <!-- more -->
 
@@ -27,7 +27,12 @@ date: 2017-09-03
 
 形式化地说，由用户提供的 Map 函数和 Reduce 函数应有如下类型：
 
-![](/img/mapreduce_summary/mapreduce_types.png)
+$$
+\begin{array}{lll}
+\textrm{map} & (k_1,v_1) & \rightarrow \textrm{list}(k_2,v_2) \\\
+\textrm{reduce} & (k_2,\textrm{list}(v_2)) & \rightarrow \textrm{list}(v_2) \\\
+\end{array}
+$$
 
 值得注意的是，在实际的实现中 MapReduce 框架使用 `Iterator` 来代表作为输入的集合，主要是为了避免集合过大，无法被完整地放入到内存中。
 
@@ -70,7 +75,7 @@ reduce(String key, Iterator values):
 3. 收到 Map 任务的 Worker 们（又称 Mapper）开始读入自己对应的 Split，将读入的内容解析为输入键值对并调用由用户定义的 Map 函数。由 Map 函数产生的中间结果键值对会被暂时存放在缓冲内存区中
 4. 在 Map 阶段进行的同时，Mapper 们周期性地将放置在缓冲区中的中间结果存入到自己的本地磁盘中，同时根据用户指定的 Partition 函数（默认为 $hash(\textrm{key})$ $\textbf{mod}$ $R$）将产生的中间结果分为 $R$ 个部分。任务完成时，Mapper 便会将中间结果在其本地磁盘上的存放位置报告给 Master
 5. Mapper 上报的中间结果存放位置会被 Master 转发给 Reducer。当 Reducer 接收到这些信息后便会通过 RPC 读取存储在 Mapper 本地磁盘上属于对应 Partition 的中间结果。在读取完毕后，Reducer 会对读取到的数据进行排序以令拥有相同键的键值对能够连续分布
-6. 之后，Reducer 会为每个键收集与其关联的值的集合，并以之调用用户定义的Reduce函数。Reduce 函数的结果会被放入到对应的Reduce Partition 结果文件
+6. 之后，Reducer 会为每个键收集与其关联的值的集合，并以之调用用户定义的 Reduce 函数。Reduce 函数的结果会被放入到对应的 Reduce Partition 结果文件
 
 实际上，在一个 MapReduce 集群中，Master 会记录每一个 Map 和 Reduce 任务的当前完成状态，以及所分配的 Worker。除此之外，Master 还负责将 Mapper 产生的中间结果文件的位置和大小转发给 Reducer。
 
@@ -92,7 +97,7 @@ reduce(String key, Iterator values):
 
 整个 MapReduce 集群中只会有一个 Master 结点，因此 Master 失效的情况并不多见。
 
-Master 结点在运行时会周期性地将集群的当前状态作为存储点（Checkpoint）写入到磁盘中。Master 进程终止后，重新启动的 Master 进程即可利用存储在磁盘中的数据恢复到上一次存储点的状态。
+Master 结点在运行时会周期性地将集群的当前状态作为保存点（Checkpoint）写入到磁盘中。Master 进程终止后，重新启动的 Master 进程即可利用存储在磁盘中的数据恢复到上一次保存点的状态。
 
 ### 落后的 Worker
 
