@@ -9,11 +9,9 @@ tags:
 date: 2017-09-03
 ---
 
-这篇文章是本人在按照 MIT 6.824 的课程安排学习 Google MapReduce 并完成对应 Lab 的基础之上总结而成。本文首先会详细介绍 Google MapReduce 的原理，再详细介绍如何完成课程对应的 MapReduce Lab。部分有关 Google MapReduce 和具体代码实现的细节不会在本文中提及，读者可自行查阅 Google MapReduce 的论文原文以及本人的 [MIT 6.824 Lab 代码仓库](https://github.com/Mr-Dai/MIT-6.824)。
+这篇文章是本人在按照 MIT 6.824 的课程安排学习 Google MapReduce 并完成对应 Lab 的基础之上总结而成。本文会详细介绍 Google MapReduce 的原理，但考虑到 Lab1 较为简单，本文不会提及 Lab1 的相关内容。部分有关 Google MapReduce 和具体代码实现的细节不会在本文中提及，读者可自行查阅 Google MapReduce 的论文原文以及本人的 [MIT 6.824 Lab 代码仓库](https://github.com/Mr-Dai/MIT-6.824)。
 
 <!-- more -->
-
-**注意**：虽然说是什么说，但作者这条咸鱼还没抽出空来做 Lab。Lab 相关的内容在我做完以后再更新。
 
 ## Google MapReduce 总结
 
@@ -121,6 +119,3 @@ Google MapReduce 采用 Google File System 来保存输入和结果数据，因�
 
 在这种情况下，Google MapReduce 系统允许用户声明在 Mapper 上执行的 Combiner 函数：Mapper 会使用由自己输出的 $R$ 个中间结果 Partition 调用 Combiner 函数以对中间结果进行局部合并，减少 Mapper 和 Reducer 间需要传输的数据量。
 
-## 6.824 Lab 1：MapReduce
-
-TODO。等我做完了 Lab 再更新。希望不会鸽掉吧。
