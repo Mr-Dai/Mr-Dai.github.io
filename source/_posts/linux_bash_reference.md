@@ -4,7 +4,7 @@ tags:
  - Linux
  - Bash
  - Shell
-date: 2017-09-07
+date: 2017-12-17
 ---
 
 我写这篇文章主要是用来作为我的 Linux Bash 工具书的，希望这篇文章对你也能起到同样的效果。随着我学习到更多有关 Linux Bash 的知识，我会不断地更新这篇文章。
@@ -203,6 +203,124 @@ done
 
 本部分将主要描述 Bash Shell 各个内置命令（Built-in Command）的作用及用法。要初步了解这些命令，我们可以首先使用 `help` 命令来查看 Bash Shell 支持的所有内置命令和简单的文档。
 
+### dirs、pushd、popd
+
+Bash 提供了一套以栈/链表管理你曾经进入的路径的方式，方便你在不同的路径间跳转，相关的管理命令包括 `dirs`、`pushd`、`popd`。
+
+首先，Bash 使用了链表来实现这个先入先出的栈行为，而 `dirs` 命令能把该链表的内容完整地打印出来：
+
+```
+$ help dirs
+dirs: dirs [-clpv] [+N] [-N]
+    Display directory stack.
+
+    Display the list of currently remembered directories.  Directories
+    find their way onto the list with the `pushd' command; you can get
+    back up through the list with the `popd' command.
+
+    Options:
+      -c        clear the directory stack by deleting all of the elements
+      -l        do not print tilde-prefixed versions of directories relative
+        to your home directory
+      -p        print the directory stack with one entry per line
+      -v        print the directory stack with one entry per line prefixed
+        with its position in the stack
+
+    Arguments:
+      +N        Displays the Nth entry counting from the left of the list shown by
+        dirs when invoked without options, starting with zero.
+
+      -N        Displays the Nth entry counting from the right of the list shown by
+        dirs when invoked without options, starting with zero.
+
+    Exit Status:
+    Returns success unless an invalid option is supplied or an error occurs.
+```
+
+简单来讲，用户在使用 `dirs` 查看链表内容的同时，可以通过 `-p`、`-v` 选项调整 `dirs` 的输出样式，通过 `+N`、`-N` 参数指定 `dirs` 只输出链表某部分的内容，甚至使用 `-c` 选项清空链表。
+
+值得注意的是，`dirs -c` 以及后面会提到的 `popd` 命令并不能真正地清空链表内容：当链表内容变为空后，Bash 会自动将当前目录放入到链表中，成为链表中仅有的元素。
+
+`dirs` 的帮助信息中也提到，用户可使用 `pushd` 和 `popd` 管理链表中的元素。首先先来看 `pushd`：
+
+```
+$ help pushd
+pushd: pushd [-n] [+N | -N | dir]
+    Add directories to stack.
+
+    Adds a directory to the top of the directory stack, or rotates
+    the stack, making the new top of the stack the current working
+    directory.  With no arguments, exchanges the top two directories.
+
+    Options:
+      -n        Suppresses the normal change of directory when adding
+        directories to the stack, so only the stack is manipulated.
+
+    Arguments:
+      +N        Rotates the stack so that the Nth directory (counting
+        from the left of the list shown by `dirs', starting with
+        zero) is at the top.
+
+      -N        Rotates the stack so that the Nth directory (counting
+        from the right of the list shown by `dirs', starting with
+        zero) is at the top.
+
+      dir       Adds DIR to the directory stack at the top, making it the
+        new current working directory.
+
+    The `dirs' builtin displays the directory stack.
+
+    Exit Status:
+    Returns success unless an invalid argument is supplied or the directory
+    change fails.
+```
+
+简单来讲，`pushd` 会对链表进行一定的操作，然后将当前目录改为目前位于链表左端（栈顶部）的目录。根据用户给定参数的不同，`pushd` 有三种运行模式：
+
+1. 用户未给定参数，那么 `pushd` 交换链表最左侧的两个元素
+2. 用户给定了一个路径，那么 `pushd` 将该路径放入到链表最左侧
+3. 用户给定 `+N` 或 `-N`，实际上意味着用户指定了链表中的某一个元素（`N` 为从 `0` 开始的索引值；`+N` 意味着从左端数起，`-N` 则从右端数起），然后 `pushd` 会对链表进行旋转（最右端的元素离开链表，再将其放入到链表的左端），直到用户指定的元素到达链表最左侧 
+
+用户可以通过 `-n` 选项让 `pushd` 在对链表进行操作后不改变当前目录。
+
+最后再来看看 `popd`
+
+```
+$ help popd
+popd: popd [-n] [+N | -N]
+    Remove directories from stack.
+
+    Removes entries from the directory stack.  With no arguments, removes
+    the top directory from the stack, and changes to the new top directory.
+
+    Options:
+      -n        Suppresses the normal change of directory when removing
+        directories from the stack, so only the stack is manipulated.
+
+    Arguments:
+      +N        Removes the Nth entry counting from the left of the list
+        shown by `dirs', starting with zero.  For example: `popd +0'
+        removes the first directory, `popd +1' the second.
+
+      -N        Removes the Nth entry counting from the right of the list
+        shown by `dirs', starting with zero.  For example: `popd -0'
+        removes the last directory, `popd -1' the next to last.
+
+    The `dirs' builtin displays the directory stack.
+
+    Exit Status:
+    Returns success unless an invalid argument is supplied or the directory
+    change fails.
+```
+
+类似，`popd` 会根据用户指定的参数对链表中的元素进行删除，然后把当前目录改为链表最左侧的元素。根据用户指定参数的不同，`popd` 也有三种运行模式：
+
+1. 若用户没有指定参数，那么 `popd` 移除链表最左侧的元素
+2. 若用户指定参数 `+N`，那么 `popd` 移除链表最左侧的第 `N+1` 个元素
+3. 若用户指定参数 `-N`，那么 `popd` 移除链表最右侧的第 `N+1` 个元素
+
+同样，`popd` 也支持 `-n` 参数，使得其在对链表完成操作后不改变当前目录。
+
 ### exec
 
 我们先来看 `help exec` 给出的信息：
@@ -330,9 +448,162 @@ set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]
 
 ## 第三部分：小型命令行工具
 
+### free
+
+`free` 命令可用于查看系统当前的内存使用情况。典型的 `free` 输出如下：
+
+```bash
+$ free
+              total        used        free      shared  buff/cache   available
+Mem:        8312948     5037412     3039060       17720      236476     3134680
+Swap:      25165824       58460    25107364
+```
+
+通过 `man free` 可以查看 `free` 的详细介绍。首先：
+
+```
+NAME
+       free - Display amount of free and used memory in the system
+
+SYNOPSIS
+       free [options]
+
+DESCRIPTION
+       free  displays  the  total amount of free and used physical and swap memory in the system, as well as the buffers and caches
+       used by the kernel. The information is gathered by parsing /proc/meminfo. ...
+```
+
+这里提到，`free` 输出的结果主要是通过解析 `/proc/meminfo` 文件的内容得出的。而后介绍了 `free` 输出各行的含义：
+
+```
+DESCRIPTION
+       ... The displayed columns are:
+
+       total  Total installed memory (MemTotal and SwapTotal in /proc/meminfo)
+
+       used   Used memory (calculated as total - free - buffers - cache)
+
+       free   Unused memory (MemFree and SwapFree in /proc/meminfo)
+
+       shared Memory used (mostly) by tmpfs (Shmem in /proc/meminfo, available on kernels 2.6.32, displayed as zero if  not  available)
+
+       buffers
+              Memory used by kernel buffers (Buffers in /proc/meminfo)
+
+       cache  Memory used by the page cache and slabs (Cached and Slab in /proc/meminfo)
+
+       buff/cache
+              Sum of buffers and cache
+
+       available
+              Estimation  of how much memory is available for starting new applications, without swapping. Unlike the data provided
+              by the cache or free fields, this field takes into account page cache and also that not all reclaimable memory  slabs
+              will  be  reclaimed  due to items being in use (MemAvailable in /proc/meminfo, available on kernels 3.14, emulated on
+              kernels 2.6.27+, otherwise the same as free)
+```
+
+后续便是各个参数的介绍。首先是可以调整显示数字单位的参数：
+
+```
+OPTIONS
+       -b, --bytes
+              Display the amount of memory in bytes.
+
+       -k, --kilo
+              Display the amount of memory in kilobytes.  This is the default.
+
+       -m, --mega
+              Display the amount of memory in megabytes.
+
+       -g, --giga
+              Display the amount of memory in gigabytes.
+
+       --tera Display the amount of memory in terabytes.
+
+       -h, --human
+              Show all output fields automatically scaled to shortest three digit unit and display the  units  of  print
+              out.  Following units are used.
+
+                B = bytes
+                K = kilos
+                M = megas
+                G = gigas
+                T = teras
+
+              If unit is missing, and you have petabyte of RAM or swap, the number is in terabytes and columns might not
+              be aligned with header.
+```
+
+使用的效果大致如下：
+
+```bash
+$ free -h
+              total        used        free      shared  buff/cache   available
+Mem:           7.9G        4.7G        3.0G         17M        230M        3.1G
+Swap:           24G         59M         23G
+```
+
+除外，还有 `--si` 参数可以让 `free` 输出的单位按照 1000 进制进行计算而不是 1024 进制：
+
+```
+       --si   Use power of 1000 not 1024.
+```
+
+```bash
+$ free -h --si
+              total        used        free      shared  buff/cache   available
+Mem:           8.3G        4.9G        3.2G         17M        236M        3.3G
+Swap:           25G         61M         25G
+```
+
+接下来是可拆分显示 `buff`、`cache` 数值的 `-w` 参数：
+
+```
+       -w, --wide
+              Switch to the wide mode. The wide mode produces lines longer than 80 characters. In this mode buffers  and
+              cache are reported in two separate columns.
+```
+
+```bash
+$ free -wh
+              total        used        free      shared     buffers       cache   available
+Mem:           7.9G        4.8G        2.9G         17M         33M        197M        3.0G
+Swap:           24G         59M         23G
+```
+
+还有可以显示额外行信息的 `-l`、`-t` 参数：
+
+```
+       -l, --lohi
+              Show detailed low and high memory statistics.
+       -t, --total
+              Display a line showing the column totals.
+```
+
+```bash
+$ free -hlt
+              total        used        free      shared  buff/cache   available
+Mem:           7.9G        4.8G        2.9G         17M        230M        3.0G
+Low:           7.9G        5.0G        2.9G
+High:            0B          0B          0B
+Swap:           24G         59M         23G
+Total:          31G        4.9G         26G
+```
+
+最后，`free` 指令还允许用户指定按周期进行持续汇报。用户可通过 `-s` 和 `-c` 参数调整 `free` 汇报的周期时长和汇报次数：
+
+```
+       -s, --seconds seconds
+              Continuously  display  the result delay seconds apart.  You may actually specify any floating point number
+              for delay, usleep(3) is used for microsecond resolution delay times.
+       -c, --count count
+              Display the result count times.  Requires the -s option.
+```
+
+
 ### rename
 
-我们通过 `man rename` 可以查看 `rename` 的简单描述：
+相较于 `mv`、`rename` 可用于对文件进行批量重命名。我们通过 `man rename` 可以查看 `rename` 的简单描述：
 
 ```
 NAME
