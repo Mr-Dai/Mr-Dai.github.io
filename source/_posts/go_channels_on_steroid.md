@@ -1,5 +1,6 @@
 ---
 title: 吃了兴奋剂的 Go Channel
+category: Go
 tags: Go
 date: 2017-07-08
 ---

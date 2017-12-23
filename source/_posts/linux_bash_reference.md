@@ -1,9 +1,9 @@
 ---
 title: Linux Bash 参考指南
+category: Linux
 tags:
  - Linux
  - Bash
- - Shell
 date: 2017-12-17
 ---
 

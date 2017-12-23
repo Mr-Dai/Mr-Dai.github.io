@@ -1,5 +1,6 @@
 ---
 title: Java String Formatting
+category: Java
 tags: Java
 date: 2016-03-26
 ---

@@ -4,7 +4,7 @@ category: 分布式系统
 tags:
  - Yarn
  - Hadoop
- - 集群资源调度平台
+ - 集群资源调度
  - 分布式系统
 date: 2017-09-07
 ---

@@ -3,7 +3,7 @@ title: Mesos 总结
 category: 分布式系统
 tags:
  - Mesos
- - 集群资源调度平台
+ - 集群资源调度
  - 分布式系统
 date: 2017-09-04
 ---

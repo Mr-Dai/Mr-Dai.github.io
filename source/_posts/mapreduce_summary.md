@@ -2,8 +2,8 @@
 title: Google MapReduce 总结
 category: 分布式系统
 tags:
- - 分布式计算平台
- - MapReduce
+ - 分布式计算
+ - 分布式系统
  - MIT 6.824
 date: 2017-09-03
 ---

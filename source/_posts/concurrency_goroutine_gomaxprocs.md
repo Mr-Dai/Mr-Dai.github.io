@@ -1,6 +1,7 @@
 ---
 layout: post_translated
 title: 并发、Goroutine 与 GOMAXPROCS
+category: Go
 tags: Go
 org_title: Concurrency, Goroutines and GOMAXPROCS
 org_url: "https://www.goinggo.net/2014/01/concurrency-goroutines-and-gomaxprocs.html"

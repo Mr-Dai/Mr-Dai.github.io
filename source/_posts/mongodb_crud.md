@@ -1,5 +1,6 @@
 ---
 title: MongoDB CRUD Cookbook
+category: MongoDB
 tags: MongoDB
 date: 2017-03-27
 ---

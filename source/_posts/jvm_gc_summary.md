@@ -1,5 +1,6 @@
 ---
 title: Java 内存布局与垃圾回收归纳
+category: Java
 tags:
   - Java
   - JVM

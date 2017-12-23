@@ -1,10 +1,9 @@
 ---
 title: Spark Core 源码解析：RDD
-category: Spark Core 源码解析
+category: Spark
 date: 2015-08-28
 comments: true
-tags:
- - Spark
+tags: Spark
 ---
 
 我的[上一个系列](/sparksql_catalyst_source_1)的 Spark 源码解析已经完结了一段时间了。当时我出于实习工作的需要阅读了 SparkSQL 以及 Spark REPL 的源代码，并顺势写下了那个系列的源码解析文章。但读 Spark 源代码怎么能只读那些外围插件的源代码呢？于是我又开一个新坑了。

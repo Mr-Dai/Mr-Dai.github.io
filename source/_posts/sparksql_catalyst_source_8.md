@@ -1,10 +1,9 @@
 ---
 title: Spark Catalyst 进阶：Join
-category: Spark Catalyst 源码解析
+category: Spark
 tags:
   - Spark
   - SparkSQL
-  - Catalyst
 date: 2015-08-24
 ---
 

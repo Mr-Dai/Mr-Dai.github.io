@@ -1,5 +1,6 @@
 ---
 title: MongoDB 存储引擎
+category: MongoDB
 tags: MongoDB
 date: 2015-11-01
 ---

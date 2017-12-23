@@ -1,9 +1,7 @@
 ---
 title: MongoDB 分布式部署教程
-tags:
-  - MongoDB
-  - Replica Set
-  - Sharding
+category: MongoDB
+tags: MongoDB
 date: 2015-11-23
 ---
 

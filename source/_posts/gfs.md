@@ -3,7 +3,7 @@ title: Google File System 总结
 category: 分布式系统
 tags:
  - 分布式存储
- - Google File System
+ - 分布式系统
  - MIT 6.824
 date: 2017-12-18
 ---

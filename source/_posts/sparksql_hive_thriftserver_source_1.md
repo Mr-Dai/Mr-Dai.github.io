@@ -1,6 +1,6 @@
 ---
 title: SparkSQL Hive ThriftServer 源码解析：Intro
-category: SparkSQL Hive ThriftServer 源码解析
+category: Spark
 date: 2015-07-27
 comments: true
 tags:

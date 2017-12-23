@@ -1,5 +1,6 @@
 ---
 title: MongoDB Aggregation
+category: MongoDB
 tags: MongoDB
 date: 2015-11-12
 ---

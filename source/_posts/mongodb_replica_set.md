@@ -1,8 +1,10 @@
 ---
 title: MongoDB Replica Set
+category: MongoDB
 tags:
  - MongoDB
- - Replica Set
+ - 分布式存储
+ - 分布式系统
 date: 2017-03-28
 ---
 
