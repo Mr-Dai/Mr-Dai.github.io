@@ -4,7 +4,7 @@ category: Linux
 tags:
  - Linux
  - Bash
-date: 2017-12-17
+date: 2017-12-26
 ---
 
 我写这篇文章主要是用来作为我的 Linux Bash 工具书的，希望这篇文章对你也能起到同样的效果。随着我学习到更多有关 Linux Bash 的知识，我会不断地更新这篇文章。
@@ -351,6 +351,33 @@ exec: exec [-cl] [-a name] [command [arguments ...]] [redirection ...]
 
 > **警告**：尝试在当前 Shell 中使用 `exec` 对标准输出进行重定向时一定要小心，这有可能导致很多程序无法正常运行。建议在执行前先使用如 `exec 3>&1` 命令将标准输出保存到其他文件描述符中，以便后续恢复。
 
+### export
+
+我们先来看看 `help export` 给出的信息：
+
+```
+$ help export
+export: export [-fn] [name[=value] ...] or export -p
+    Set export attribute for shell variables.
+
+    Marks each NAME for automatic export to the environment of subsequently
+    executed commands.  If VALUE is supplied, assign VALUE before exporting.
+
+    Options:
+      -f        refer to shell functions
+      -n        remove the export property from each NAME
+      -p        display a list of all exported variables and functions
+
+    An argument of `--' disables further option processing.
+
+    Exit Status:
+    Returns success unless an invalid option is given or NAME is invalid.
+```
+
+对于常用的变量设置而言，相比起一般的 `FOO=bar` 的变量设置方式，`export FOO=bar` 会使得当前 Shell 的子进程（包括该 Shell 调用的其他程序/文件）也可以访问该变量，因此设置环境变量时我们都会使用 `export` 指令来进行设置。
+
+相比于常见的 `export FOO=bar` 用法，`export` 实际上可以接受若干对由空格分隔的变量键值对；若不给定变量的值，`export` 会把当前 Shell 已给该变量设定的值（默认为空）进行导出；`-n` 选项可以移除指定的 `export` 变量；`export -p` 能够打印当前已经 `export` 的变量；若使用 `-f` 选项，`export` 指令会把指定的 `name` 当做 Shell 函数而不是变量进行导出。
+
 ### set
 
 我们先来看看 `help set` 给出的信息：
@@ -445,6 +472,29 @@ set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]
 
 - 使用 `--` 时，若后续未给出参数，则当前位置参数会被清空
 - 使用 `-` 时，`-x` 和 `-v` 选项会被关闭
+
+### source
+
+我们先来看看 `help source` 给出的信息：
+
+```
+$ help source
+source: source filename [arguments]
+    Execute commands from a file in the current shell.
+
+    Read and execute commands from FILENAME in the current shell.  The
+    entries in $PATH are used to find the directory containing FILENAME.
+    If any ARGUMENTS are supplied, they become the positional parameters
+    when FILENAME is executed.
+
+    Exit Status:
+    Returns the status of the last command executed in FILENAME; fails if
+    FILENAME cannot be read.
+```
+
+可见，相比起一般的文件运行，`source` 会把指定文件中的指令读入到当前的 Shell 中并执行。这种运行方式与在子进程/子 Shell 中运行的方式相比，在部分行为上会有所不同，例如若文件中使用了 `exit` 指令，当前的 Shell 也会被退出，导致后面的指令无法被执行；有时为了令某个文件中的 `export` 指令在当前 Shell 中生效，也会需要使用 `source` 命令来运行该文件，这种用法常见于 `.bashrc`、`/etc/profile` 等会为 Bash 设置环境变量的文件。
+
+除外，`source` 命令还有一个简写形式，为 `.`，即 `. some_file` 等价于 `source some_file`。 
 
 ## 第三部分：小型命令行工具
 
