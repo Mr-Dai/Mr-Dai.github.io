@@ -8,7 +8,7 @@ tags:
 date: 2017-12-18
 ---
 
-这篇文章是本人按照 MIT 6.824 的课程安排阅读 [Google File System 的论文](http://nil.csail.mit.edu/6.824/2017/papers/gfs.pdf)并总结而来。
+这篇文章是本人按照 MIT 6.824 的课程安排阅读 [Google File System 的论文](http://nil.csail.mit.edu/6.824/2017/papers/gfs.pdf)以及相关课程资料并总结而来。
 
 <!-- more -->
 
