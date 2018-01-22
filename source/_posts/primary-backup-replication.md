@@ -42,7 +42,7 @@ Deterministic Replay 会以日志记录的形式记录主服务器接收到的�
 
 首先我们先来看看 VMware FT 主从备份的架构：
 
-![](/img/priymary-backup-replication/ft-configuration.png)
+![](/img/primary-backup-replication/ft-configuration.png)
 
 如图所示，整个架构由一主一备组成，两个虚拟机运行在两个不同的物理机上，通过一个 Logging Channel 传输 Deterministic Replay 产生的日志信息，同时两个虚拟机都能访问一个 Shared Disk。
 
@@ -127,7 +127,7 @@ FT 备份的是**计算**，你能用它为任何已有的网络服务器提供�
 
 这是合理的，因为现实世界中的多数失效本质上来讲都是宕机失效，例如各种网络失效和电源失效。要做到更好的话就需要处理那些似乎正在正常运行但其实正在产生错误结果的计算机 —— 在最坏的情况下，这样的失效可能是来源于一个恶意的攻击者。这类非宕机失效的失效通常被称为“拜占庭”（Byzantine）。我们实际上是有方法去应对拜占庭失效的，我们会在这节课的末尾学习这些方法，但 6.824 的主要内容还是关于宕机失效。
 
-译者注：关于更多类型的失效，可参考[《Failure Modes in Distributed Systems》}(http://alvaro-videla.com/2013/12/failure-modes-in-distributed-systems.html) 一文。
+译者注：关于更多类型的失效，可参考[《Failure Modes in Distributed Systems》](http://alvaro-videla.com/2013/12/failure-modes-in-distributed-systems.html) 一文。
 
 ## 结语
 

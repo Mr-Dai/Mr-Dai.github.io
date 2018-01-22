@@ -17,7 +17,7 @@ tags:
 
 ## 为什么要用 Git ？
 
-如果你想了解 Git 对比于如 SVN 等中央式源代码管理系统有怎么样的优势和劣势的话，你在[浏览](http://whygitisbetterthanx.com/">网上</a>稍微<a href="http://git.or.cz/gitwiki/GitSvnComparsion)一下便能找到答案。这么久以来，两党之间可谓是战火不断。作为一个开发者，我本人更倾向于 Git。我认为 Git 极大地改变了开发者对分支与合并的认知。在我的印象里，用 CVS 或是 SVN 进行分支或合并着实是有些吓人（当心合并冲突，他们会咬你的 :D），而且这样的操作也很少会进行。
+如果你想了解 Git 对比于如 SVN 等中央式源代码管理系统有怎么样的优势和劣势的话，你在[网上](http://whygitisbetterthanx.com/")稍微[浏览](http://git.or.cz/gitwiki/GitSvnComparsion)一下便能找到答案。这么久以来，两党之间可谓是战火不断。作为一个开发者，我本人更倾向于 Git。我认为 Git 极大地改变了开发者对分支与合并的认知。在我的印象里，用 CVS 或是 SVN 进行分支或合并着实是有些吓人（当心合并冲突，他们会咬你的 :D），而且这样的操作也很少会进行。
 
 但对于使用 Git 的人来说，这样的操作却是相当的方便快捷，这样的操作也早已成为他们的家常便饭。举个例子，在 CVS/Subversion 的相关[书籍](http://svnbook.red-bean.com)中，分支与合并一直到书的后半部分才作为高级功能首次出现，而大部分的[书](http://pragprog.com/titles/tsgit/pragmatic-version-control-using-git">Git</a><a href="http://book.git-scm.com)[籍](http://github.com/progit/progit)早在第三章便将其作为基本功能进行介绍。
 
