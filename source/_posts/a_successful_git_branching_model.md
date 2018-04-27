@@ -7,6 +7,8 @@ tags:
  - 团队协作
 ---
 
+本文译自 [Vincent Driessen](http://nvie.com/about/) 的[《A Successful Git Branch Model》](http://nvie.com/posts/a-successful-git-branching-model/)，转载时请注明原文链接。
+
 在这篇文章中我将为大家介绍我这一年以来在工作项目和个人项目上都有在使用的开发模式，而事实也证明该模式十分有效可行。实际上，我很久以前就打算要写这篇文章了，但直到现在我才终于抽出时间来把它写完。在这篇文章中，我会详细地讲述项目的分支策略和发布版本管理，但我并不会讲述任何项目的有关细节。
 
 <!-- more -->
