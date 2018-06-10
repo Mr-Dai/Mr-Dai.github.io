@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  server:
+    image: "mr-dai.github.io"
+    build: "."
+    container_name: "mr-dai.github.io"
+    volumes:
+      - ".:/site"
+    ports:
+      - "4000:4000"
+    command: "hexo server"
+    stdin_open: true
+    tty: true
