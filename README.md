@@ -6,7 +6,12 @@ Github Pages Repo of my personal blog <http://mr-dai.github.io>.
 
 ## Usage
 
-Use command `docker-compose up` to start a local test server on <http://localhost:4000/>.
+Use the following commands to start a local test server on <http://localhost:4000/>:
+
+```bash
+npm ci
+npm run server
+```
 
 ## TODO
 
