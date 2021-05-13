@@ -1,6 +1,6 @@
 # Mr-Dai.github.io
 
-[![Build Status](https://travis-ci.org/Mr-Dai/Mr-Dai.github.io.svg?branch=source)](https://travis-ci.org/Mr-Dai/Mr-Dai.github.io)
+![](https://github.com/Mr-Dai/Mr-Dai.github.io/actions/workflows/deploy.yml/badge.svg)
 
 Github Pages Repo of my personal blog <http://mr-dai.github.io>.
 
