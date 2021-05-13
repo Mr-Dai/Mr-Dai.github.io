@@ -1,0 +1,36 @@
+name: Hexo Deploy
+
+on:
+  push:
+    branches:
+      - source
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: source
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '15.x'
+
+      - name: Setup and Build Hexo
+        run: |
+          npm ci
+          npm run generate
+
+      - name: Deploy
+        env:
+          ACTION_DEPLOY_KEY: ${{ secrets.HEXO_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$ACTION_DEPLOY_KEY" > ~/.ssh/id_rsa
+          chmod 700 ~/.ssh
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.name "Mr-Dai"
+          git config --global user.email "robert.peng@foxmail.com"
+          npm run deploy
