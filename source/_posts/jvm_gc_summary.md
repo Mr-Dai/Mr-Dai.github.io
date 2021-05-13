@@ -5,7 +5,7 @@ tags:
   - Java
   - JVM
   - GC
-date: 2017-08-30
+date: 2019-09-24
 ---
 
 本文基于由周志明所著的《深入理解 Java 虚拟机》一书的第二部分的内容，同时加入了 JVM 规范以及 Oracle 官方 GC 性能调优指南中的内容，旨在能让读者更好地理解这部分知识。目前本文只会包含 JVM 内存布局与垃圾回收相关的归纳内容，如果以后有机会我会继续更新 JVM GC 调优相关的内容。如果读者对本文的内容组织有更好的建议，欢迎在下方评论处提出。
@@ -222,7 +222,7 @@ CMS 收集器的执行过程分为 4 个步骤：
 
 CMS 收集器的主要缺点包括以下 4 点：
 
-- 对CPU资源敏感
+- 对 CPU 资源敏感
 - 存在浮动垃圾
 - Concurrent Mode Failure
 - 存在空间碎片
@@ -231,9 +231,9 @@ CMS 收集器的主要缺点包括以下 4 点：
 
 而后，CMS 收集器在并发标记阶段难以避免会因用户程序的持续执行导致可达性分析不完全正确，部分对象会在被标记后变为可回收对象。CMS 收集器无法在当次收集中处理这样的对象，这样的对象就成为了**“浮动垃圾”**，需要等待下一次收集才能被清理。
 
-除此之外，由于标记阶段用户程序的持续执行，新对象需要申请更多的内存空间，因此 CMS 收集器不能在老年代空间即将填满时才开始进行收集，而是需要预留一部分空间给用户程序。我们可以通过 `-XX:CMSInitiatingOccupancyFraction` 参数来设置触发 CMS GC 的百分比。
+除此之外，由于标记阶段用户程序的持续执行，新对象需要申请更多的内存空间，因此 CMS 收集器不能在老年代空间即将填满时才开始进行收集，而是需要预留一部分空间给用户程序。我们可以通过 `-XX:CMSInitiatingOccupancyFraction` 参数来设置触发 CMS GC 的老年代空间使用百分比。
 
-当 CMS 运行期间预留的内存无法满足程序需要，就会出现一次 **Concurrent Mode Failure**。此时 JVM 就会启动后备预案，启用 <u>Serial Old</u> 收集器重新进行老年代的垃圾收集，这样就导致 GC 停顿时间变长了。过高的 `-XX:CMSInitiatingOccupancyFraction` 参数容易导致 Concurrent Mode Failure 频繁发生，反而降低性能。
+当 CMS 运行期间预留的内存无法满足程序需要，就会出现一次 **Concurrent Mode Failure**。此时 JVM 就会启动后备预案，启用 <u>Serial Old</u> 收集器重新进行老年代的垃圾收集（Full GC），这样就导致 GC 停顿时间变长了。过高的 `-XX:CMSInitiatingOccupancyFraction` 参数容易导致 Concurrent Mode Failure 频繁发生，反而降低性能。
 
 最后，CMS 收集器采用的是标记 – 清除算法，这样的算法在收集后会产生大量的空间碎片，后续出现的大对象可能难以找到可用的连续空间，导致提前触发 Major GC。值得注意的是，CMS 收集器还提供了 `-XX:+UseCMSCompactAtFullCollection` 和 `-XX:CMSFullGCsBeforeCompaction` 参数来在满足一定条件时进行内存整理。
 
