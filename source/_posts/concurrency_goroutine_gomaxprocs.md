@@ -6,6 +6,7 @@ tags: Go
 org_title: Concurrency, Goroutines and GOMAXPROCS
 org_url: "https://www.goinggo.net/2014/01/concurrency-goroutines-and-gomaxprocs.html"
 date: 2017-06-14
+updated: 2017-06-14
 toc: true
 ---
 

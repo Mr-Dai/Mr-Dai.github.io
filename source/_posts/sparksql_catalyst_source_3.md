@@ -5,6 +5,7 @@ tags:
   - Spark
   - SparkSQL
 date: 2015-08-19
+updated: 2015-08-19
 toc: true
 ---
 

@@ -5,6 +5,7 @@ tags:
  - 分布式存储
  - 分布式系统
 date: 2021-05-16
+updated: 2021-05-16
 toc: true
 ---
 
@@ -106,8 +107,8 @@ toc: true
 ### 最终一致性 - Eventual Consistency
 
 最终一致性是最弱的一致性模型，它既不保证系统完成数据一致的时延，也不保证写入可见的顺序，仅保证系统 **总能在某一时间后** 收敛到一致。
->
-> ![](/img/consistency-models/eventual-consistency.jpg)
+
+![](/img/consistency-models/eventual-consistency.jpg)
 
 ### 线性一致性 - Linearizability
 

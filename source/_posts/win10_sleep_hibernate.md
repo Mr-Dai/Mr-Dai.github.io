@@ -2,6 +2,7 @@
 title: 解决 Windows10 笔记本关上后仍会掉电的问题
 tags: Windows
 date: 2017-05-06
+updated: 2017-05-06
 toc: true
 ---
 

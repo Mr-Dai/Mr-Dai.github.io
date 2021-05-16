@@ -2,6 +2,7 @@
 title: SQL Reference
 tags: SQL
 date: 2017-03-05
+updated: 2017-03-05
 toc: true
 ---
 

@@ -3,6 +3,7 @@ title: MongoDB 分布式部署教程
 category: MongoDB
 tags: MongoDB
 date: 2015-11-23
+updated: 2015-11-23
 toc: true
 ---
 

@@ -7,6 +7,7 @@ tags:
  - Bigtable
  - HBase
 date: 2018-04-14
+updated: 2018-04-14
 toc: true
 ---
 

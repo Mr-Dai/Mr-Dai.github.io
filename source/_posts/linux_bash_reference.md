@@ -5,6 +5,7 @@ tags:
  - Linux
  - Bash
 date: 2017-12-26
+updated: 2017-12-26
 toc: true
 ---
 

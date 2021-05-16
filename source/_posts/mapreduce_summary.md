@@ -6,6 +6,7 @@ tags:
  - 分布式系统
  - MIT 6.824
 date: 2017-09-03
+updated: 2017-09-03
 toc: true
 ---
 
