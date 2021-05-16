@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>MongoDB Replica Set - Robert Peng&#039;s Blog</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="呆呆的博客"><meta name="msapplication-TileImage" content="/img/avatar.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="呆呆的博客"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="本篇文章将脱离基本的 MongoDB 数据存储和操作，立足于 MongoDB 提供的高可用方案。MongoDB 的高可用方案包括 Replica Set 和 Sharding，这篇文章将介绍 MongoDB 的 Replica Set。"><meta property="og:type" content="blog"><meta property="og:title" content="MongoDB Replica Set"><meta property="og:url" content="https://mr-dai.github.io/mongodb_replica_set/"><meta property="og:site_name" content="Robert Peng&#039;s Blog"><meta property="og:description" content="本篇文章将脱离基本的 MongoDB 数据存储和操作，立足于 MongoDB 提供的高可用方案。MongoDB 的高可用方案包括 Replica Set 和 Sharding，这篇文章将介绍 MongoDB 的 Replica Set。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://docs.mongodb.com/manual/_images/replica-set-read-write-operations-primary.bakedsvg.svg"><meta property="og:image" content="https://docs.mongodb.com/manual/_images/replica-set-primary-with-two-secondaries.bakedsvg.svg"><meta property="og:image" content="https://docs.mongodb.com/manual/_images/replica-set-trigger-election.bakedsvg.svg"><meta property="og:image" content="https://docs.mongodb.com/manual/_images/replica-set-primary-with-secondary-and-arbiter.bakedsvg.svg"><meta property="og:image" content="https://docs.mongodb.com/manual/_images/replica-set-read-preference.bakedsvg.svg"><meta property="og:image" content="https://docs.mongodb.com/manual/_images/replica-set-trigger-election.bakedsvg.svg"><meta property="og:image" content="https://docs.mongodb.com/manual/_images/replica-set-primary-with-secondary-and-arbiter.bakedsvg.svg"><meta property="article:published_time" content="2017-03-27T16:00:00.000Z"><meta property="article:modified_time" content="2017-03-27T16:00:00.000Z"><meta property="article:author" content="Robert Peng"><meta property="article:tag" content="分布式存储"><meta property="article:tag" content="分布式系统"><meta property="article:tag" content="MongoDB"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="https://docs.mongodb.com/manual/_images/replica-set-read-write-operations-primary.bakedsvg.svg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://mr-dai.github.io/mongodb_replica_set/"},"headline":"MongoDB Replica Set","image":[],"datePublished":"2017-03-27T16:00:00.000Z","dateModified":"2017-03-27T16:00:00.000Z","author":{"@type":"Person","name":"Robert Peng"},"publisher":{"@type":"Organization","name":"Robert Peng's Blog","logo":{"@type":"ImageObject","url":"https://mr-dai.github.io/img/avatar.png"}},"description":"本篇文章将脱离基本的 MongoDB 数据存储和操作，立足于 MongoDB 提供的高可用方案。MongoDB 的高可用方案包括 Replica Set 和 Sharding，这篇文章将介绍 MongoDB 的 Replica Set。"}</script><link rel="canonical" href="https://mr-dai.github.io/mongodb_replica_set/"><link rel="icon" href="/img/avatar.png"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css"><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/avatar.png" alt="Robert Peng&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">首页</a><a class="navbar-item" href="/categories">分类</a><a class="navbar-item" href="/tags">标签</a><a class="navbar-item" href="/about">关于</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="我的 Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2017-03-27T16:00:00.000Z" title="3/27/2017, 4:00:00 PM">2017-03-28</time>发表</span><span class="level-item"><time dateTime="2017-03-27T16:00:00.000Z" title="3/27/2017, 4:00:00 PM">2017-03-28</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/MongoDB/">MongoDB</a></span></div></div><h1 class="title is-3 is-size-4-mobile">MongoDB Replica Set</h1><div class="content"><p>本篇文章将脱离基本的 MongoDB 数据存储和操作，立足于 MongoDB 提供的高可用方案。MongoDB 的高可用方案包括 Replica Set 和 Sharding，这篇文章将介绍 MongoDB 的 Replica Set。</p>
+<span id="more"></span>
+
+<h2 id="什么是-Replica-Set"><a href="#什么是-Replica-Set" class="headerlink" title="什么是 Replica Set"></a>什么是 Replica Set</h2><p>Replica Set 由一组 <code>mongod</code> 实例组成，这些 <code>mongod</code> 都维护着相同的数据集，通过冗余备份的方式提高数据的可用性。其中一个被称为 <code>Primary</code>（等同于 <code>Master</code>）的 <code>mongod</code> 负责接收所有客户端发来的写操作请求。其他被称为 <code>Secondary</code>（等同于 <code>Slave</code>）的 <code>mongod</code> 也会执行相同的操作，以与 <code>Primary</code> 进行同步。</p>
+<p><img src="https://docs.mongodb.com/manual/_images/replica-set-read-write-operations-primary.bakedsvg.svg"></p>
+<p><code>Primary</code> 会将发生在数据集上的改动记录在自己的 <a href="#oplog">oplog</a> 中，其他 <code>Secondary</code> 则负责复制 <code>Primary</code> 的 oplog，并把相关的改动应用在自己的数据集上。由此，<code>Secondary</code> 将始终持有与 <code>Primary</code> 完全相同的数据。</p>
+<p>Replica Set 中的任何成员都可以接受客户端发来的读请求，但默认情况下，应用程序的驱动程序只会把读请求发往 <code>Primary</code>，客户端必须通过显式设置 <a href="#read_preference">Read Preference</a> 才能改变这种行为。</p>
+<p>整个 Replica Set 通过在实例间发送心跳信号来互相知会哪些实例在正常运转，任意一个实例都会与其他所有实例进行心跳通信。</p>
+<p><img src="https://docs.mongodb.com/manual/_images/replica-set-primary-with-two-secondaries.bakedsvg.svg"></p>
+<p>当 <code>Primary</code> 超过 10 秒不与 Replica Set 中其他成员通信时，Replica Set 则认为该 <code>Primary</code> 因各种原因不可用了（断电、断网、死机）。此时，<code>Secondary</code> 们会开始<a href="#election">选举</a>，得票最高的 <code>Secondary</code> 则成为新的 <code>Primary</code>。Replica Set 的这项特性被称为 <a href="#automatic-failover">Automatic Failover</a>（自动恢复）。</p>
+<p><img src="https://docs.mongodb.com/manual/_images/replica-set-trigger-election.bakedsvg.svg"></p>
+<p>通过配置，负责维持备份数据的 <code>Secondary</code> 结点还能成为如下三种特殊 <code>Secondary</code> 结点：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/core/replica-set-priority-0-member/">Priority 0 <code>Secondary</code></a>：优先级为 <code>0</code> 的 <code>Secondary</code> 结点，无法在 <code>Primary</code> 不可用时被选举为 <code>Primary</code>，适合作为次级数据中心的 <code>Secondary</code> 结点</li>
+<li><a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/core/replica-set-hidden-member/">Hidden <code>Secondary</code></a>：Hidden <code>Secondary</code> 对客户端不可见，客户端无法将读请求发往 Hidden <code>Secondary</code>。Hidden <code>Secondary</code> 同时也必须是 Priority 0 的</li>
+<li><a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/core/replica-set-delayed-member/">Delayed <code>Secondary</code></a>：Delayed <code>Secondary</code> 会在指定的延时后才应用 <code>Primary</code> oplog 上的记录，其维护的数据反映了整个 Replica Set 在一定时间以前的状态。Delayed <code>Secondary</code> 必须也是 Priority 0 的，也应该是 Hidden 的</li>
+</ul>
+<p>除此之外，Replica Set 中还可以存在一种特殊的 <code>Secondary</code> 结点，它不负责备份任何数据，只负责在 <code>Primary</code> 不可用时进行投票，这样的 <code>Secondary</code> 被称为 <a href="#arbiter"><code>Arbiter</code></a>（仲裁者）。</p>
+<p><img src="https://docs.mongodb.com/manual/_images/replica-set-primary-with-secondary-and-arbiter.bakedsvg.svg"></p>
+<p>在 <code>Primary</code> 不可用时，其他某个 <code>Secondary</code> 可能成为新的 <code>Primary</code>，而原本的 <code>Primary</code> 在重新上线后变为 <code>Secondary</code>，但 <code>Arbiter</code> 永远都是 <code>Arbiter</code>。</p>
+<h2 id="data-synchronization">Replica Set 主从数据同步</h2>
+
+<p>为确保每个 <code>Secondary</code> 上都能保持一份最新的数据备份，Replica Set 的实例间会相互进行同步。</p>
+<p>具体来说，MongoDB 所使用的同步方式可以被分为两种形式：</p>
+<ul>
+<li>MongoDB 会使用<a href="#initial-sync">初始化同步</a>为新加入的成员在本地迅速生成一份完整的数据备份</li>
+<li>之后，<code>Secondary</code> 便不断地将数据集发生的变化同步应用在自己的数据集上，以确保自己的数据集能和 <code>Primary</code> 保持同步。</li>
+</ul>
+<p>接下来我们就分开来看一下这两种同步形式。</p>
+<h3 id="initial-sync">初始化同步</h3>
+
+<p>初始化同步（Initial Sync）相当于从同步源将整个数据集复制到本地。在以下两种情况下会触发 <code>mongod</code> 的初始化同步操作：</p>
+<ul>
+<li>一个新的 <code>mongod</code> 实例加入了 Replica Set</li>
+<li>某个已经加入 Replica Set 的 <code>mongod</code> 实例由于种种原因，其同步状态落后过多，以至于 <code>Primary</code> 的 oplog 中那些它还未同步的修改记录已经被覆写</li>
+</ul>
+<p>初始化同步操作大概包含 2 个方面：</p>
+<ul>
+<li>复制同步源上除 <code>local</code> 数据库以外的所有数据。这个过程也会同时构建索引；</li>
+<li>使用同步源的 oplog 将后来发生的数据集变动应用到本地的备份数据集上。这个过程在后面会一直进行，以始终确保 <code>Secondary</code> 的同步性</li>
+</ul>
+<p>在上述两步完成后，新的节点也就会进入到了正常运转的状态，成为一个可用的 <code>Secondary</code>。</p>
+<p>有关手动触发初始化同步的更多细节，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/tutorial/resync-replica-set-member/">这里</a>。</p>
+<h3 id="后续数据同步"><a href="#后续数据同步" class="headerlink" title="后续数据同步"></a>后续数据同步</h3><p>在完成初始化同步后，<code>Secondary</code> 便会持续地从其同步源处同步数据，异步地读取同步源 oplog 上的新纪录并应用到自己的数据集上。</p>
+<p>值得注意的是，<code>Secondary</code> 的同步源并不一定是 <code>Primary</code> 结点，其同步源也有可能随着结点间 Ping 延时长短和状态的变化而发生改变。</p>
+<h2 id="oplog">Replica Set Oplog</h2>
+
+<p><code>Oplog</code>（Operations Log）用于保存所有应用在数据库上的数据修改。MongoDB 会把数据库的写操作发往 <code>Primary</code>，<br>由 <code>Primary</code> 将该操作所产生的数据修改记录到 oplog 上。其他所有的 <code>Secondary</code> 异步地将 <code>Primary</code> 的 oplog<br>复制到本地并将其中的数据修改应用到自己的数据集中。</p>
+<p>所有的 <code>mongod</code> 实例都会有一个自己的 oplog。Oplog 实际上储存在 Collection <code>local.oplog.rs</code> 中，而这是一个 <a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/core/capped-collections/">Capped Collection</a>（大小固定的 Collection，当达到容量上限时会覆写旧的 Document）。</p>
+<p>有关 oplog 的更多信息，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/core/replica-set-oplog/">这里</a>。</p>
+<h3 id="Replica-Set-数据同步的异步性"><a href="#Replica-Set-数据同步的异步性" class="headerlink" title="Replica Set 数据同步的异步性"></a>Replica Set 数据同步的异步性</h3><p><code>Secondary</code> 与 <code>Primary</code> 之间的同步实际上是异步的。当用户发送写操作到 <code>Primary</code> 时，<code>Primary</code> 在 oplog 上写下记录并将操作应用在自己的数据集上，然后便会立刻向客户端返回写操作的结果（成功或失败、修改了多少个 Document）。如果使用线程同步的同步操作，<code>Primary</code> 则会等到所有的 <code>Secondary</code> 都将该操作应用到自己的数据集上时才向客户端返回响应，而 MongoDB Replica Set 的同步操作是异步的，<code>Primary</code> 不会等待其他 <code>Secondary</code>。<code>Secondary</code> 会通过心跳信号发现 <code>Primary</code> 的 oplog 上的新修改，而后将其复制到自己的 oplog，并应用在自己的数据集上。</p>
+<h3 id="Oplog-记录的幂等性"><a href="#Oplog-记录的幂等性" class="headerlink" title="Oplog 记录的幂等性"></a>Oplog 记录的幂等性</h3><p><code>Primary</code> 并不会把用户传来的写操作直接原封不动地记录在 oplog 上，oplog 上记录的操作必须确保是幂等的（idempotent）。所谓幂等，即指这些操作对于同一个 Collection，无论应用多少次都应产生相同的结果。</p>
+<p>举个例子。比如说我们发送了一个删除记录的请求：<code>db.users.remove(&#123; age : 30 &#125;)</code>。这个记录删除掉 <code>users</code> 中所有年龄为 30 的用户记录。这个操作不是幂等的，因为对于同一个 <code>users</code>，<code>users</code> 中实际存放的数据会影响执行的结果。实际上，<code>Primary</code> 接收到这样的请求，真正记录到 oplog 上的记录会是：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">db.users.remove(&#123; <span class="attr">_id</span> : ... &#125;)</span><br><span class="line">db.users.remove(&#123; <span class="attr">_id</span> : ... &#125;)</span><br><span class="line">db.users.remove(&#123; <span class="attr">_id</span> : ... &#125;)</span><br><span class="line">db.users.remove(&#123; <span class="attr">_id</span> : ... &#125;)</span><br><span class="line">db.users.remove(&#123; <span class="attr">_id</span> : ... &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，<code>Primary</code> 会先计算这个操作所会影响的 Document，并在 oplog 中写下对这些 Document 的修改。正是由于 <code>_id</code> 的唯一性，我们可以确保这样的操作记录是幂等的。</p>
+<h2 id="read-preference">Read Preference</h2>
+
+<p>客户端可以使用 Read Preference 来决定将读操作发往 Replica Set 的哪个成员。</p>
+<p><img src="https://docs.mongodb.com/manual/_images/replica-set-read-preference.bakedsvg.svg"></p>
+<p>默认的 Read Preference 会把读操作发往 <code>Primary</code>。考虑到 Replica Set 数据同步的异步性，<code>Secondary</code> 的备份数据集实际上总是滞后于 <code>Primary</code> 的，其滞后程度甚至有可能十分严重以至于其实际上已经和 <code>Primary</code> 失去同步。客户端是没有办法得知某个 <code>Secondary</code> 具体滞后多少的。因此，将读操作发往 <code>Primary</code> 可以确保拿到的数据只会是最新的数据。</p>
+<p>而对于那些对数据同步性要求不是那么高的应用程序，将读操作发往距离客户端最近的 Replica Set 成员可以有效地降低 <code>Primary</code> 的压力，提高客户端请求的响应速度。总的来讲，可以直接从 <code>Secondary</code> 读取数据的应用程序用例包括如下几种：</p>
+<ul>
+<li>执行不会影响前端应用程序的系统操作</li>
+<li>直接从位于本地的 Replica Set 成员读取数据。在这种情况下，<code>Primary</code> 可能距离客户端十分遥远，一次读操作光是花费在链路上的时间可能就达到了上百毫秒，<br>  而直接访问位于本地数据中心的 <code>Secondary</code> 往往可以在几毫秒之内得到响应</li>
+<li>确保应用程序在 <code>Primary</code> 不可用时不会受到影响。尽管 MongoDB 有着自动恢复的特性，但仍然需要花费几十秒的时间来重新选举出一个新的 <code>Primary</code></li>
+</ul>
+<p>但实际上，更多时候我们并不推荐使用这种读取模式，因为：</p>
+<ul>
+<li>Replica Set 中的每个成员都有着大致相同的写操作压力。尽管写操作会被直接发往 <code>Primary</code>，但数据的同步使得这些操作也会发生在每一个 <code>Secondary</code> 上，<br>  而每一个写操作往往都隐含着读操作，因此 Replica Set 的每个成员也有着大致相同的读操作压力；</li>
+<li>Replica Set 的数据同步是异步的，这意味着 <code>Secondary</code> 的数据必然或多或少落后于 <code>Primary</code>，从 <code>Secondary</code> 读取数据很有可能会拿到过时的数据；</li>
+<li>读操作分布在 <code>Secondary</code> 上，这同样要求在某个 <code>Secondary</code> 不可用时，其他 <code>Secondary</code> 要能够处理所有这些多出来的请求。在某种程度上，<br>  这样的读取模式会使得系统的可用性难以估量；</li>
+</ul>
+<p>总的来看，在大多数时候，使用 Sharding 来分散压力会是更好的选择。我将在之后的文章里介绍 MongoDB 的 Sharding 功能。</p>
+<p>MongoDB 驱动所支持的 Read Preference 包括如下几种：</p>
+<table>
+<thead>
+<tr>
+<th>Read Preference 模式</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/read-preference/#primary">primary</a></td>
+<td>默认的模式，所有读操作都发往 <code>Primary</code></td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/read-preference/#primaryPreferred">primaryPreferred</a></td>
+<td>优先将读操作发往 <code>Primary</code>，仅在 <code>Primary</code> 不可用时才把读操作发往 <code>Secondary</code></td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/read-preference/#secondary">secondary</a></td>
+<td>所有读操作都发往 <code>Secondary</code></td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/read-preference/#secondaryPreferred">secondaryPreferred</a></td>
+<td>优先将读操作发往 <code>Secondary</code>，仅在所有 <code>Secondary</code> 都不可用时才把读操作发往 <code>Primary</code></td>
+</tr>
+<tr>
+<td><a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/read-preference/#nearest">nearest</a></td>
+<td>将读操作发往与客户端有着最低网络延迟（最“近”）的 Replica Set 成员，不管它是 <code>Primary</code> 还是 <code>Secondary</code></td>
+</tr>
+</tbody></table>
+<p>有关 Read Preference 的更多内容，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/core/read-preference-mechanics">这里</a>。</p>
+<h2 id="write-concern">Write Concern</h2>
+
+<p>前文的 Read Preference 决定了驱动程序从 Replica Set 读取数据时的行为，而相对的 Write Concern 则决定了驱动程序写数据时的行为。</p>
+<p>实际上，比起只用于 Replica Set 的 Read Preference，Write Concern 还适用于 standalone 的 MongoDB 实例。驱动程序在发出写操作请求时同时发出 Write Concern，MongoDB 实例则会根据 Write Concern 的设置来决定什么时候给客户端返回写操作成功的响应。因此，对于越强的 Write Concern，当 MongoDB 成功返回响应时，你就更能确定数据已被安全保存。但实际上，越强的 Write Concern 往往需要更多的时间等待 MongoDB 返回。</p>
+<p>Write Concern 由三个参数组成，分别是 <code>w</code> 、 <code>j</code> 和 <code>wtimeout</code>。接下来将一一介绍。</p>
+<h3 id="w-参数"><a href="#w-参数" class="headerlink" title="w 参数"></a>w 参数</h3><p><code>w</code> 参数决定了 MongoDB 在多少个实例上写入数据后返回响应。该响应实际上是在 MongoDB 将数据写入到内存缓存后返回，因此返回后仍有可能因为断电等原因导致内存缓存丢失从而丢失该操作引起的数据修改。更高等级的 Write Concern 需由 <code>j</code> 参数给出，我们将在后文讲述。</p>
+<p><code>w</code> 参数可选的值包括如下：</p>
+<table>
+<thead>
+<tr>
+<th>值</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>1</code></td>
+<td>默认值，在 standalone 的 MongoDB 实例或者 Replica Set 的 <code>Primary</code> 成功执行该写操作后返回响应</td>
+</tr>
+<tr>
+<td><code>0</code></td>
+<td>完全关闭 MongoDB 的执行响应，但由网络错误引起的 Exception 仍会抛出。值得注意的是，即使使用了该设定，如果你还用 <code>j</code> 参数要求 MongoDB 返回日志提交的响应，MongoDB 还是会返回写操作响应的</td>
+</tr>
+<tr>
+<td>大于 <code>1</code> 的任意整数</td>
+<td>MongoDB 会确保该操作顺利传播到指定数量的 Replica Set 成员上再返回。如果设定的值大于 Replica Set 的总成员数，MongoDB 会继续等待那些“不存在”的成员接收到该操作，这意味着驱动可能会一直阻塞。此时我们应搭配使用 <code>wtimeout</code> 参数</td>
+</tr>
+<tr>
+<td><code>&quot;majority&quot;</code></td>
+<td>MongoDB 确保该操作顺利传播到大多数 Replica Set 数据成员上后再返回</td>
+</tr>
+<tr>
+<td><code>&lt;tag set&gt;</code></td>
+<td>MongoDB 确定该操作顺利传播到属于给定 Tag Set 的 Replica Set 成员上后再返回。关于 Tag Set，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/tutorial/configure-replica-set-tag-sets/#replica-set-configuration-tag-sets">这里</a>。</td>
+</tr>
+</tbody></table>
+<h3 id="j-参数"><a href="#j-参数" class="headerlink" title="j 参数"></a>j 参数</h3><p><code>j</code> 参数决定了 MongoDB 是否要在将该操作成功写入到日志后再返回。<code>j</code> 参数只有两种值：<code>false</code> 和 <code>true</code>。当设定 <code>j: true</code> 时，驱动将会等待 MongoDB 把该写操作记录到日志上以后再返回。</p>
+<p>通常情况下，<code>j: true</code> 意味着最高级别的 Write Concern —— 操作一旦记录到日志上以后就意味着该改动已被安全保存，即使因断电导致内存数据丢失，MongoDB 实例在重新启动时也可根据日志恢复该操作。不过，对于 Replica Set 的 <code>Primary </code> 而言，如果该操作在传播到其它 Replica Set 成员的 oplog 之前，该 <code>Primary</code> 就降级了的话，在该结点重新上线时还是会回滚该操作，导致该操作丢失。因此，对于 Replica Set 而言，最安全的做法是 <code>&#123;w: &quot;majority&quot;, j: true&#125;</code>。</p>
+<h3 id="wtimeout-参数"><a href="#wtimeout-参数" class="headerlink" title="wtimeout 参数"></a>wtimeout 参数</h3><p><code>wtimeout</code> 参数只在 <code>w</code> 参数被设定为大于 <code>1</code> 的值时才会生效，它用于为 Write Concern 设定以<strong>毫秒</strong>为单位的超时时间，在时限到达后直接抛出错误。</p>
+<p>如果你设定的 <code>w</code> 参数值大于 Replica Set 当前成员数且没有设置 <code>wtimeout</code>，驱动将会一直阻塞。设定 <code>wtimeout: 0</code> 会使 MongoDB 忽略 <code>wtimeout</code> 参数。</p>
+<p>关于 Write Concern 的更多内容，请看<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/core/write-concern">这里</a>和<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/write-concern/">这里</a>。</p>
+<h2 id="automatic-failover">Replica Set 自动恢复</h2>
+
+<p>MongoDB Replica Set 的高可用性体现在其所提供的自动恢复功能（Automatic Failover）上。当 Replica Set 的 <code>Primary</code> 因各种原因而不可用时，Replica Set 的自动恢复特性使得某个 <code>Secondary</code> 可以升级为 <code>Primary</code> 而替代原本的已经不可用的 <code>Primary</code>。这个过程是完全自动的，不需要任何人的手动干预即可自然发生。</p>
+<p>Replica Set 的自动恢复特性包含两个方面：</p>
+<ul>
+<li><code>Secondary</code> 会在发现 <code>Primary</code> 不可用时进行<a href="#election">选举</a>，获得最高票数的 <code>Secondary</code> 成为新的 <code>Primary</code></li>
+<li>有些情况下，自动恢复的过程可能还需要进行一次<a href="#rollback">回滚</a></li>
+</ul>
+<p>接下来我们逐个看一下这两种不同的恢复动作。</p>
+<h3 id="election">Replica Set 选举</h3>
+
+<p>Replica Set 会使用选举的形式来决定谁成为 <code>Primary</code>。这个过程在启动 Replica Set 时就会发生一次。在 Replica Set 运行的过程中，每当其他 <code>Secondary</code> 达成共识认为 <code>Primary</code> 已经不可用时，它们就会发起一次选举，得票数最高的 <code>Secondary</code> 成为新的 <code>Primary</code>。</p>
+<p><img src="https://docs.mongodb.com/manual/_images/replica-set-trigger-election.bakedsvg.svg"></p>
+<p>尽管这样的功能十分 fancy，但选举的过程仍然是需要时间的。在进行选举时，整个 Replica Set 没有 <code>Primary</code>，因此整个 Replica Set 也无法接受任何写操作，所有的结点都会是只读的。因此，MongoDB 会尽可能地避免进行选举。</p>
+<p>除了上述两种情况，当 <code>Primary</code> 降级时，Replica Set 也会进行一次选举。总的来说，<code>Primary</code> 在如下情况下会降级：</p>
+<ul>
+<li>接收到 <a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/command/replSetStepDown/#dbcmd.replSetStepDown"><code>replSetStepDown</code></a> 命令</li>
+<li>某个 <code>Secondary</code> 被选举为新的 <code>Primary</code> 而且它有更高的优先级</li>
+<li><code>Primary</code> 无法连接到 Replica Set 中的其他大多数成员（<code>Primary</code> 会得出自己已经断网了的结论）</li>
+</ul>
+<p>Replica Set 通过让每个成员相互之间发送心跳信号来判断某个成员是否已经变得不可用。因此，成员所处的网络拓补结构将会影响选举的结果。在选取网络拓补结构时，我们应确保在某个 <code>Primary</code> 节点不可用时，剩下的节点确实能够选举出新的 <code>Primary</code>，因为 <code>Secondary</code> 成为新的 <code>Primary</code> 除了需要得到最高的票数，还需要其所得票数达到集群的总票数的大多数。如果有相当一部分成员同时不可用，Replica Set 将始终无法收集到足够多的票数，那么 Replica Set 将无法选举出新的 <code>Primary</code>。由此，我们应该将 Replica Set 的大多数投票成员以及所有可以成为 <code>Primary</code> 的成员放置在与应用程序系统相同的设施中，使得 Replica Set 不至于因为网络隔离而无法收集到大多数成员的选票。</p>
+<p>更多有关选举的内容，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/core/replica-set-elections/">这里</a>。</p>
+<h3 id="rollback">回滚</h3>
+
+<p>Replica Set 的 <code>Secondary</code> 在发现 <code>Primary</code> 已经不可用前是需要花费一些时间的：每个成员每隔 2 秒会发送一次心跳信号，如果该心跳信号在 10 秒内没有收到某个节点的响应，则这个节点被标记为“不可达”；当大多数 <code>Secondary</code> 都将 <code>Primary</code>标记为“不可达”时，它们才会达成共识认为 <code>Primary</code> 已经从 Replica Set 不可达。而原本的 <code>Primary</code>如果只是从大多数节点不可达但不是因为断电或死机之类的原因导致其不可用的话，它在意识到自己已经不可达并主动降级为 <code>Secondary</code>前也需要一定的时间。</p>
+<p>然而网络环境是复杂的。有些时候，Replica Set 成员间的不可达并不代表这个结点是客户端所不可达的。在 Replica Set 的 <code>Secondary</code>选举出新的 <code>Primary</code> 以及原有的 <code>Primary</code> 主动降级之前，只要客户端仍能连接上原本的 <code>Primary</code> ，那么客户端就会认为一切正常，依旧将写操作发往这个原有的 <code>Primary</code>，即使由于该 <code>Primary</code> 已与大多数 <code>Secondary</code> 无法连接，这些写操作很有可能永远不会被同步到其他 <code>Secondary</code> 上。</p>
+<p>在选举的过程中，<code>Secondary</code> 们会倾向于将票投给拥有最“新”的备份数据（上一次备份时间最近）的 <code>Secondary</code>。但尽管如此，原本的 <code>Primary</code> 仍然可能已经执行了其他所有 <code>Secondary</code> 都没有同步的数据修改。在原本的 <code>Primary</code> 降级为 <code>Secondary</code>，或者说它以 <code>Secondary</code> 的身份重新加入 Replica Set 时，这些数据修改是仍然会保留在它的本地数据里的。</p>
+<p>这个时候，为了让它与新的 <code>Primary</code> 进行同步，它会根据自己的 oplog 对本地数据进行回滚，撤销那些未同步的数据修改，然后再从新的 <code>Primary</code> 上同步新的数据修改。</p>
+<p>当回滚发生后，被回滚的数据会以 <a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/reference/glossary/#term-bson">BSON</a>文件的形式保存在 <a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/reference/configuration-options/#storage.dbPath">dbPath</a>目录下的 <code>rollback/</code> 目录中，文件名格式为 <code>&lt;database&gt;.&lt;collection&gt;.&lt;timestamp&gt;.bson</code>。管理员可以使用 <a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/reference/program/bsondump/">bsondump</a> 工具查看具体内容并自行决定如何处理。</p>
+<p>由于 MongoDB 的这项设置，我们需要确保 Replica Set 中的成员全都有着大致相同的性能。由于网络不可达而导致回滚是一回事，但如果 <code>Secondary</code> 由于性能限制无法跟上 <code>Primary</code> 的节拍，<code>Secondary</code> 的备份数据则会始终落后于 <code>Primary</code>，也就导致 <code>Primary</code> 在降级时需要回滚更多的操作了。</p>
+<p>为保证部分关键的写操作数据不因 <code>Primary</code> 不可用而导致被回滚，客户端可在请求时使用 <code>&#123;w: &quot;majority&quot;&#125;</code> Write Concern来确保该写操作能顺利传递到其他 Replica Set 成员上。</p>
+<p>由此我们也可以认识到，同一个 Replica Set 中的所有成员都始终经受着大致相同的读写压力，企图通过将读操作分布在不同的 Replica Set成员上来提高吞吐量并不是最好的做法，更好的做法应该是使用 Sharding。</p>
+<p>更多有关回滚的内容，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/core/replica-set-rollbacks/">这里</a>。</p>
+<h2 id="arbiter">Arbiter</h2>
+
+<p>正如我之前所说，一旦涉及到分布式，网络环境可能出现的情况是繁杂多样的，我们很难考虑全面。考虑这么一种情况：你的 Replica Set 中有两个服务器，突然 <code>Primary</code> 不可用了。实际上在这个时候，你的 Replica Set 无法进行自动恢复，因为整个 Replica Set 中只剩下一个可用的 <code>Secondary</code>，它无法获得“大多数”的选票，因为它只能获得它自己的那一票，而整个 Replica Set 总共应有两张票，50% 可不是“大多数”。</p>
+<p>最直观的解决方案，便是为 Replica Set 引入一名新的成员。在成员数为 3 的情况下，任意一名成员不可用都不会导致 Replica Set 无法自动恢复，因为新的 <code>Primary</code> 会在选举时获得 2/3 的票数，正好属于“大多数”。</p>
+<p>但这个解决方案有个不好的地方。我们引入一个新的节点只是为了打破原有结构的选票平局，我们真正需要的是它的选票。但加入 Replica Set成为 <code>Secondary</code> 意味着它也要备份 <code>Primary</code> 的数据，经受和 <code>Primary</code> 相当的写压力，也就要求它的性能起码能与 <code>Primary</code> 相当了。这么想来，性价比还是比较低的。MongoDB 为此提供的解决方案，便是 <code>Arbiter</code>（仲裁者）。</p>
+<p><img src="https://docs.mongodb.com/manual/_images/replica-set-primary-with-secondary-and-arbiter.bakedsvg.svg"></p>
+<p><code>Arbiter</code> 也是 Replica Set 的成员，但它不是 <code>Secondary</code>：<code>Arbiter</code> 会在 Replica Set 发起选举时参与投票，但它不会像 <code>Secondary</code> 那样备份 <code>Primary</code> 的数据，而这正是我们想要的：我们想要的就是 <code>Arbiter</code> 的投票能力。没有了备份 <code>Primary</code> 数据所带来的读写压力，<code>Arbiter</code> 的性能要求实际上会很低很低，我们完全可以用一台小型机来支撑起一个担任 <code>Arbiter</code> 的 <code>mongod</code>。</p>
+<p>更多关于 Arbiter 的内容，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/core/replica-set-arbiter/">这里</a>。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>关于 MongoDB 高可用解决方案之一的 Replica Set，其分布式备份的功能固然使其需要考虑更多的情况。本文只是对 Replica Set 相关概念的一个 Intro，想要了解更多详细内容还需读者自行查阅 MongoDB 的<a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/replication/">官方文档</a>。</p>
+<p>Anyway, I did what I could. Hopefully you can enjoy it.</p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>MongoDB Replica Set</p><p><a href="https://mr-dai.github.io/mongodb_replica_set/">https://mr-dai.github.io/mongodb_replica_set/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Robert Peng</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2017-03-28</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2017-03-28</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/">分布式存储</a><a class="link-muted mr-2" rel="tag" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/">分布式系统</a><a class="link-muted mr-2" rel="tag" href="/tags/MongoDB/">MongoDB</a></div><!--!--></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/img/alipay-qrcode.png" alt="支付宝"></span></a><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/img/wechat-qrcode.png" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/mongodb_sharding/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">MongoDB Sharding</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/mongodb_crud/"><span class="level-item">MongoDB CRUD Cookbook</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div id="disqus_thread"><noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></div><script>var disqus_config = function () {
+            this.page.url = 'https://mr-dai.github.io/mongodb_replica_set/';
+            this.page.identifier = 'mongodb_replica_set/';
+        };
+        (function() {
+            var d = document, s = d.createElement('script');  
+            s.src = '//' + 'robertpsblog' + '.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="呆呆"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">呆呆</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>中国广州</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">49</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">9</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">35</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://www.zhihu.com/people/robert.peng" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="知乎" href="https://www.zhihu.com/people/robert.peng"><i class="fab fa-zhihu"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Bash/"><span class="tag">Bash</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Bigtable/"><span class="tag">Bigtable</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GC/"><span class="tag">GC</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Git/"><span class="tag">Git</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Go/"><span class="tag">Go</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Gradle/"><span class="tag">Gradle</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Groovy/"><span class="tag">Groovy</span><span class="tag">5</span></a></div><div class="control"><a class="tags has-addons" href="/tags/HBase/"><span class="tag">HBase</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hadoop/"><span class="tag">Hadoop</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hive-ThriftServer/"><span class="tag">Hive ThriftServer</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JVM/"><span class="tag">JVM</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Linux/"><span class="tag">Linux</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MIT-6-824/"><span class="tag">MIT 6.824</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Mesos/"><span class="tag">Mesos</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MongoDB/"><span class="tag">MongoDB</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Paxos/"><span class="tag">Paxos</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Raft/"><span class="tag">Raft</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SQL/"><span class="tag">SQL</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spark/"><span class="tag">Spark</span><span class="tag">13</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spark-SQL/"><span class="tag">Spark SQL</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SparkSQL/"><span class="tag">SparkSQL</span><span class="tag">10</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Windows/"><span class="tag">Windows</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Yarn/"><span class="tag">Yarn</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/ZooKeeper/"><span class="tag">ZooKeeper</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/etcd/"><span class="tag">etcd</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%87%E4%BB%BD/"><span class="tag">主从备份</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86/"><span class="tag">分布式共识</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%86%85%E5%AD%98/"><span class="tag">分布式内存</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/"><span class="tag">分布式存储</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"><span class="tag">分布式系统</span><span class="tag">12</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/"><span class="tag">分布式计算</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/"><span class="tag">团队协作</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6/"><span class="tag">集群资源调度</span><span class="tag">2</span></a></div></div></div></div></div><div class="column-right-shadow is-hidden-widescreen is-sticky"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3 is-sticky"><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#什么是-Replica-Set"><span class="level-left"><span class="level-item">1</span><span class="level-item">什么是 Replica Set</span></span></a></li><li><a class="level is-mobile" href="#data-synchronization"><span class="level-left"><span class="level-item">2</span><span class="level-item">Replica Set 主从数据同步</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#initial-sync"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">初始化同步</span></span></a></li><li><a class="level is-mobile" href="#后续数据同步"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">后续数据同步</span></span></a></li></ul></li><li><a class="level is-mobile" href="#oplog"><span class="level-left"><span class="level-item">3</span><span class="level-item">Replica Set Oplog</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#Replica-Set-数据同步的异步性"><span class="level-left"><span class="level-item">3.1</span><span class="level-item">Replica Set 数据同步的异步性</span></span></a></li><li><a class="level is-mobile" href="#Oplog-记录的幂等性"><span class="level-left"><span class="level-item">3.2</span><span class="level-item">Oplog 记录的幂等性</span></span></a></li></ul></li><li><a class="level is-mobile" href="#read-preference"><span class="level-left"><span class="level-item">4</span><span class="level-item">Read Preference</span></span></a></li><li><a class="level is-mobile" href="#write-concern"><span class="level-left"><span class="level-item">5</span><span class="level-item">Write Concern</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#w-参数"><span class="level-left"><span class="level-item">5.1</span><span class="level-item">w 参数</span></span></a></li><li><a class="level is-mobile" href="#j-参数"><span class="level-left"><span class="level-item">5.2</span><span class="level-item">j 参数</span></span></a></li><li><a class="level is-mobile" href="#wtimeout-参数"><span class="level-left"><span class="level-item">5.3</span><span class="level-item">wtimeout 参数</span></span></a></li></ul></li><li><a class="level is-mobile" href="#automatic-failover"><span class="level-left"><span class="level-item">6</span><span class="level-item">Replica Set 自动恢复</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#election"><span class="level-left"><span class="level-item">6.1</span><span class="level-item">Replica Set 选举</span></span></a></li><li><a class="level is-mobile" href="#rollback"><span class="level-left"><span class="level-item">6.2</span><span class="level-item">回滚</span></span></a></li></ul></li><li><a class="level is-mobile" href="#arbiter"><span class="level-left"><span class="level-item">7</span><span class="level-item">Arbiter</span></span></a></li><li><a class="level is-mobile" href="#结语"><span class="level-left"><span class="level-item">8</span><span class="level-item">结语</span></span></a></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/avatar.png" alt="Robert Peng&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2021 Robert Peng</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="我的 Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><script type="text/x-mathjax-config">MathJax.Hub.Config({
+            'HTML-CSS': {
+                matchFontHeight: false
+            },
+            SVG: {
+                matchFontHeight: false
+            },
+            CommonHTML: {
+                matchFontHeight: false
+            },
+            tex2jax: {
+                inlineMath: [
+                    ['$','$'],
+                    ['\\(','\\)']
+                ]
+            }
+        });</script><script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

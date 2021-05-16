@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Linux Bash 参考指南 - Robert Peng&#039;s Blog</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="呆呆的博客"><meta name="msapplication-TileImage" content="/img/avatar.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="呆呆的博客"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="我写这篇文章主要是用来作为我的 Linux Bash 工具书的，希望这篇文章对你也能起到同样的效果。随着我学习到更多有关 Linux Bash 的知识，我会不断地更新这篇文章。"><meta property="og:type" content="blog"><meta property="og:title" content="Linux Bash 参考指南"><meta property="og:url" content="https://mr-dai.github.io/linux_bash_reference/"><meta property="og:site_name" content="Robert Peng&#039;s Blog"><meta property="og:description" content="我写这篇文章主要是用来作为我的 Linux Bash 工具书的，希望这篇文章对你也能起到同样的效果。随着我学习到更多有关 Linux Bash 的知识，我会不断地更新这篇文章。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://mr-dai.github.io/img/og_image.png"><meta property="article:published_time" content="2017-12-25T16:00:00.000Z"><meta property="article:modified_time" content="2017-12-25T16:00:00.000Z"><meta property="article:author" content="Robert Peng"><meta property="article:tag" content="Linux"><meta property="article:tag" content="Bash"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://mr-dai.github.io/linux_bash_reference/"},"headline":"Linux Bash 参考指南","image":["https://mr-dai.github.io/img/og_image.png"],"datePublished":"2017-12-25T16:00:00.000Z","dateModified":"2017-12-25T16:00:00.000Z","author":{"@type":"Person","name":"Robert Peng"},"publisher":{"@type":"Organization","name":"Robert Peng's Blog","logo":{"@type":"ImageObject","url":"https://mr-dai.github.io/img/avatar.png"}},"description":"我写这篇文章主要是用来作为我的 Linux Bash 工具书的，希望这篇文章对你也能起到同样的效果。随着我学习到更多有关 Linux Bash 的知识，我会不断地更新这篇文章。"}</script><link rel="canonical" href="https://mr-dai.github.io/linux_bash_reference/"><link rel="icon" href="/img/avatar.png"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css"><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/avatar.png" alt="Robert Peng&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">首页</a><a class="navbar-item" href="/categories">分类</a><a class="navbar-item" href="/tags">标签</a><a class="navbar-item" href="/about">关于</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="我的 Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2017-12-25T16:00:00.000Z" title="12/25/2017, 4:00:00 PM">2017-12-26</time>发表</span><span class="level-item"><time dateTime="2017-12-25T16:00:00.000Z" title="12/25/2017, 4:00:00 PM">2017-12-26</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/Linux/">Linux</a></span></div></div><h1 class="title is-3 is-size-4-mobile">Linux Bash 参考指南</h1><div class="content"><p>我写这篇文章主要是用来作为我的 Linux Bash 工具书的，希望这篇文章对你也能起到同样的效果。随着我学习到更多有关 Linux Bash 的知识，我会不断地更新这篇文章。</p>
+<span id="more"></span>
+
+<p>本文的内容假设你对 Linux 和 Linux 命令行有基本的了解。如果你没有的话，你可以去看看<a target="_blank" rel="noopener" href="http://linuxcommand.org/lc3_learning_the_shell.php">这篇教程</a>。</p>
+<p>本文的内容分为三个主要部分：</p>
+<ol>
+<li>Linux Shell 脚本编程</li>
+<li>Linux Bash 内置命令</li>
+<li>常见的轻量级 Linux 命令工具</li>
+</ol>
+<p>让我们开始吧</p>
+<h2 id="第一部分：脚本编程"><a href="#第一部分：脚本编程" class="headerlink" title="第一部分：脚本编程"></a>第一部分：脚本编程</h2><p>在这一部分中，我会介绍 Linux Shell 脚本编程的基本语法，并在其中穿插一些对日常工作有所帮助的代码示例。这些代码示例能在大部分 POSIX Shell 解释器上运行，但如果这些代码对于某些如 Bash 的特殊 Shell 解释器有更好的写法的话，文中也会一并给出。</p>
+<h3 id="1-1-基本使用"><a href="#1-1-基本使用" class="headerlink" title="1.1 基本使用"></a>1.1 基本使用</h3><p>在 Shell 解释器执行脚本文件时，它实际上会考虑脚本文件中给出的控制流语句，并一行一行地从脚本文件中读入命令并执行。如此，如果你知道怎么使用 Shell 命令行的话，一个 Shell 脚本文件的基本组成对你来说实际上是很直观的。</p>
+<p>如下是一段简单的 Hello World 示例：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="comment"># My first script</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;Hello, world!&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><a href="#she-bang"></a>上述脚本文件的第一行被称为 <b><abbr title="# 号和 ! 号的英文发音组合">She-Bang</abbr> 注释</b>，以 <code>#!</code> 开头。这行注释能告诉 Shell 该用哪个解释器程序来解释这个脚本文件。在上面的示例中，我们使用了 <code>/bin/sh</code> 来解释这个文件。如果你想要用除了 Shell 以外的解释器来执行文件的话，你也可以在这行注释中指定别的解释器程序，例如 <code>#!/bin/env python</code> 可以用来执行 Python 文件。</p>
+<p><a href="#comment"></a>第二行则是一般的<strong>行注释</strong>，以 <code>#</code> 开头。行注释是 Shell 支持的唯一一种注释形式，也就是说 Shell 不支持块注释。Shell 解释器在运行时会忽略注释，注释里的内容通常都是写给其他人类读者的。</p>
+<p>除了注释，一个 Shell 脚本文件由若干个命令组成，正是这些命令告诉解释器接下来该做什么。在 Shell 脚本文件中使用的命令和你平常在命令行中使用的命令完全一致。如果你不知道你可以使用哪些命令以及如何使用这些命令，你可以去看看本文的后面几个部分的内容，或者直接使用 <code>man</code> 命令来查看相关文档。</p>
+<h3 id="1-2-标准输入和标准输出"><a href="#1-2-标准输入和标准输出" class="headerlink" title="1.2 标准输入和标准输出"></a>1.2 标准输入和标准输出</h3><p>标准输入和标准输出是你的脚本与用户进行交互的主要方式。</p>
+<p>正如你在上面的示例中看到的那样，<code>echo</code> 命令可以用来产生标准输出，而从标准输入中读取内容则可以通过 <code>read</code> 命令完成：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> -n <span class="string">&quot;Enter some text &gt; &quot;</span></span><br><span class="line"><span class="built_in">read</span> text</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;You entered: <span class="variable">$text</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>read</code> 命令接受一个变量名作为参数。在运行时，它会扫描标准输入中的内容并将其保存到指定名称的变量中。你可以在后续的代码中使用 <code>$</code> 记号读取该变量的值。</p>
+<p>有关 <code>echo</code> 和 <code>read</code> 命令更多高级的用法，详见 <code>help echo</code> 和 <code>help read</code>。</p>
+<h3 id="1-3-命令行参数"><a href="#1-3-命令行参数" class="headerlink" title="1.3 命令行参数"></a>1.3 命令行参数</h3><p>除了标准输入和标准输出以外，用户还可以在运行你的脚本文件时指定命令行参数，而命令行参数通常会被用于进行简单的配置。</p>
+<p>在你的脚本代码中，你可以：</p>
+<ul>
+<li>使用变量 <code>$#</code> 获取用户给定命令行参数的数量</li>
+<li>使用从 <code>$1</code> 到 <code>$9</code> 逐个获取用户给定的命令行参数，或者</li>
+<li>使用 <code>$@</code> 变量将用户输入的所有命令行参数读取为一个数组</li>
+</ul>
+<p>值得一提的是，你还可以使用一个特殊的 <code>$0</code> 参数，它包含了正在运行的脚本文件在系统中的<strong>绝对路径</strong>，而且它的值不会被包含在 <code>$@</code> 变量中。</p>
+<h3 id="1-4-函数"><a href="#1-4-函数" class="headerlink" title="1.4 函数"></a>1.4 函数</h3><p>就像其他编程语言一样，你还可以在 Shell 脚本中定义函数以减少代码冗余。</p>
+<p>Shell 函数有两种定义方式：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="built_in">print</span> &#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Received <span class="variable">$@</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">another_print</span></span>() &#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Received <span class="variable">$@</span>&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span> Hello</span><br><span class="line">another_print hello</span><br></pre></td></tr></table></figure>
+
+<p>两种方式的效果完全一致。</p>
+<p>调用函数的方式和你调用其他的命令的方式完全一致。在函数中你同样可以使用 <code>$1</code> 到 <code>$9</code> 、 <code>$@</code> 、 <code>$#</code> 等变量获取函数调用时给定的参数。</p>
+<h3 id="1-5-退出状态码"><a href="#1-5-退出状态码" class="headerlink" title="1.5 退出状态码"></a>1.5 退出状态码</h3><p>有时，你的脚本文件可能会因为一些原因而不能成功执行，这时你可能会想要告诉你的用户具体发生了什么错误。除了通过 <code>echo</code> 命令将错误信息打印到错误输出以外，你还可以使用 <code>exit</code> 指令来以非零的退出状态码结束你的脚本：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">PROGNAME=$(basename <span class="variable">$0</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="title">error_exit</span></span>() &#123;</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$&#123;PROGNAME&#125;</span>: <span class="variable">$&#123;1:-&quot;Unknown Error&quot;&#125;</span>&quot;</span> 1&gt;&amp;2</span><br><span class="line">    <span class="built_in">exit</span> 1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Example of error with line number and message&quot;</span></span><br><span class="line">error_exit <span class="string">&quot;<span class="variable">$LINENO</span>: An error has occurred.&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>函数则可以通过使用 <code>return</code> 命令来返回指定的值并结束自身的运行，而不至于结束整个脚本。</p>
+<p>你在任何使用都可以通过访问变量 <code>$?</code> 来获取上一个指定的命令的退出状态码或上一个指定的函数的返回值。</p>
+<p>请通过查阅 <code>help exit</code> 和 <code>help return</code> 来了解更多有关内容。</p>
+<h3 id="1-6-控制流语句"><a href="#1-6-控制流语句" class="headerlink" title="1.6 控制流语句"></a>1.6 控制流语句</h3><p>除了那些你能在命令行中使用的命令以外，你还可以在脚本中使用控制流语句来实现更加复杂的功能。Shell 所支持的控制流语句和你在其他编程语言中用的很相似，包括 <code>if</code> 、 <code>case</code> 、 <code>for</code> 、 <code>while</code> 和 <code>until</code>。</p>
+<h4 id="1-6-1-If"><a href="#1-6-1-If" class="headerlink" title="1.6.1 If"></a>1.6.1 If</h4><p><code>if</code> 语句可以让你的脚本文件只在满足某个指定条件时才执行某段代码：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> [ <span class="string">&quot;<span class="variable">$#</span>&quot;</span> -e 0 ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Received nothing&quot;</span></span><br><span class="line"><span class="keyword">elif</span> [ <span class="string">&quot;<span class="variable">$#</span>&quot;</span> -e 1 ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Received one argument: <span class="variable">$1</span>&quot;</span></span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Received arguments: <span class="variable">$@</span>&quot;</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<p>你可以使用任意命令作为 <code>if</code> 的条件，如果命令的退出码为零那么 <code>if</code> 就会认为条件满足。请查阅 <code>help if</code> 了解更多有关内容。</p>
+<p>通常，我们会使用类似 <code>[ &quot;$#&quot; -e 1 ]</code> 这样的简写方式来使用 <code>test</code> 命令，声明数值比较或是其他在 Linux 中常见的条件，例如指定路径指向的是一个文件或是一个目录。该简写等价于 <code>test &quot;$#&quot; -e 1</code>。请查阅 <code>help test</code> 来了解除 <code>-e</code> 以外的条件运算。</p>
+<blockquote>
+<p>在某些 Shell 上（包括 Bash、Zsh 和 Ksh），你还可以以双中括号的形式声明条件，如 <code>[[ a != b ]]</code>。这种写法并非由 POSIX 标准给出，且只被一部分 Shell 支持。这样的写法比起原生的 <code>test</code> 命令更加安全，原因在于它不会在执行前对给定的参数进行展开，但这样的写法无疑会导致你的脚本的可移植性下降。请查阅 <code>help [[</code> 和<a target="_blank" rel="noopener" href="http://mywiki.wooledge.org/BashFAQ/031">这篇文章</a>了解更多有关内容。</p>
+</blockquote>
+<p>你还可以使用 <code>&amp;&amp;</code> 和 <code>||</code> 来对多个 <code>test</code> 命令的结果进行组合。这些运算符同样支持在其他编程语言中常见的短路功能，而这样的功能可以被用来将某些简单的条件检查语句变得更加简短。例如，<code>[ 2 -gt 1 ] &amp;&amp; echo &#39;ok&#39;</code> 等价于如下代码片段：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> [ 2 -gt 1 ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&#x27;ok&#x27;</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+
+<p>除了中括号以外，大括号也可以被用来声明条件语句。请查阅<a target="_blank" rel="noopener" href="https://unix.stackexchange.com/questions/306111/confused-about-operators-vs-vs-vs">这篇文章</a>了解更多有关内容。</p>
+<h4 id="1-6-2-Case"><a href="#1-6-2-Case" class="headerlink" title="1.6.2 Case"></a>1.6.2 Case</h4><p><code>case</code> 语句的功能和其他编程语言中的 <code>switch</code> 语句大致相同。它会用给定的字符串与若干个 <strong>Glob 模式</strong>进行匹配，并在满足匹配时执行对应的命令。一个简单的 <code>case</code> 语句示例如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> <span class="variable">$character</span> <span class="keyword">in</span></span><br><span class="line">    [[:lower:]] | [[:upper:]] ) <span class="built_in">echo</span> <span class="string">&quot;You typed the letter <span class="variable">$character</span>&quot;</span>;;</span><br><span class="line">    [0-9] )                     <span class="built_in">echo</span> <span class="string">&quot;You typed the digit <span class="variable">$character</span>&quot;</span>;;</span><br><span class="line">    * )                         <span class="built_in">echo</span> <span class="string">&quot;You did not type a letter or a digit&quot;</span></span><br><span class="line"><span class="keyword">esac</span></span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是，我们需要使用一个右括号（<code>)</code>）来分隔 Glob 模式和对应的命令，并在除了最后一个分支以外的其他每以个 <code>case</code> 分支的最后一个命令的末尾加上两个分号（<code>;;</code>）。</p>
+<h4 id="1-6-3-While"><a href="#1-6-3-While" class="headerlink" title="1.6.3 While"></a>1.6.3 While</h4><p><code>while</code> 语句可以被用来循环执行指定的命令，直到给定的条件不满足：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">number=0</span><br><span class="line"><span class="keyword">while</span> [ <span class="string">&quot;<span class="variable">$number</span>&quot;</span> -lt 10 ]; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Number = <span class="variable">$number</span>&quot;</span></span><br><span class="line">    number=$((number + <span class="number">1</span>))</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="1-6-4-Until"><a href="#1-6-4-Until" class="headerlink" title="1.6.4 Until"></a>1.6.4 Until</h4><p><code>until</code> 语句的作用和 <code>while</code> 语句十分相似，但它会在给定的条件满足时结束循环：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">number=0</span><br><span class="line">until [ <span class="string">&quot;<span class="variable">$number</span>&quot;</span> -ge 10 ]; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Number = <span class="variable">$number</span>&quot;</span></span><br><span class="line">    number=$((number + <span class="number">1</span>))</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="1-6-5-For"><a href="#1-6-5-For" class="headerlink" title="1.6.5 For"></a>1.6.5 For</h4><p><code>for</code> 语句可以用来遍历给定的数组：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> argument <span class="keyword">in</span> <span class="string">&quot;<span class="variable">$@</span>&quot;</span>; <span class="keyword">do</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;Received <span class="variable">$argument</span>&quot;</span></span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="第二部分：Bash-Shell-内置命令"><a href="#第二部分：Bash-Shell-内置命令" class="headerlink" title="第二部分：Bash Shell 内置命令"></a>第二部分：Bash Shell 内置命令</h2><p>本部分将主要描述 Bash Shell 各个内置命令（Built-in Command）的作用及用法。要初步了解这些命令，我们可以首先使用 <code>help</code> 命令来查看 Bash Shell 支持的所有内置命令和简单的文档。</p>
+<h3 id="dirs、pushd、popd"><a href="#dirs、pushd、popd" class="headerlink" title="dirs、pushd、popd"></a>dirs、pushd、popd</h3><p>Bash 提供了一套以栈/链表管理你曾经进入的路径的方式，方便你在不同的路径间跳转，相关的管理命令包括 <code>dirs</code>、<code>pushd</code>、<code>popd</code>。</p>
+<p>首先，Bash 使用了链表来实现这个先入先出的栈行为，而 <code>dirs</code> 命令能把该链表的内容完整地打印出来：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ help dirs</span><br><span class="line">dirs: dirs [-clpv] [+N] [-N]</span><br><span class="line">    Display directory stack.</span><br><span class="line"></span><br><span class="line">    Display the list of currently remembered directories.  Directories</span><br><span class="line">    find their way onto the list with the `pushd&#x27; command; you can get</span><br><span class="line">    back up through the list with the `popd&#x27; command.</span><br><span class="line"></span><br><span class="line">    Options:</span><br><span class="line">      -c        clear the directory stack by deleting all of the elements</span><br><span class="line">      -l        do not print tilde-prefixed versions of directories relative</span><br><span class="line">        to your home directory</span><br><span class="line">      -p        print the directory stack with one entry per line</span><br><span class="line">      -v        print the directory stack with one entry per line prefixed</span><br><span class="line">        with its position in the stack</span><br><span class="line"></span><br><span class="line">    Arguments:</span><br><span class="line">      +N        Displays the Nth entry counting from the left of the list shown by</span><br><span class="line">        dirs when invoked without options, starting with zero.</span><br><span class="line"></span><br><span class="line">      -N        Displays the Nth entry counting from the right of the list shown by</span><br><span class="line">        dirs when invoked without options, starting with zero.</span><br><span class="line"></span><br><span class="line">    Exit Status:</span><br><span class="line">    Returns success unless an invalid option is supplied or an error occurs.</span><br></pre></td></tr></table></figure>
+
+<p>简单来讲，用户在使用 <code>dirs</code> 查看链表内容的同时，可以通过 <code>-p</code>、<code>-v</code> 选项调整 <code>dirs</code> 的输出样式，通过 <code>+N</code>、<code>-N</code> 参数指定 <code>dirs</code> 只输出链表某部分的内容，甚至使用 <code>-c</code> 选项清空链表。</p>
+<p>值得注意的是，<code>dirs -c</code> 以及后面会提到的 <code>popd</code> 命令并不能真正地清空链表内容：当链表内容变为空后，Bash 会自动将当前目录放入到链表中，成为链表中仅有的元素。</p>
+<p><code>dirs</code> 的帮助信息中也提到，用户可使用 <code>pushd</code> 和 <code>popd</code> 管理链表中的元素。首先先来看 <code>pushd</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">$ help pushd</span><br><span class="line">pushd: pushd [-n] [+N | -N | dir]</span><br><span class="line">    Add directories to stack.</span><br><span class="line"></span><br><span class="line">    Adds a directory to the top of the directory stack, or rotates</span><br><span class="line">    the stack, making the new top of the stack the current working</span><br><span class="line">    directory.  With no arguments, exchanges the top two directories.</span><br><span class="line"></span><br><span class="line">    Options:</span><br><span class="line">      -n        Suppresses the normal change of directory when adding</span><br><span class="line">        directories to the stack, so only the stack is manipulated.</span><br><span class="line"></span><br><span class="line">    Arguments:</span><br><span class="line">      +N        Rotates the stack so that the Nth directory (counting</span><br><span class="line">        from the left of the list shown by `dirs&#x27;, starting with</span><br><span class="line">        zero) is at the top.</span><br><span class="line"></span><br><span class="line">      -N        Rotates the stack so that the Nth directory (counting</span><br><span class="line">        from the right of the list shown by `dirs&#x27;, starting with</span><br><span class="line">        zero) is at the top.</span><br><span class="line"></span><br><span class="line">      dir       Adds DIR to the directory stack at the top, making it the</span><br><span class="line">        new current working directory.</span><br><span class="line"></span><br><span class="line">    The `dirs&#x27; builtin displays the directory stack.</span><br><span class="line"></span><br><span class="line">    Exit Status:</span><br><span class="line">    Returns success unless an invalid argument is supplied or the directory</span><br><span class="line">    change fails.</span><br></pre></td></tr></table></figure>
+
+<p>简单来讲，<code>pushd</code> 会对链表进行一定的操作，然后将当前目录改为目前位于链表左端（栈顶部）的目录。根据用户给定参数的不同，<code>pushd</code> 有三种运行模式：</p>
+<ol>
+<li>用户未给定参数，那么 <code>pushd</code> 交换链表最左侧的两个元素</li>
+<li>用户给定了一个路径，那么 <code>pushd</code> 将该路径放入到链表最左侧</li>
+<li>用户给定 <code>+N</code> 或 <code>-N</code>，实际上意味着用户指定了链表中的某一个元素（<code>N</code> 为从 <code>0</code> 开始的索引值；<code>+N</code> 意味着从左端数起，<code>-N</code> 则从右端数起），然后 <code>pushd</code> 会对链表进行旋转（最右端的元素离开链表，再将其放入到链表的左端），直到用户指定的元素到达链表最左侧 </li>
+</ol>
+<p>用户可以通过 <code>-n</code> 选项让 <code>pushd</code> 在对链表进行操作后不改变当前目录。</p>
+<p>最后再来看看 <code>popd</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">$ help popd</span><br><span class="line">popd: popd [-n] [+N | -N]</span><br><span class="line">    Remove directories from stack.</span><br><span class="line"></span><br><span class="line">    Removes entries from the directory stack.  With no arguments, removes</span><br><span class="line">    the top directory from the stack, and changes to the new top directory.</span><br><span class="line"></span><br><span class="line">    Options:</span><br><span class="line">      -n        Suppresses the normal change of directory when removing</span><br><span class="line">        directories from the stack, so only the stack is manipulated.</span><br><span class="line"></span><br><span class="line">    Arguments:</span><br><span class="line">      +N        Removes the Nth entry counting from the left of the list</span><br><span class="line">        shown by `dirs&#x27;, starting with zero.  For example: `popd +0&#x27;</span><br><span class="line">        removes the first directory, `popd +1&#x27; the second.</span><br><span class="line"></span><br><span class="line">      -N        Removes the Nth entry counting from the right of the list</span><br><span class="line">        shown by `dirs&#x27;, starting with zero.  For example: `popd -0&#x27;</span><br><span class="line">        removes the last directory, `popd -1&#x27; the next to last.</span><br><span class="line"></span><br><span class="line">    The `dirs&#x27; builtin displays the directory stack.</span><br><span class="line"></span><br><span class="line">    Exit Status:</span><br><span class="line">    Returns success unless an invalid argument is supplied or the directory</span><br><span class="line">    change fails.</span><br></pre></td></tr></table></figure>
+
+<p>类似，<code>popd</code> 会根据用户指定的参数对链表中的元素进行删除，然后把当前目录改为链表最左侧的元素。根据用户指定参数的不同，<code>popd</code> 也有三种运行模式：</p>
+<ol>
+<li>若用户没有指定参数，那么 <code>popd</code> 移除链表最左侧的元素</li>
+<li>若用户指定参数 <code>+N</code>，那么 <code>popd</code> 移除链表最左侧的第 <code>N+1</code> 个元素</li>
+<li>若用户指定参数 <code>-N</code>，那么 <code>popd</code> 移除链表最右侧的第 <code>N+1</code> 个元素</li>
+</ol>
+<p>同样，<code>popd</code> 也支持 <code>-n</code> 参数，使得其在对链表完成操作后不改变当前目录。</p>
+<h3 id="exec"><a href="#exec" class="headerlink" title="exec"></a>exec</h3><p>我们先来看 <code>help exec</code> 给出的信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">exec: exec [-cl] [-a name] [command [arguments ...]] [redirection ...]</span><br><span class="line">    Replace the shell with the given command.</span><br><span class="line"></span><br><span class="line">    Execute COMMAND, replacing this shell with the specified program.</span><br><span class="line">    ARGUMENTS become the arguments to COMMAND.  If COMMAND is not specified,</span><br><span class="line">    any redirections take effect in the current shell.</span><br><span class="line"></span><br><span class="line">    Options:</span><br><span class="line">      -a name   pass NAME as the zeroth argument to COMMAND</span><br><span class="line">      -c                execute COMMAND with an empty environment</span><br><span class="line">      -l                place a dash in the zeroth argument to COMMAND</span><br><span class="line"></span><br><span class="line">    If the command cannot be executed, a non-interactive shell exits, unless</span><br><span class="line">    the shell option `execfail&#x27; is set.</span><br><span class="line"></span><br><span class="line">    Exit Status:</span><br><span class="line">    Returns success unless COMMAND is not found or a redirection error occurs.</span><br></pre></td></tr></table></figure>
+
+<p>文档中实际上给出了颇为完整的信息：<code>exec</code> 命令可以直接将当前进程运行的 Shell 程序替换为由给定命令指定的程序，新的程序则可以访问当前 Shell 已经设定好的环境变量。该命令仅提供了 <code>-a</code> 、 <code>-c</code> 、 <code>-l</code> 三个选项，其中 <code>-a</code> 和 <code>-l</code> 选项均用于对指定程序的 <code>$0</code> 参数进行改动，而 <code>-c</code> 选项则可以屏蔽所有环境变量，让指定程序在一个干净的环境中运行。</p>
+<p>除此以外，<code>exec</code> 命令还允许你在不指定具体命令的情况下指定重定向，这种情况下重定向操作将直接作用于当前 Shell。很多时候，你可以在你的脚本文件中使用 <code>exec 1&gt; out 2&gt;&amp;1</code> 命令，这样该脚本文件后续的输出就会被导向到指定的文件中。</p>
+<blockquote>
+<p><strong>警告</strong>：尝试在当前 Shell 中使用 <code>exec</code> 对标准输出进行重定向时一定要小心，这有可能导致很多程序无法正常运行。建议在执行前先使用如 <code>exec 3&gt;&amp;1</code> 命令将标准输出保存到其他文件描述符中，以便后续恢复。</p>
+</blockquote>
+<h3 id="export"><a href="#export" class="headerlink" title="export"></a>export</h3><p>我们先来看看 <code>help export</code> 给出的信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ help export</span><br><span class="line">export: export [-fn] [name[=value] ...] or export -p</span><br><span class="line">    Set export attribute for shell variables.</span><br><span class="line"></span><br><span class="line">    Marks each NAME for automatic export to the environment of subsequently</span><br><span class="line">    executed commands.  If VALUE is supplied, assign VALUE before exporting.</span><br><span class="line"></span><br><span class="line">    Options:</span><br><span class="line">      -f        refer to shell functions</span><br><span class="line">      -n        remove the export property from each NAME</span><br><span class="line">      -p        display a list of all exported variables and functions</span><br><span class="line"></span><br><span class="line">    An argument of `--&#x27; disables further option processing.</span><br><span class="line"></span><br><span class="line">    Exit Status:</span><br><span class="line">    Returns success unless an invalid option is given or NAME is invalid.</span><br></pre></td></tr></table></figure>
+
+<p>对于常用的变量设置而言，相比起一般的 <code>FOO=bar</code> 的变量设置方式，<code>export FOO=bar</code> 会使得当前 Shell 的子进程（包括该 Shell 调用的其他程序/文件）也可以访问该变量，因此设置环境变量时我们都会使用 <code>export</code> 指令来进行设置。</p>
+<p>相比于常见的 <code>export FOO=bar</code> 用法，<code>export</code> 实际上可以接受若干对由空格分隔的变量键值对；若不给定变量的值，<code>export</code> 会把当前 Shell 已给该变量设定的值（默认为空）进行导出；<code>-n</code> 选项可以移除指定的 <code>export</code> 变量；<code>export -p</code> 能够打印当前已经 <code>export</code> 的变量；若使用 <code>-f</code> 选项，<code>export</code> 指令会把指定的 <code>name</code> 当做 Shell 函数而不是变量进行导出。</p>
+<h3 id="set"><a href="#set" class="headerlink" title="set"></a>set</h3><p>我们先来看看 <code>help set</code> 给出的信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">set: set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]         </span><br><span class="line">    Set or unset values of shell options and positional parameters.   </span><br><span class="line">                                                                      </span><br><span class="line">    Change the value of shell attributes and positional parameters, or</span><br><span class="line">    display the names and values of shell variables.</span><br><span class="line"></span><br><span class="line">    Options:</span><br><span class="line">      ...</span><br><span class="line"></span><br><span class="line">    Using + rather than - causes these flags to be turned off.  The</span><br><span class="line">    flags can also be used upon invocation of the shell.  The current</span><br><span class="line">    set of flags may be found in $-.  The remaining n ARGs are positional</span><br><span class="line">    parameters and are assigned, in order, to $1, $2, .. $n.  If no</span><br><span class="line">    ARGs are given, all shell variables are printed.</span><br><span class="line"></span><br><span class="line">    Exit Status:</span><br><span class="line">    Returns success unless an invalid option is given.</span><br></pre></td></tr></table></figure>
+
+<p>此处仅截取了完整 <code>help</code> 信息首位两段的内容。可见，<code>set</code> 命令可以修改当前 Shell 程序的启动选项和位置参数。我们可以通过 <code>$-</code> 变量访问当前 Shell 的启动选项，同样也可以通过 <code>$1</code> 等变量访问当前位置参数。</p>
+<p><code>set</code> 命令允许我们配置的这些选项多数都能用于开关 Shell 的某些功能，比如我们常用的 <code>-x</code> 能够在命令执行时将命令打印到标准输出，<code>-v</code> 则会回显输入的文本。在选项打开后我们还可以使用对应的 <code>+</code> 写法取消这些选项，例如用 <code>set +x</code> 取消 <code>set -x</code> 的效果。这些开关选项同样可以作为 Shell 的启动选项进行配置，例如我们可以将脚本文件的 She-Bang 注释写为 <code>#!/bin/sh -x</code> 来达到同样的效果。</p>
+<p>我们回忆一下 <code>set</code> 命令的标准格式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set [-abefhkmnptuvxBCHP] [-o option-name] [--] [arg ...]</span><br></pre></td></tr></table></figure>
+
+<p>可见 <code>set</code> 支持很多的选项，其中包括一个特殊的 <code>-o</code> 选项、 <code>--</code> 以及剩下的参数。接下来我会先简单说说除 <code>-o</code> 外每一个选项的作用：</p>
+<table>
+<thead>
+<tr>
+<th>选项名</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>a</code></td>
+<td>创建和修改变量时会同样将其 <code>export</code> 为环境变量</td>
+</tr>
+<tr>
+<td><code>b</code></td>
+<td>在任务终止时立刻打印通知</td>
+</tr>
+<tr>
+<td><code>e</code></td>
+<td>Shell 在其中一个命令返回非零退出状态码时立刻退出。用于脚本文件时能让你的脚本在其中一个命令发生错误时立刻结束执行</td>
+</tr>
+<tr>
+<td><code>f</code></td>
+<td>关闭 Glob 模式展开</td>
+</tr>
+<tr>
+<td><code>h</code></td>
+<td>在查找到命令后记住它们所在的位置</td>
+</tr>
+<tr>
+<td><code>k</code></td>
+<td>所有以复制形式指定的参数都将作为命令的环境变量，而不仅仅是位于命令前面的那些</td>
+</tr>
+<tr>
+<td><code>m</code></td>
+<td>开启作业管理功能</td>
+</tr>
+<tr>
+<td><code>n</code></td>
+<td>读取命令但不执行。适用于对脚本文件进行语法检查。对交互式 Shell 不起作用</td>
+</tr>
+<tr>
+<td><code>p</code></td>
+<td>该选项会在当前用户 ID 与实际用户 ID 不同时被开启，开启后会不再处理 $ENV 文件，也不会导入 Shell 函数。关闭该选项会使得当前用户 ID 和组 ID 被设置为实际用户 ID 和组 ID</td>
+</tr>
+<tr>
+<td><code>t</code></td>
+<td>在读取并执行一个命令后退出 Shell</td>
+</tr>
+<tr>
+<td><code>u</code></td>
+<td>将尝试读取未设定的变量的行为视为错误。在当前 Shell 设定该选项可能导致 Tab 键命令自动补全功能发生错误</td>
+</tr>
+<tr>
+<td><code>v</code></td>
+<td>在读取到一行 Shell 输入时将其重新打印到错误输出。作用于 Shell 脚本时，解释器会把读入的每一行命令打印到错误输出</td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td>在运行命令前将命令和其参数打印到标准输出。Shell 在执行命令前可能会考虑 <code>alias</code> 并对你输入的文本进行展开，启动该选项后所打印的命令将是 Shell 在完成上述预处理后实际执行的命令</td>
+</tr>
+<tr>
+<td><code>B</code></td>
+<td>启动 Shell 的大括号展开功能</td>
+</tr>
+<tr>
+<td><code>C</code></td>
+<td>禁止使用输出重定向覆写已存在的文件</td>
+</tr>
+<tr>
+<td><code>E</code></td>
+<td>Shell 函数将继承 ERR 陷入</td>
+</tr>
+<tr>
+<td><code>H</code></td>
+<td>开启 <code>!</code> 式的历史命令展开功能。该选项在互动式 Shell 下默认开启</td>
+</tr>
+<tr>
+<td><code>P</code></td>
+<td>启动后不会在执行命令时解析符号链接</td>
+</tr>
+<tr>
+<td><code>T</code></td>
+<td>Shell 函数会继承 DEBUG 陷入</td>
+</tr>
+</tbody></table>
+<p>除了这些选项以外，我们还可以通过 <code>-o</code> 选项来指定选项。实际上，上述选项一一对应着 <code>-o</code> 所支持的选项，<code>-o</code> 所支持的多数选项可被视为上述选项的全称。我们通过 <code>-o &lt;name&gt;</code> 来开启对应名称的选项，并通过 <code>+o &lt;name&gt;</code> 关闭。支持的选项名称包括如下：</p>
+<table>
+<thead>
+<tr>
+<th>选项名称</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>allexport</code></td>
+<td>等同于 <code>-a</code></td>
+</tr>
+<tr>
+<td><code>braceexpand</code></td>
+<td>等同于 <code>-B</code></td>
+</tr>
+<tr>
+<td><code>emacs</code></td>
+<td>使用 Emacs 风格的行编辑命令行接口</td>
+</tr>
+<tr>
+<td><code>errexit</code></td>
+<td>等同于 <code>-e</code></td>
+</tr>
+<tr>
+<td><code>errtrace</code></td>
+<td>等同于 <code>-E</code></td>
+</tr>
+<tr>
+<td><code>functrace</code></td>
+<td>等同于 <code>-T</code></td>
+</tr>
+<tr>
+<td><code>hashall</code></td>
+<td>等同于 <code>-h</code></td>
+</tr>
+<tr>
+<td><code>histexpand</code></td>
+<td>等同于 <code>-H</code></td>
+</tr>
+<tr>
+<td><code>history</code></td>
+<td>启动历史命令功能</td>
+</tr>
+<tr>
+<td><code>ignoreeof</code></td>
+<td>当前 Shell 在读取到 EOF 后不会退出</td>
+</tr>
+<tr>
+<td><code>interactive-comments</code></td>
+<td>允许在互动式命令中输入注释</td>
+</tr>
+<tr>
+<td><code>keyword</code></td>
+<td>等同于 <code>-k</code></td>
+</tr>
+<tr>
+<td><code>monitor</code></td>
+<td>等同于 <code>-m</code></td>
+</tr>
+<tr>
+<td><code>noclobber</code></td>
+<td>等同于 <code>-C</code></td>
+</tr>
+<tr>
+<td><code>noexec</code></td>
+<td>等同于 <code>-n</code></td>
+</tr>
+<tr>
+<td><code>noglob</code></td>
+<td>等同于 <code>-f</code></td>
+</tr>
+<tr>
+<td><code>nolog</code></td>
+<td>无作用</td>
+</tr>
+<tr>
+<td><code>notify</code></td>
+<td>等同于 <code>-b</code></td>
+</tr>
+<tr>
+<td><code>nounset</code></td>
+<td>等同于 <code>-u</code></td>
+</tr>
+<tr>
+<td><code>onecmd</code></td>
+<td>等同于 <code>-t</code></td>
+</tr>
+<tr>
+<td><code>physical</code></td>
+<td>等同于 <code>-P</code></td>
+</tr>
+<tr>
+<td><code>pipefail</code></td>
+<td>管道中最后一个返回非零退出状态码的命令的退出状态码将作为该管道命令的返回值，若所有命令的退出状态码都为零则返回零</td>
+</tr>
+<tr>
+<td><code>posix</code></td>
+<td>改变 Bash 与 POSIX 标准不同的行为以严格遵循 POSIX 标准</td>
+</tr>
+<tr>
+<td><code>privileged</code></td>
+<td>等同于 <code>-p</code></td>
+</tr>
+<tr>
+<td><code>verbose</code></td>
+<td>等同于 <code>-v</code></td>
+</tr>
+<tr>
+<td><code>vi</code></td>
+<td>使用 Vi 风格的行编辑命令行接口</td>
+</tr>
+<tr>
+<td><code>xtrace</code></td>
+<td>等同于 <code>-x</code></td>
+</tr>
+</tbody></table>
+<p>除了上述选项，<code>set</code> 命令还允许在选项后接上 <code>--</code> 或 <code>-</code> 以及其余参数作为 Shell 的当前位置参数，其中：</p>
+<ul>
+<li>使用 <code>--</code> 时，若后续未给出参数，则当前位置参数会被清空</li>
+<li>使用 <code>-</code> 时，<code>-x</code> 和 <code>-v</code> 选项会被关闭</li>
+</ul>
+<h3 id="source"><a href="#source" class="headerlink" title="source"></a>source</h3><p>我们先来看看 <code>help source</code> 给出的信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ help source</span><br><span class="line">source: source filename [arguments]</span><br><span class="line">    Execute commands from a file in the current shell.</span><br><span class="line"></span><br><span class="line">    Read and execute commands from FILENAME in the current shell.  The</span><br><span class="line">    entries in $PATH are used to find the directory containing FILENAME.</span><br><span class="line">    If any ARGUMENTS are supplied, they become the positional parameters</span><br><span class="line">    when FILENAME is executed.</span><br><span class="line"></span><br><span class="line">    Exit Status:</span><br><span class="line">    Returns the status of the last command executed in FILENAME; fails if</span><br><span class="line">    FILENAME cannot be read.</span><br></pre></td></tr></table></figure>
+
+<p>可见，相比起一般的文件运行，<code>source</code> 会把指定文件中的指令读入到当前的 Shell 中并执行。这种运行方式与在子进程/子 Shell 中运行的方式相比，在部分行为上会有所不同，例如若文件中使用了 <code>exit</code> 指令，当前的 Shell 也会被退出，导致后面的指令无法被执行；有时为了令某个文件中的 <code>export</code> 指令在当前 Shell 中生效，也会需要使用 <code>source</code> 命令来运行该文件，这种用法常见于 <code>.bashrc</code>、<code>/etc/profile</code> 等会为 Bash 设置环境变量的文件。</p>
+<p>除外，<code>source</code> 命令还有一个简写形式，为 <code>.</code>，即 <code>. some_file</code> 等价于 <code>source some_file</code>。 </p>
+<h2 id="第三部分：小型命令行工具"><a href="#第三部分：小型命令行工具" class="headerlink" title="第三部分：小型命令行工具"></a>第三部分：小型命令行工具</h2><h3 id="free"><a href="#free" class="headerlink" title="free"></a>free</h3><p><code>free</code> 命令可用于查看系统当前的内存使用情况。典型的 <code>free</code> 输出如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ free</span><br><span class="line">              total        used        free      shared  buff/cache   available</span><br><span class="line">Mem:        8312948     5037412     3039060       17720      236476     3134680</span><br><span class="line">Swap:      25165824       58460    25107364</span><br></pre></td></tr></table></figure>
+
+<p>通过 <code>man free</code> 可以查看 <code>free</code> 的详细介绍。首先：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">NAME</span><br><span class="line">       free - Display amount of free and used memory in the system</span><br><span class="line"></span><br><span class="line">SYNOPSIS</span><br><span class="line">       free [options]</span><br><span class="line"></span><br><span class="line">DESCRIPTION</span><br><span class="line">       free  displays  the  total amount of free and used physical and swap memory in the system, as well as the buffers and caches</span><br><span class="line">       used by the kernel. The information is gathered by parsing /proc/meminfo. ...</span><br></pre></td></tr></table></figure>
+
+<p>这里提到，<code>free</code> 输出的结果主要是通过解析 <code>/proc/meminfo</code> 文件的内容得出的。而后介绍了 <code>free</code> 输出各行的含义：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">DESCRIPTION</span><br><span class="line">       ... The displayed columns are:</span><br><span class="line"></span><br><span class="line">       total  Total installed memory (MemTotal and SwapTotal in /proc/meminfo)</span><br><span class="line"></span><br><span class="line">       used   Used memory (calculated as total - free - buffers - cache)</span><br><span class="line"></span><br><span class="line">       free   Unused memory (MemFree and SwapFree in /proc/meminfo)</span><br><span class="line"></span><br><span class="line">       shared Memory used (mostly) by tmpfs (Shmem in /proc/meminfo, available on kernels 2.6.32, displayed as zero if  not  available)</span><br><span class="line"></span><br><span class="line">       buffers</span><br><span class="line">              Memory used by kernel buffers (Buffers in /proc/meminfo)</span><br><span class="line"></span><br><span class="line">       cache  Memory used by the page cache and slabs (Cached and Slab in /proc/meminfo)</span><br><span class="line"></span><br><span class="line">       buff/cache</span><br><span class="line">              Sum of buffers and cache</span><br><span class="line"></span><br><span class="line">       available</span><br><span class="line">              Estimation  of how much memory is available for starting new applications, without swapping. Unlike the data provided</span><br><span class="line">              by the cache or free fields, this field takes into account page cache and also that not all reclaimable memory  slabs</span><br><span class="line">              will  be  reclaimed  due to items being in use (MemAvailable in /proc/meminfo, available on kernels 3.14, emulated on</span><br><span class="line">              kernels 2.6.27+, otherwise the same as free)</span><br></pre></td></tr></table></figure>
+
+<p>后续便是各个参数的介绍。首先是可以调整显示数字单位的参数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">OPTIONS</span><br><span class="line">       -b, --bytes</span><br><span class="line">              Display the amount of memory in bytes.</span><br><span class="line"></span><br><span class="line">       -k, --kilo</span><br><span class="line">              Display the amount of memory in kilobytes.  This is the default.</span><br><span class="line"></span><br><span class="line">       -m, --mega</span><br><span class="line">              Display the amount of memory in megabytes.</span><br><span class="line"></span><br><span class="line">       -g, --giga</span><br><span class="line">              Display the amount of memory in gigabytes.</span><br><span class="line"></span><br><span class="line">       --tera Display the amount of memory in terabytes.</span><br><span class="line"></span><br><span class="line">       -h, --human</span><br><span class="line">              Show all output fields automatically scaled to shortest three digit unit and display the  units  of  print</span><br><span class="line">              out.  Following units are used.</span><br><span class="line"></span><br><span class="line">                B = bytes</span><br><span class="line">                K = kilos</span><br><span class="line">                M = megas</span><br><span class="line">                G = gigas</span><br><span class="line">                T = teras</span><br><span class="line"></span><br><span class="line">              If unit is missing, and you have petabyte of RAM or swap, the number is in terabytes and columns might not</span><br><span class="line">              be aligned with header.</span><br></pre></td></tr></table></figure>
+
+<p>使用的效果大致如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ free -h</span><br><span class="line">              total        used        free      shared  buff/cache   available</span><br><span class="line">Mem:           7.9G        4.7G        3.0G         17M        230M        3.1G</span><br><span class="line">Swap:           24G         59M         23G</span><br></pre></td></tr></table></figure>
+
+<p>除外，还有 <code>--si</code> 参数可以让 <code>free</code> 输出的单位按照 1000 进制进行计算而不是 1024 进制：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--si   Use power of 1000 not 1024.</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ free -h --si</span><br><span class="line">              total        used        free      shared  buff/cache   available</span><br><span class="line">Mem:           8.3G        4.9G        3.2G         17M        236M        3.3G</span><br><span class="line">Swap:           25G         61M         25G</span><br></pre></td></tr></table></figure>
+
+<p>接下来是可拆分显示 <code>buff</code>、<code>cache</code> 数值的 <code>-w</code> 参数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-w, --wide</span><br><span class="line">       Switch to the wide mode. The wide mode produces lines longer than 80 characters. In this mode buffers  and</span><br><span class="line">       cache are reported in two separate columns.</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ free -wh</span><br><span class="line">              total        used        free      shared     buffers       cache   available</span><br><span class="line">Mem:           7.9G        4.8G        2.9G         17M         33M        197M        3.0G</span><br><span class="line">Swap:           24G         59M         23G</span><br></pre></td></tr></table></figure>
+
+<p>还有可以显示额外行信息的 <code>-l</code>、<code>-t</code> 参数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-l, --lohi</span><br><span class="line">       Show detailed low and high memory statistics.</span><br><span class="line">-t, --total</span><br><span class="line">       Display a line showing the column totals.</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ free -hlt</span><br><span class="line">              total        used        free      shared  buff/cache   available</span><br><span class="line">Mem:           7.9G        4.8G        2.9G         17M        230M        3.0G</span><br><span class="line">Low:           7.9G        5.0G        2.9G</span><br><span class="line">High:            0B          0B          0B</span><br><span class="line">Swap:           24G         59M         23G</span><br><span class="line">Total:          31G        4.9G         26G</span><br></pre></td></tr></table></figure>
+
+<p>最后，<code>free</code> 指令还允许用户指定按周期进行持续汇报。用户可通过 <code>-s</code> 和 <code>-c</code> 参数调整 <code>free</code> 汇报的周期时长和汇报次数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-s, --seconds seconds</span><br><span class="line">       Continuously  display  the result delay seconds apart.  You may actually specify any floating point number</span><br><span class="line">       for delay, usleep(3) is used for microsecond resolution delay times.</span><br><span class="line">-c, --count count</span><br><span class="line">       Display the result count times.  Requires the -s option.</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="rename"><a href="#rename" class="headerlink" title="rename"></a>rename</h3><p>相较于 <code>mv</code>、<code>rename</code> 可用于对文件进行批量重命名。我们通过 <code>man rename</code> 可以查看 <code>rename</code> 的简单描述：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">NAME</span><br><span class="line">       rename - renames multiple files</span><br><span class="line"></span><br><span class="line">SYNOPSIS</span><br><span class="line">       rename [ -v ] [ -n ] [ -f ] perlexpr [ files ]</span><br><span class="line"></span><br><span class="line">OPTIONS</span><br><span class="line">       -v, --verbose</span><br><span class="line">               Verbose: print names of files successfully renamed.</span><br><span class="line"></span><br><span class="line">       -n, --no-act</span><br><span class="line">               No Action: show what files would have been renamed.</span><br><span class="line"></span><br><span class="line">       -f, --force</span><br><span class="line">               Force: overwrite existing files.</span><br></pre></td></tr></table></figure>
+
+<p>由此可见，<code>rename</code> 命令接收两类位置参数：第一个位置参数为 Perl 正则表达式，用于表达文件名变换规则；第二个参数为若干个文件名，在 Bash Shell 下我们可以利用 Blob 表达式的展开来方便地指定我们需要重命名的文件。</p>
+<p>支持的选项主要包括如下三个：</p>
+<ul>
+<li><code>-v</code>、<code>--verbose</code>：打印成功重命名的文件名称</li>
+<li><code>-n</code>、<code>--no-act</code>：不执行重命名操作，只打印会被重命名的文件</li>
+<li><code>-f</code>、<code>--force</code>：重命名时覆盖已存在的文件</li>
+</ul>
+<p>总体而言是很好理解的三个选项。这个命令唯一的疑点就在于 Perl 表达式的语法了。</p>
+<p>在<a target="_blank" rel="noopener" href="https://www.computerhope.com/unix/rename.htm">这个页面</a>中有对 <code>rename</code> 可用的 Perl 正则表达式语法有简单的介绍。</p>
+<p>简单而言，Perl 正则表达式主要用于进行字符串替换，具体的组成如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;s|y&gt;/&lt;match_expr&gt;/&lt;sub_expr&gt;/[g][i]</span><br></pre></td></tr></table></figure>
+
+<p>其中第一个匹配表达式用于匹配给定字符串中的某个部分，而第二个转换表达式则表示如何转换匹配到的子字符串。两个表达式都支持各种常见的正则表达式元素，同时加入了一些简单的语法来更好地完成替换动作。</p>
+<p>Perl 正则表达式包含替换（Substitution）和转译（Translation）两种执行模式，分别对应首字母 <code>s</code> 和 <code>y</code>。除此以外，通过结尾的修饰符 <code>g</code> 和 <code>i</code> 也可以选择全局匹配（正则表达式默认只匹配第一个匹配的子字符串）和大小写不敏感匹配。</p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>Linux Bash 参考指南</p><p><a href="https://mr-dai.github.io/linux_bash_reference/">https://mr-dai.github.io/linux_bash_reference/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Robert Peng</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2017-12-26</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2017-12-26</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Linux/">Linux</a><a class="link-muted mr-2" rel="tag" href="/tags/Bash/">Bash</a></div><!--!--></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/img/alipay-qrcode.png" alt="支付宝"></span></a><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/img/wechat-qrcode.png" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/primary-backup-replication/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">Primary-Backup Replication 总结</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/gfs/"><span class="level-item">Google File System 总结</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div id="disqus_thread"><noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></div><script>var disqus_config = function () {
+            this.page.url = 'https://mr-dai.github.io/linux_bash_reference/';
+            this.page.identifier = 'linux_bash_reference/';
+        };
+        (function() {
+            var d = document, s = d.createElement('script');  
+            s.src = '//' + 'robertpsblog' + '.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="呆呆"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">呆呆</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>中国广州</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">49</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">9</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">35</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://www.zhihu.com/people/robert.peng" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="知乎" href="https://www.zhihu.com/people/robert.peng"><i class="fab fa-zhihu"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Bash/"><span class="tag">Bash</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Bigtable/"><span class="tag">Bigtable</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GC/"><span class="tag">GC</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Git/"><span class="tag">Git</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Go/"><span class="tag">Go</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Gradle/"><span class="tag">Gradle</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Groovy/"><span class="tag">Groovy</span><span class="tag">5</span></a></div><div class="control"><a class="tags has-addons" href="/tags/HBase/"><span class="tag">HBase</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hadoop/"><span class="tag">Hadoop</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hive-ThriftServer/"><span class="tag">Hive ThriftServer</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JVM/"><span class="tag">JVM</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Linux/"><span class="tag">Linux</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MIT-6-824/"><span class="tag">MIT 6.824</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Mesos/"><span class="tag">Mesos</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MongoDB/"><span class="tag">MongoDB</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Paxos/"><span class="tag">Paxos</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Raft/"><span class="tag">Raft</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SQL/"><span class="tag">SQL</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spark/"><span class="tag">Spark</span><span class="tag">13</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spark-SQL/"><span class="tag">Spark SQL</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SparkSQL/"><span class="tag">SparkSQL</span><span class="tag">10</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Windows/"><span class="tag">Windows</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Yarn/"><span class="tag">Yarn</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/ZooKeeper/"><span class="tag">ZooKeeper</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/etcd/"><span class="tag">etcd</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%87%E4%BB%BD/"><span class="tag">主从备份</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86/"><span class="tag">分布式共识</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%86%85%E5%AD%98/"><span class="tag">分布式内存</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/"><span class="tag">分布式存储</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"><span class="tag">分布式系统</span><span class="tag">12</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/"><span class="tag">分布式计算</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/"><span class="tag">团队协作</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6/"><span class="tag">集群资源调度</span><span class="tag">2</span></a></div></div></div></div></div><div class="column-right-shadow is-hidden-widescreen is-sticky"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3 is-sticky"><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#第一部分：脚本编程"><span class="level-left"><span class="level-item">1</span><span class="level-item">第一部分：脚本编程</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#1-1-基本使用"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">1.1 基本使用</span></span></a></li><li><a class="level is-mobile" href="#1-2-标准输入和标准输出"><span class="level-left"><span class="level-item">1.2</span><span class="level-item">1.2 标准输入和标准输出</span></span></a></li><li><a class="level is-mobile" href="#1-3-命令行参数"><span class="level-left"><span class="level-item">1.3</span><span class="level-item">1.3 命令行参数</span></span></a></li><li><a class="level is-mobile" href="#1-4-函数"><span class="level-left"><span class="level-item">1.4</span><span class="level-item">1.4 函数</span></span></a></li><li><a class="level is-mobile" href="#1-5-退出状态码"><span class="level-left"><span class="level-item">1.5</span><span class="level-item">1.5 退出状态码</span></span></a></li><li><a class="level is-mobile" href="#1-6-控制流语句"><span class="level-left"><span class="level-item">1.6</span><span class="level-item">1.6 控制流语句</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#1-6-1-If"><span class="level-left"><span class="level-item">1.6.1</span><span class="level-item">1.6.1 If</span></span></a></li><li><a class="level is-mobile" href="#1-6-2-Case"><span class="level-left"><span class="level-item">1.6.2</span><span class="level-item">1.6.2 Case</span></span></a></li><li><a class="level is-mobile" href="#1-6-3-While"><span class="level-left"><span class="level-item">1.6.3</span><span class="level-item">1.6.3 While</span></span></a></li><li><a class="level is-mobile" href="#1-6-4-Until"><span class="level-left"><span class="level-item">1.6.4</span><span class="level-item">1.6.4 Until</span></span></a></li><li><a class="level is-mobile" href="#1-6-5-For"><span class="level-left"><span class="level-item">1.6.5</span><span class="level-item">1.6.5 For</span></span></a></li></ul></li></ul></li><li><a class="level is-mobile" href="#第二部分：Bash-Shell-内置命令"><span class="level-left"><span class="level-item">2</span><span class="level-item">第二部分：Bash Shell 内置命令</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#dirs、pushd、popd"><span class="level-left"><span class="level-item">2.1</span><span class="level-item">dirs、pushd、popd</span></span></a></li><li><a class="level is-mobile" href="#exec"><span class="level-left"><span class="level-item">2.2</span><span class="level-item">exec</span></span></a></li><li><a class="level is-mobile" href="#export"><span class="level-left"><span class="level-item">2.3</span><span class="level-item">export</span></span></a></li><li><a class="level is-mobile" href="#set"><span class="level-left"><span class="level-item">2.4</span><span class="level-item">set</span></span></a></li><li><a class="level is-mobile" href="#source"><span class="level-left"><span class="level-item">2.5</span><span class="level-item">source</span></span></a></li></ul></li><li><a class="level is-mobile" href="#第三部分：小型命令行工具"><span class="level-left"><span class="level-item">3</span><span class="level-item">第三部分：小型命令行工具</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#free"><span class="level-left"><span class="level-item">3.1</span><span class="level-item">free</span></span></a></li><li><a class="level is-mobile" href="#rename"><span class="level-left"><span class="level-item">3.2</span><span class="level-item">rename</span></span></a></li></ul></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/avatar.png" alt="Robert Peng&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2021 Robert Peng</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="我的 Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><script type="text/x-mathjax-config">MathJax.Hub.Config({
+            'HTML-CSS': {
+                matchFontHeight: false
+            },
+            SVG: {
+                matchFontHeight: false
+            },
+            CommonHTML: {
+                matchFontHeight: false
+            },
+            tex2jax: {
+                inlineMath: [
+                    ['$','$'],
+                    ['\\(','\\)']
+                ]
+            }
+        });</script><script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

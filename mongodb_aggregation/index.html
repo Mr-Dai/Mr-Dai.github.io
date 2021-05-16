@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>MongoDB Aggregation - Robert Peng&#039;s Blog</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="呆呆的博客"><meta name="msapplication-TileImage" content="/img/avatar.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="呆呆的博客"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="在之前的文章中，我总结了 MongoDB CRUD 操作的基本方法，而本文将会介绍 MongoDB 的 Aggregation Framework。"><meta property="og:type" content="blog"><meta property="og:title" content="MongoDB Aggregation"><meta property="og:url" content="https://mr-dai.github.io/mongodb_aggregation/"><meta property="og:site_name" content="Robert Peng&#039;s Blog"><meta property="og:description" content="在之前的文章中，我总结了 MongoDB CRUD 操作的基本方法，而本文将会介绍 MongoDB 的 Aggregation Framework。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://mr-dai.github.io/img/og_image.png"><meta property="article:published_time" content="2015-11-11T16:00:00.000Z"><meta property="article:modified_time" content="2015-11-11T16:00:00.000Z"><meta property="article:author" content="Robert Peng"><meta property="article:tag" content="MongoDB"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://mr-dai.github.io/mongodb_aggregation/"},"headline":"MongoDB Aggregation","image":["https://mr-dai.github.io/img/og_image.png"],"datePublished":"2015-11-11T16:00:00.000Z","dateModified":"2015-11-11T16:00:00.000Z","author":{"@type":"Person","name":"Robert Peng"},"publisher":{"@type":"Organization","name":"Robert Peng's Blog","logo":{"@type":"ImageObject","url":"https://mr-dai.github.io/img/avatar.png"}},"description":"在之前的文章中，我总结了 MongoDB CRUD 操作的基本方法，而本文将会介绍 MongoDB 的 Aggregation Framework。"}</script><link rel="canonical" href="https://mr-dai.github.io/mongodb_aggregation/"><link rel="icon" href="/img/avatar.png"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css"><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/avatar.png" alt="Robert Peng&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">首页</a><a class="navbar-item" href="/categories">分类</a><a class="navbar-item" href="/tags">标签</a><a class="navbar-item" href="/about">关于</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="我的 Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2015-11-11T16:00:00.000Z" title="11/11/2015, 4:00:00 PM">2015-11-12</time>发表</span><span class="level-item"><time dateTime="2015-11-11T16:00:00.000Z" title="11/11/2015, 4:00:00 PM">2015-11-12</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/MongoDB/">MongoDB</a></span></div></div><h1 class="title is-3 is-size-4-mobile">MongoDB Aggregation</h1><div class="content"><p>在<a href="/mongodb/2015/06/11/MongoDB-CRUD.html">之前的文章</a>中，我总结了 MongoDB CRUD 操作的基本方法，而本文将会介绍 MongoDB 的 Aggregation Framework。</p>
+<span id="more"></span>
+
+<p>MongoDB 的 Aggregation 操作的灵感主要源于 SQL 的 Aggregation 操作。在 SQL 中，我们可以通过 <code>count</code> 、 <code>sum</code> 等运算符来为某张表的数据进行统计。比如，为了统计每个电子设备制造厂商所发行的设备的种数，我们可能会这样写：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> manufacturer, <span class="built_in">count</span>(<span class="operator">*</span>)</span><br><span class="line">  <span class="keyword">FROM</span> products</span><br></pre></td></tr></table></figure>
+
+<p>由此，我们便能获得统计结果，比如苹果发行了 10 种不同的电子设备。MongoDB 同样也为用户提供了对 Aggregation 操作的支持。通过运用 MongoDB 的这项功能，我们同样可以达成如上述 SQL 语句那般的效果。接下来我们就来学习一下 MongoDB Aggregation 的基本使用方法。</p>
+<h2 id="Aggregation-Pipeline"><a href="#Aggregation-Pipeline" class="headerlink" title="Aggregation Pipeline"></a>Aggregation Pipeline</h2><p>MongoDB Aggregation 使用 Pipeline 的形式来组织用户指定的操作。使用过 Unix 或 Linux 的读者应该对 Shell 的管道操作十分熟悉了，不过即使你没有学过也没有关系。接下来将通过实际操作来演示 MongoDB 的 Aggregation Pipeline。</p>
+<p>假设我们有一个叫做 <code>zips</code> 的 Collection（数据文件可在<a target="_blank" rel="noopener" href="http://media.mongodb.org/zips.json">这里</a>下载到），这个 Collection 的模式大致如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;_id&quot;</span>: <span class="number">35004</span>,</span><br><span class="line">  <span class="string">&quot;city&quot;</span>: <span class="string">&quot;ACMAR&quot;</span>,</span><br><span class="line">  <span class="string">&quot;loc&quot;</span>: [</span><br><span class="line">    -<span class="number">86.51557</span>,</span><br><span class="line">    <span class="number">33.584132</span></span><br><span class="line">  ],</span><br><span class="line">  <span class="string">&quot;pop&quot;</span>: <span class="number">6055</span>,</span><br><span class="line">  <span class="string">&quot;state&quot;</span>: AL</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，<code>zips</code> 中的一条 Document 以城市的邮政编码（zip）作为 <code>_id</code>，并给出了城市名 <code>city</code> 、城市坐标 <code>loc</code> 、城市人口 <code>pop</code> 以及城市所属州的缩写 <code>state</code>。</p>
+<p>上述 Collection 的模式并不复杂，如果忽略 <code>loc</code> 字段，剩余的模式完全可以直接作为关系型数据库的表模式。那么假设我们有这么一条 SQL 语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">SELECT</span> city, <span class="built_in">sum</span>(pop) <span class="keyword">AS</span> population</span><br><span class="line">    <span class="keyword">FROM</span> zips</span><br><span class="line">   <span class="keyword">WHERE</span> state <span class="operator">=</span> &quot;NY&quot;</span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> city</span><br></pre></td></tr></table></figure>
+
+<p>不难看出，上述语句计算的是纽约州每个城市的总人口（我并不是很懂 SQL，写错了别打我）。那么在 MongoDB 中，同样的操作是这样写的：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">db.zips.aggregate([&#123;</span><br><span class="line">    <span class="attr">$match</span>: &#123;</span><br><span class="line">      <span class="attr">state</span>: <span class="string">&quot;NY&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">$group</span>: &#123;</span><br><span class="line">      <span class="attr">_id</span>: <span class="string">&quot;$city&quot;</span>,</span><br><span class="line">      <span class="attr">population</span>: &#123; <span class="attr">$sum</span>: <span class="string">&quot;$pop&quot;</span> &#125;      </span><br><span class="line">    &#125;</span><br><span class="line">  &#125;, &#123; </span><br><span class="line">    <span class="attr">$project</span>: &#123;</span><br><span class="line">      <span class="attr">_id</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">city</span>: <span class="string">&quot;$_id&quot;</span>,</span><br><span class="line">      <span class="attr">population</span>: <span class="number">1</span>,</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">])</span><br></pre></td></tr></table></figure>
+
+<p>首先这里出现了三个 Aggregation 专用的运算符：<code>$match</code> 、 <code>$group</code> 和 <code>$project</code>。它们具体的作用我会在后文详述。我们之所以说 MongoDB 的 Aggregation 使用的是 Pipeline 来组织用户的操作，正是因为 <code>db.zips.aggregate</code> 方法接受的是一个由 Aggregation 操作组成的数列，数列中的每个操作将按顺序执行，前一个操作的结果将作为后一个操作的输入。</p>
+<p>上面这条语句中，首先第一个 <code>$match</code> 运算符相当于之前的 SQL 语句中的 <code>WHERE</code> 子句，它从 Collection 中筛选出所有属于纽约州的邮政编码，并将其作为下一个操作的输入。下一个操作为 <code>$group</code> 操作，它相当于 SQL 中的 <code>GROUP BY</code>，并以一个 <code>_id</code> 来指明，我们将以 <code>city</code> 字段来进行 group。同时在该操作中还搭配使用了 <code>$sum</code> 运算符，将各个城市的 <code>pop</code> 字段值进行求和，赋给了新的 <code>population</code> 字段。最后的 <code>$project</code> 则相当于 SQL 中的 <code>SELECT AS</code>，将上一个操作传来的结果集中的 <code>_id</code> 重新改名为 <code>city</code>，并保留了 <code>population</code> 字段。</p>
+<p>尽管这么说其实还是比较模糊，但正如我所说，我将在下文逐个讲述每个 Aggregation 操作符的作用，这里我们只需要了解到 MongoDB Aggregation 的 Pipeline 意味着所有 Aggregation 操作将以流水线的形式来处理数据即可。</p>
+<p>Aggregation Pipeline 中的每一次操作被称为一个 <em>stage</em>。<em>Stage</em>的操作种类包括如下：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>$project</code></td>
+<td>改变 Pipeline 中的 Document 的模式，如添加一个新的字段、改变字段值或删除字段等</td>
+</tr>
+<tr>
+<td><code>$match</code></td>
+<td>过滤传入的 Document，并不做改变地输出匹配的 Document</td>
+</tr>
+<tr>
+<td><code>$redact</code></td>
+<td>综合 <code>$project</code> 和 <code>$redact</code> 的功能，对 Document 进行改写</td>
+</tr>
+<tr>
+<td><code>$limit</code></td>
+<td>给定一个数字 <em>n</em>，仅输出传入的前 <em>n</em> 个 Document</td>
+</tr>
+<tr>
+<td><code>$skip</code></td>
+<td>给定一个数字 <em>n</em>，跳过传入的前 <em>n</em> 个 Document</td>
+</tr>
+<tr>
+<td><code>$unwind</code></td>
+<td>拆散输入 Document 中指定的一个数组字段，为数组中的每个元素生成一个新的 Document，并用该元素作为该字段的值</td>
+</tr>
+<tr>
+<td><code>$group</code></td>
+<td>根据给定的标识表达式组织传入的 Document，并在声明了累积操作符的情况下将其应用于每一组 Document</td>
+</tr>
+<tr>
+<td><code>$sort</code></td>
+<td>根据指定的字段和顺序，对输入的所有 Document 进行排序</td>
+</tr>
+<tr>
+<td><code>$geoNear</code></td>
+<td>根据 Document 与给定地理坐标的远近程度进行排序后输出</td>
+</tr>
+<tr>
+<td><code>$out</code></td>
+<td>将 Aggregation 的结果写入到指定的 Collection 中。<code>$out</code> 只能作为 Aggregation 的最后一个 <em>Stage</em></td>
+</tr>
+</tbody></table>
+<p>接下来我将逐个介绍上述的所有 <em>Stage</em>。</p>
+<h2 id="project"><a href="#project" class="headerlink" title="$project"></a><code>$project</code></h2><p><code>$project</code> 只会将设定好的字段值传递给 Pipeline 的下一个 Stage，这些字段可以来自原有的字段，也可以是新创建的字段。从形式上，<code>$project</code> 的标准使用格式如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; $project: &#123; &lt;specifications&gt; &#125; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，<code>$project</code> 的参数为一个 Document，该 Document 说明哪些字段该输出、如何得出这些字段以及哪些字段该被删除。该 Document 的格式如下：</p>
+<table>
+<thead>
+<tr>
+<th>语法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;field&gt;: &lt;1 or true&gt;</code></td>
+<td>指定结果 Document 包含原有的某个字段</td>
+</tr>
+<tr>
+<td><code>_id: &lt;0 or false&gt;</code></td>
+<td>指定结果 Document 不包含原有的 <code>_id</code> 字段</td>
+</tr>
+<tr>
+<td><code>&lt;field&gt;: &lt;expression&gt;</code></td>
+<td>根据给定表达式为结果 Document 创建一个新的字段</td>
+</tr>
+</tbody></table>
+<p>默认情况下，输入 Document 的 <code>_id</code> 字段将会保留在输出 Document 中，除非显式地将其声明为 <code>_id: 0</code> 或修改为其他值。同时，除 <code>_id</code> 外的其他所有字段默认是不保留的，如果需要保留在输出 Document 中则必须通过上述语法显式地指定。</p>
+<p>如果你用 <code>&lt;field&gt;: &lt;1 or true&gt;</code> 语法指定包含某个原本不存在的字段，<code>$project</code> 会忽略你的这项设置，即 <code>$project</code> 不会因你这项设置而为输出 Document 新增一个字段。</p>
+<p>使用 <code>&lt;field&gt;: &lt;expression&gt;</code> 为输出 Document 新增字段时，我们可以指定新增字段的字段名，同时用表达式给出字段的值。更多有关<em>表达式</em>的内容，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/meta/aggregation-quick-reference/#aggregation-expressions">这里</a>。</p>
+<p>如果要为某个字段设置一个数字或布尔值，必须使用<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/operator/aggregation/literal/#exp._S_literal">$literal</a>操作符。否则，<code>$project</code> 会认为你只是在指定包含或删除某个原有字段。</p>
+<p>举个例子，假设我们有一个叫做 <code>orders</code> 的 Collection，其中的一个 Document 模式如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">_id</span>: <span class="number">5</span>,</span><br><span class="line">  <span class="attr">product_id</span>: <span class="number">123</span>,</span><br><span class="line">  <span class="attr">price</span>: <span class="number">50</span>,</span><br><span class="line">  <span class="attr">quantity</span>: <span class="number">5</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>订单给出了用户购买的物品的单价 <code>price</code> 以及用户购买的数量 <code>quantity</code>。我们完全可以通过 <code>$project</code> 来生成只包含订单总价的 Document：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">db.orders.aggregate([&#123;</span><br><span class="line">    <span class="attr">$project</span>: &#123;</span><br><span class="line">        <span class="attr">product_id</span>: <span class="literal">true</span>,</span><br><span class="line">        <span class="attr">amount</span>: &#123; <span class="attr">$multiply</span>: [ $price, $quantity ] &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">])</span><br></pre></td></tr></table></figure>
+
+<p>如此，新的 Document 中保留了原有的商品 id<code>product_id</code>，同时利用原有的商品单价和商品数量计算出了订单总价 <code>amount</code>。</p>
+<p>实际上，<code>$project</code> 所接受的参数之所以被叫做 <code>specifications</code>，是因为它正是输出 Document 的模式的 <code>specification</code>，<br>输出 Document 的模式将与其保持一致。我们完全可以利用这一特性使输出 Document 的某个字段包含一个子 Document 或数组：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">db.orders.aggregate([&#123;</span><br><span class="line">    <span class="attr">$project</span>: &#123;</span><br><span class="line">        <span class="attr">product</span>: &#123;</span><br><span class="line">          <span class="attr">product_id</span>: <span class="string">&quot;$product_id&quot;</span>,</span><br><span class="line">            <span class="attr">price</span>: <span class="string">&quot;$price&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">amount</span>: &#123; <span class="attr">$multiply</span>: [ $price, $quantity ] &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">])</span><br></pre></td></tr></table></figure>
+
+<p>如此一来，新的 Document 中的 <code>product</code> 字段的值便是一个包含了商品 id 和商品单价的 Document 了。</p>
+<h2 id="match"><a href="#match" class="headerlink" title="$match"></a><code>$match</code></h2><p><code>$match</code> 接受一个表示查询条件的 Document 作为参数，只把匹配该查询条件的 Document 传递到下一个 Stage。<code>$match</code> 的标准使用格式如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; $match: &#123; &lt;query&gt; &#125; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，用于表示查询条件的 <code>query</code> 使用与 <code>find</code> 和 <code>findOne</code> 方法中的查询条件完全相同的格式。有关查询语法，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/tutorial/query-documents/#read-operations-query-argument">这里</a>。</p>
+<p>将 <code>$match</code> 放在 Pipeline 中尽可能靠前的位置，可以更早地降低 Pipeline 中 Document 的数量，因为 Pipeline 实际上是在内存中做运算的。如果你将 <code>$match</code> 作为第一个 Stage，它就可以像 <code>find</code> 和 <code>findOne</code> 那样利用上 Collection 中的索引了。</p>
+<p>你不能在 <code>$match</code> 中使用<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/operator/query/where/#op._S_where">$where</a>操作符。同时，想要在 <code>$match</code> 中使用<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/operator/query/text/#op._S_text">$text</a>操作符，必须确保 <code>$match</code> 为 Pipeline 的第一个 Stage。</p>
+<p>举个例子，还是上述那个 <code>orders</code> Collection，我们可以编写如下 Aggregation：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">db.orders.aggregate([&#123;</span><br><span class="line">    <span class="attr">$project</span>: &#123;</span><br><span class="line">      <span class="attr">product</span>: &#123;</span><br><span class="line">        <span class="attr">product_id</span>: <span class="string">&quot;$product_id&quot;</span>,</span><br><span class="line">        <span class="attr">price</span>: <span class="string">&quot;$price&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">amount</span>: &#123; <span class="attr">$multiply</span>: [ $price, $quantity ] &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">$match</span>: &#123;</span><br><span class="line">      <span class="attr">amount</span>: &#123;<span class="attr">$gt</span>: <span class="number">500</span>&#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">])</span><br></pre></td></tr></table></figure>
+
+<p>如此一来，我们就只会得到总价大于 500 的订单了。</p>
+<h2 id="sort"><a href="#sort" class="headerlink" title="$sort"></a><code>$sort</code></h2><p><code>$sort</code> 对传入的 Collection 进行排序后传递到下一个 Stage。<code>$sort</code> 的标准使用格式如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; $sort: &#123; &lt;field1&gt;: &lt;sort order&gt;, &lt;field2&gt;: &lt;sort order&gt; ... &#125; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>实际上这些参数并没有看上去那么复杂，它的格式和 <code>sort()</code> 方法的参数是完全一致的。比如：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">db.orders.aggregate([&#123;</span><br><span class="line">    <span class="attr">$project</span>: &#123;</span><br><span class="line">      <span class="attr">product</span>: &#123;</span><br><span class="line">        <span class="attr">product_id</span>: <span class="string">&quot;$product_id&quot;</span>,</span><br><span class="line">        <span class="attr">price</span>: <span class="string">&quot;$price&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">amount</span>: &#123; <span class="attr">$multiply</span>: [ $price, $quantity ] &#125;</span><br><span class="line">  &#125;, &#123;</span><br><span class="line">    <span class="attr">$sort</span>: &#123;</span><br><span class="line">      <span class="attr">amount</span>: -<span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">])</span><br></pre></td></tr></table></figure>
+
+<p>我们就获得了总价按降序排列的订单列表了。</p>
+<h2 id="limit"><a href="#limit" class="headerlink" title="$limit"></a><code>$limit</code></h2><p><code>$limit</code> 接受一个正整数参数 <em>n</em>，只把传入的前 <em>n</em> 个 Document 传递到下一个 Stage。<code>$limit</code> 的标准使用格式如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; $limit: &lt;positive integer&gt; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>从功能上讲，<code>$limit</code> 和 <code>limit()</code> 方法是完全一致的。举个例子：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">db.orders.aggregate(</span><br><span class="line">    &#123; <span class="attr">$limit</span> : <span class="number">5</span> &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>这样一来我们便可以获得前 <em>5</em> 个订单了。</p>
+<p>值得注意的是，如果 <code>$limit</code> 紧接着一个 <code>$sort</code>，<code>$sort</code> 将会采用 Lazy 的排序方式，在选出前 <em>n</em> 个 Document 以后便结束排序，而不会对整个 Collection 进行排序。</p>
+<h2 id="skip"><a href="#skip" class="headerlink" title="$skip"></a><code>$skip</code></h2><p><code>$skip</code> 接受一个正整数参数<i>n</i>，跳过传入的前<i>n</i>个 Document 后，将剩余的 Document 原封不动地传给下一个 Stage。<code>$skip</code> 的标准使用格式如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; $skip: &lt;positive integer&gt; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>从功能上讲，<code>$skip</code> 和 <code>skip()</code> 方法是完全一致的。举个例子：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">db.orders.aggregate(</span><br><span class="line">    &#123; <span class="attr">$skip</span> : <span class="number">5</span> &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>这样一来我们便跳过了前 <em>5</em> 个订单了。</p>
+<h2 id="unwind"><a href="#unwind" class="headerlink" title="$unwind"></a><code>$unwind</code></h2><p><code>$unwind</code> 接受一个字段名作为参数，拆散指定的数组字段，为数组中的每一个元素生成一个新的 Document，并以该元素作为新的 Document 中该数组字段的值。<code>$unwind</code> 的标准使用格式如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; $unwind: &lt;field path&gt; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意，在指定字段名时，字段名前面要加上一个 <code>$</code> 符号。举个例子，假设我们有 Document 如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; a : <span class="number">0</span>, b : <span class="number">0</span>, c : [ <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> ] &#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们执行 <code>&#123; $unwind: &quot;$c&quot; &#125;</code> 操作后，将得到如下几个 Document：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123; a : <span class="number">0</span>, b : <span class="number">0</span>, c : <span class="number">0</span> &#125;</span><br><span class="line">&#123; a : <span class="number">0</span>, b : <span class="number">0</span>, c : <span class="number">1</span> &#125;</span><br><span class="line">&#123; a : <span class="number">0</span>, b : <span class="number">0</span>, c : <span class="number">2</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在使用 <code>$unwind</code> 时，有几点需要注意一下：</p>
+<ul>
+<li>如果传入的某个 Document 的指定字段的值不是一个数组，<code>aggregate</code> 方法会抛出一个错误</li>
+<li>如果传入的某个 Document 不包含你所指定的字段，<code>$match</code> 会忽略该 Document，不会为其生成任何 Document</li>
+<li>如果传入的某个 Document 的该字段的值为空数组（<code>[]</code>），<code>$match</code> 同样会忽略该 Document，不为其生成任何 Document</li>
+</ul>
+<h2 id="group"><a href="#group" class="headerlink" title="$group"></a><code>$group</code></h2><p><code>$group</code> 基于给定的规则将 Document 分入不同的分组中，为每个分组产生一个新的 Document，该 Document 的字段值将由累积表达式给出。<code>$group</code> 的标准适用格式如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123; $group: &#123; _id: &lt;expression&gt;, &lt;field1&gt;: &#123; &lt;accumulator1&gt; : &lt;expression1&gt; &#125;, ... &#125; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，我们需要显式地给出 <code>_id</code> 的值的计算方式，被计算出拥有相同的 <code>_id</code> 值的 Document 将被放入到同一组中。如果你想要让所有 Document 都被分入同一组，将 <code>_id</code> 设为 <code>null</code> 即可。</p>
+<p>其他字段的值将由累积表达式给出，而累积表达式由累积操作符和普通的表达式组成。可选的累积操作符如下：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>$num</code></td>
+<td>返回每组 Document 的表达式所得值的和。自动忽略非数字的值</td>
+</tr>
+<tr>
+<td><code>$avg</code></td>
+<td>返回每组 Document 的表达式所得值的平均数。自动忽略非数字的值</td>
+</tr>
+<tr>
+<td><code>$first</code></td>
+<td>返回每组中第一个 Document 的表达式所得值</td>
+</tr>
+<tr>
+<td><code>$last</code></td>
+<td>返回每组中最后一个 Document 的表达式所得值</td>
+</tr>
+<tr>
+<td><code>$max</code></td>
+<td>返回每组 Document 的表达式所得值的最大值</td>
+</tr>
+<tr>
+<td><code>$min</code></td>
+<td>返回每组 Document 的表达式所得值的最小值</td>
+</tr>
+<tr>
+<td><code>$push</code></td>
+<td>以一个数组包含一组所有 Document 的表达式所得值</td>
+</tr>
+<tr>
+<td><code>$addToSet</code></td>
+<td>以一个集合包含一组所有 Document 的表达式所得值</td>
+</tr>
+</tbody></table>
+<p>举个例子，假设我们有 Document 如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="attr">a</span> : <span class="number">0</span>, <span class="attr">b</span> : <span class="number">0</span>, <span class="attr">c</span> : <span class="number">0</span> &#125;</span><br><span class="line">&#123; <span class="attr">a</span> : <span class="number">0</span>, <span class="attr">b</span> : <span class="number">0</span>, <span class="attr">c</span> : <span class="number">1</span> &#125;</span><br><span class="line">&#123; <span class="attr">a</span> : <span class="number">0</span>, <span class="attr">b</span> : <span class="number">1</span>, <span class="attr">c</span> : <span class="number">0</span> &#125;</span><br><span class="line">&#123; <span class="attr">a</span> : <span class="number">0</span>, <span class="attr">b</span> : <span class="number">1</span>, <span class="attr">c</span> : <span class="number">1</span> &#125;</span><br><span class="line">&#123; <span class="attr">a</span> : <span class="number">1</span>, <span class="attr">b</span> : <span class="number">0</span>, <span class="attr">c</span> : <span class="number">0</span> &#125;</span><br><span class="line">&#123; <span class="attr">a</span> : <span class="number">1</span>, <span class="attr">b</span> : <span class="number">0</span>, <span class="attr">c</span> : <span class="number">1</span> &#125;</span><br><span class="line">&#123; <span class="attr">a</span> : <span class="number">1</span>, <span class="attr">b</span> : <span class="number">1</span>, <span class="attr">c</span> : <span class="number">0</span> &#125;</span><br><span class="line">&#123; <span class="attr">a</span> : <span class="number">1</span>, <span class="attr">b</span> : <span class="number">1</span>, <span class="attr">c</span> : <span class="number">1</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们执行如下操作：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">$group</span>: &#123;</span><br><span class="line">    <span class="attr">_id</span>: &#123;<span class="attr">a</span>: <span class="string">&quot;$a&quot;</span>, <span class="attr">b</span>: <span class="string">&quot;$b&quot;</span>&#125;,</span><br><span class="line">    <span class="attr">c</span>: &#123;<span class="attr">$max</span>: <span class="string">&quot;$c&quot;</span>&#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>即可获得结果如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="attr">_id</span> : &#123; <span class="attr">a</span> : <span class="number">0</span>, <span class="attr">b</span> : <span class="number">0</span> &#125;, <span class="attr">c</span> : <span class="number">1</span> &#125;</span><br><span class="line">&#123; <span class="attr">_id</span> : &#123; <span class="attr">a</span> : <span class="number">0</span>, <span class="attr">b</span> : <span class="number">1</span> &#125;, <span class="attr">c</span> : <span class="number">1</span> &#125;</span><br><span class="line">&#123; <span class="attr">_id</span> : &#123; <span class="attr">a</span> : <span class="number">1</span>, <span class="attr">b</span> : <span class="number">0</span> &#125;, <span class="attr">c</span> : <span class="number">1</span> &#125;</span><br><span class="line">&#123; <span class="attr">_id</span> : &#123; <span class="attr">a</span> : <span class="number">1</span>, <span class="attr">b</span> : <span class="number">1</span> &#125;, <span class="attr">c</span> : <span class="number">1</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>其他累积运算符的用法也是类似，这里不再赘述。具体的用法可以参考<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/operator/aggregation/#aggregation-pipeline-operator-reference">这里</a>。</p>
+<h2 id="Aggregation-的局限"><a href="#Aggregation-的局限" class="headerlink" title="Aggregation 的局限"></a>Aggregation 的局限</h2><p>尽管 MongoDB Aggregation 和 SQL Aggregation 相同，都会是我们日常生产所必须用到的工具，但在使用的时候，MongoDB Aggregation 相关的几个条件限制也是我们所需要考虑的。</p>
+<h3 id="最大内存占用：100MB"><a href="#最大内存占用：100MB" class="headerlink" title="最大内存占用：100MB"></a>最大内存占用：100MB</h3><p>MongoDB Aggregation 为单个 Stage 所能分配的最大内存为 100MB，当某个 Stage 的内存占用超过 100MB 时，你可能就拿不到结果了。因此，我们应将 <code>$match</code> 等可削减 Document 数量的 Stage 放在尽可能靠前的位置，以免某个 Stage 产生了过大的中间结果。如果无论如何都需要使用上超过 100MB 的内存，可以在为 <code>aggregate</code> 方法加上 <code>allowDiskUse: true</code> 参数，允许其使用磁盘空间来辅助计算。</p>
+<p>更多有关 <code>allowDiskUse</code> 的内容，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/reference/method/db.collection.aggregate/#db.collection.aggregate">这里</a>。</p>
+<h3 id="单个结果-Document-最大体积：16MB"><a href="#单个结果-Document-最大体积：16MB" class="headerlink" title="单个结果 Document 最大体积：16MB"></a>单个结果 Document 最大体积：16MB</h3><p>MongoDB Document 不能超过 16MB 大小这一限制来自于其所使用的 BSON 格式的大小限制。鉴于 Aggregation 产生的结果固然也会以 BSON Document 的形式传递给客户端，自然单个结果 Document 也不能超过 16MB。</p>
+<p>更多有关 Aggregation 限制的内容，详见<a target="_blank" rel="noopener" href="https://docs.mongodb.org/manual/core/aggregation-pipeline-limits/">这里</a>。</p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>MongoDB Aggregation</p><p><a href="https://mr-dai.github.io/mongodb_aggregation/">https://mr-dai.github.io/mongodb_aggregation/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Robert Peng</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2015-11-12</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2015-11-12</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/MongoDB/">MongoDB</a></div><!--!--></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/img/alipay-qrcode.png" alt="支付宝"></span></a><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/img/wechat-qrcode.png" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/mongodb_distribution_tutorial/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">MongoDB 分布式部署教程</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/mongodb_storage_engine/"><span class="level-item">MongoDB 存储引擎</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div id="disqus_thread"><noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></div><script>var disqus_config = function () {
+            this.page.url = 'https://mr-dai.github.io/mongodb_aggregation/';
+            this.page.identifier = 'mongodb_aggregation/';
+        };
+        (function() {
+            var d = document, s = d.createElement('script');  
+            s.src = '//' + 'robertpsblog' + '.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="呆呆"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">呆呆</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>中国广州</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">49</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">9</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">35</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://www.zhihu.com/people/robert.peng" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="知乎" href="https://www.zhihu.com/people/robert.peng"><i class="fab fa-zhihu"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Bash/"><span class="tag">Bash</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Bigtable/"><span class="tag">Bigtable</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GC/"><span class="tag">GC</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Git/"><span class="tag">Git</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Go/"><span class="tag">Go</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Gradle/"><span class="tag">Gradle</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Groovy/"><span class="tag">Groovy</span><span class="tag">5</span></a></div><div class="control"><a class="tags has-addons" href="/tags/HBase/"><span class="tag">HBase</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hadoop/"><span class="tag">Hadoop</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hive-ThriftServer/"><span class="tag">Hive ThriftServer</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JVM/"><span class="tag">JVM</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Linux/"><span class="tag">Linux</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MIT-6-824/"><span class="tag">MIT 6.824</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Mesos/"><span class="tag">Mesos</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MongoDB/"><span class="tag">MongoDB</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Paxos/"><span class="tag">Paxos</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Raft/"><span class="tag">Raft</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SQL/"><span class="tag">SQL</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spark/"><span class="tag">Spark</span><span class="tag">13</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spark-SQL/"><span class="tag">Spark SQL</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SparkSQL/"><span class="tag">SparkSQL</span><span class="tag">10</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Windows/"><span class="tag">Windows</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Yarn/"><span class="tag">Yarn</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/ZooKeeper/"><span class="tag">ZooKeeper</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/etcd/"><span class="tag">etcd</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%87%E4%BB%BD/"><span class="tag">主从备份</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86/"><span class="tag">分布式共识</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%86%85%E5%AD%98/"><span class="tag">分布式内存</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/"><span class="tag">分布式存储</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"><span class="tag">分布式系统</span><span class="tag">12</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/"><span class="tag">分布式计算</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/"><span class="tag">团队协作</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6/"><span class="tag">集群资源调度</span><span class="tag">2</span></a></div></div></div></div></div><div class="column-right-shadow is-hidden-widescreen is-sticky"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3 is-sticky"><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#Aggregation-Pipeline"><span class="level-left"><span class="level-item">1</span><span class="level-item">Aggregation Pipeline</span></span></a></li><li><a class="level is-mobile" href="#project"><span class="level-left"><span class="level-item">2</span><span class="level-item">$project</span></span></a></li><li><a class="level is-mobile" href="#match"><span class="level-left"><span class="level-item">3</span><span class="level-item">$match</span></span></a></li><li><a class="level is-mobile" href="#sort"><span class="level-left"><span class="level-item">4</span><span class="level-item">$sort</span></span></a></li><li><a class="level is-mobile" href="#limit"><span class="level-left"><span class="level-item">5</span><span class="level-item">$limit</span></span></a></li><li><a class="level is-mobile" href="#skip"><span class="level-left"><span class="level-item">6</span><span class="level-item">$skip</span></span></a></li><li><a class="level is-mobile" href="#unwind"><span class="level-left"><span class="level-item">7</span><span class="level-item">$unwind</span></span></a></li><li><a class="level is-mobile" href="#group"><span class="level-left"><span class="level-item">8</span><span class="level-item">$group</span></span></a></li><li><a class="level is-mobile" href="#Aggregation-的局限"><span class="level-left"><span class="level-item">9</span><span class="level-item">Aggregation 的局限</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#最大内存占用：100MB"><span class="level-left"><span class="level-item">9.1</span><span class="level-item">最大内存占用：100MB</span></span></a></li><li><a class="level is-mobile" href="#单个结果-Document-最大体积：16MB"><span class="level-left"><span class="level-item">9.2</span><span class="level-item">单个结果 Document 最大体积：16MB</span></span></a></li></ul></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/avatar.png" alt="Robert Peng&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2021 Robert Peng</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="我的 Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><script type="text/x-mathjax-config">MathJax.Hub.Config({
+            'HTML-CSS': {
+                matchFontHeight: false
+            },
+            SVG: {
+                matchFontHeight: false
+            },
+            CommonHTML: {
+                matchFontHeight: false
+            },
+            tex2jax: {
+                inlineMath: [
+                    ['$','$'],
+                    ['\\(','\\)']
+                ]
+            }
+        });</script><script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>

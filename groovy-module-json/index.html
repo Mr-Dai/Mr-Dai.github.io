@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Groovy 模块 - JSON 解析与生成 - Robert Peng&#039;s Blog</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="呆呆的博客"><meta name="msapplication-TileImage" content="/img/avatar.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="呆呆的博客"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="这是一篇译文，读者可前往 Groovy Module Guide - Parsing and producing JSON 阅读原文。  Groovy 内置了从 Groovy 对象到 JSON 之间相互转换的功能类，而这些被用于进行 JSON 序列化或解析的类都被放在了 groovy.json 包中。"><meta property="og:type" content="blog"><meta property="og:title" content="Groovy 模块 - JSON 解析与生成"><meta property="og:url" content="https://mr-dai.github.io/groovy-module-json/"><meta property="og:site_name" content="Robert Peng&#039;s Blog"><meta property="og:description" content="这是一篇译文，读者可前往 Groovy Module Guide - Parsing and producing JSON 阅读原文。  Groovy 内置了从 Groovy 对象到 JSON 之间相互转换的功能类，而这些被用于进行 JSON 序列化或解析的类都被放在了 groovy.json 包中。"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="https://mr-dai.github.io/img/og_image.png"><meta property="article:published_time" content="2018-04-23T16:00:00.000Z"><meta property="article:modified_time" content="2018-04-23T16:00:00.000Z"><meta property="article:author" content="Robert Peng"><meta property="article:tag" content="Groovy"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://mr-dai.github.io/groovy-module-json/"},"headline":"Groovy 模块 - JSON 解析与生成","image":["https://mr-dai.github.io/img/og_image.png"],"datePublished":"2018-04-23T16:00:00.000Z","dateModified":"2018-04-23T16:00:00.000Z","author":{"@type":"Person","name":"Robert Peng"},"publisher":{"@type":"Organization","name":"Robert Peng's Blog","logo":{"@type":"ImageObject","url":"https://mr-dai.github.io/img/avatar.png"}},"description":"这是一篇译文，读者可前往 Groovy Module Guide - Parsing and producing JSON 阅读原文。  Groovy 内置了从 Groovy 对象到 JSON 之间相互转换的功能类，而这些被用于进行 JSON 序列化或解析的类都被放在了 groovy.json 包中。"}</script><link rel="canonical" href="https://mr-dai.github.io/groovy-module-json/"><link rel="icon" href="/img/avatar.png"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/css/justifiedGallery.min.css"><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/pace-js@1.0.2/pace.min.js"></script><!--!--><!--!--><meta name="generator" content="Hexo 5.4.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/avatar.png" alt="Robert Peng&#039;s Blog" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">首页</a><a class="navbar-item" href="/categories">分类</a><a class="navbar-item" href="/tags">标签</a><a class="navbar-item" href="/about">关于</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="我的 Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a><a class="navbar-item is-hidden-tablet catalogue" title="目录" href="javascript:;"><i class="fas fa-list-ul"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2018-04-23T16:00:00.000Z" title="4/23/2018, 4:00:00 PM">2018-04-24</time>发表</span><span class="level-item"><time dateTime="2018-04-23T16:00:00.000Z" title="4/23/2018, 4:00:00 PM">2018-04-24</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/Groovy/">Groovy</a></span></div></div><h1 class="title is-3 is-size-4-mobile">Groovy 模块 - JSON 解析与生成</h1><div class="content"><p>这是一篇译文，读者可前往 <a target="_blank" rel="noopener" href="http://www.groovy-lang.org/json.html">Groovy Module Guide - Parsing and producing JSON</a> 阅读原文。</p>
+<!-- Groovy comes with integrated support for converting between Groovy objects and JSON. The classes dedicated to JSON serialisation and parsing are found in the groovy.json package. -->
+<p>Groovy 内置了从 Groovy 对象到 JSON 之间相互转换的功能类，而这些被用于进行 JSON 序列化或解析的类都被放在了 <code>groovy.json</code> 包中。</p>
+<span id="more"></span>
+
+<h2 id="1-JsonSlurper"><a href="#1-JsonSlurper" class="headerlink" title="1 JsonSlurper"></a>1 JsonSlurper</h2><!-- JsonSlurper is a class that parses JSON text or reader content into Groovy data structures (objects) such as maps, lists and primitive types like Integer, Double, Boolean and String. -->
+<p><code>JsonSlurer</code> 类主要用于解析 JSON 文本并转换成 Groovy 数据结构（对象），如映射、列表或 <code>Integer</code>、<code>Double</code>、<code>Boolean</code>、<code>String</code> 等基本数据类型。</p>
+<!-- The class comes with a bunch of overloaded parse methods plus some special methods such as parseText, parseFile and others. For the next example we will use the parseText method. It parses a JSON String and recursively converts it to a list or map of objects. The other parse* methods are similar in that they return a JSON String but for different parameter types. -->
+<p>该类包含了大量不同版本的 <code>parse</code> 方法以及如 <code>parseText</code>、<code>parseFile</code> 的特殊方法。在下一个例子中我们将使用 <code>parseText</code> 方法，该方法会对给定的 JSON <code>String</code> 进行解析并递归地将其转换为列表或映射。其他的 <code>parse*</code> 方法也是类似，同样会返回解析后的 Groovy 对象，只是它们接受不同类型的参数：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> jsonSlurper = <span class="keyword">new</span> JsonSlurper()</span><br><span class="line"><span class="keyword">def</span> object = jsonSlurper.parseText(<span class="string">&#x27;&#123; &quot;name&quot;: &quot;John Doe&quot; &#125; /* some comment */&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> object <span class="keyword">instanceof</span> Map</span><br><span class="line"><span class="keyword">assert</span> object.name == <span class="string">&#x27;John Doe&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<!-- Notice the result is a plain map and can be handled like a normal Groovy object instance. JsonSlurper parses the given JSON as defined by the ECMA-404 JSON Interchange Standard plus support for JavaScript comments and dates. -->
+<p>值得注意的是，解析的结果是一个普通的映射而且可以被当做普通的 Groovy 实例那样处理。<code>JsonSlurper</code> 支持对由 <a target="_blank" rel="noopener" href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf">ECMA-404</a> JSON 交换标准定义的 JSON 格式进行解析，同时还对 JavaScript 注释和日期格式提供了额外的支持。</p>
+<!-- In addition to maps JsonSlurper supports JSON arrays which are converted to lists. -->
+<p>除了映射，<code>JsonSlurper</code> 同样支持 JSON 数组并将其转换为列表。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> jsonSlurper = <span class="keyword">new</span> JsonSlurper()</span><br><span class="line"><span class="keyword">def</span> object = jsonSlurper.parseText(<span class="string">&#x27;&#123; &quot;myList&quot;: [4, 8, 15, 16, 23, 42] &#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> object <span class="keyword">instanceof</span> Map</span><br><span class="line"><span class="keyword">assert</span> object.myList <span class="keyword">instanceof</span> List</span><br><span class="line"><span class="keyword">assert</span> object.myList == [<span class="number">4</span>, <span class="number">8</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">23</span>, <span class="number">42</span>]</span><br></pre></td></tr></table></figure>
+
+<!-- The JSON standard supports the following primitive data types: string, number, object, true, false and null. JsonSlurper converts these JSON types into corresponding Groovy types. -->
+<p>JSON 标准包含对如下几种基础类型的支持：字符串、数字、对象、<code>true</code>、<code>false</code> 和 <code>null</code>。<code>JsonSlurper</code> 会将这些 JSON 类型转换成对应的 Groovy 类型。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> jsonSlurper = <span class="keyword">new</span> JsonSlurper()</span><br><span class="line"><span class="keyword">def</span> object = jsonSlurper.parseText <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    &#123; &quot;simple&quot;: 123,</span></span><br><span class="line"><span class="string">      &quot;fraction&quot;: 123.66,</span></span><br><span class="line"><span class="string">      &quot;exponential&quot;: 123e12</span></span><br><span class="line"><span class="string">    &#125;&#x27;&#x27;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> object <span class="keyword">instanceof</span> Map</span><br><span class="line"><span class="keyword">assert</span> object.simple.<span class="keyword">class</span> == Integer</span><br><span class="line"><span class="keyword">assert</span> object.fraction.<span class="keyword">class</span> == BigDecimal</span><br><span class="line"><span class="keyword">assert</span> object.exponential.<span class="keyword">class</span> == BigDecimal</span><br></pre></td></tr></table></figure>
+
+<!-- As JsonSlurper is returning pure Groovy object instances without any special JSON classes in the back, its usage is transparent. In fact, JsonSlurper results conform to GPath expressions. GPath is a powerful expression language that is supported by multiple slurpers for different data formats (XmlSlurper for XML being one example). -->
+<p>鉴于 <code>JsonSlurper</code> 能够返回完全转换后的 Groovy 对象而无需显式借助其他的特殊 JSON 类，我们可以说 <code>JsonSlurper</code> 的使用体验是透明的。事实上，<code>JsonSlurper</code> 的结果遵从 GPath 表达式。GPath 是一门十分强大的表达式语言，包括 <code>JsonSlurper</code> 在内的其他不同数据格式的 <code>Slurper</code> 均支持该语言（如用于 XML 的 <code>XmlSlurper</code>）。</p>
+<!-- For more details please have a look at the section on GPath expressions. -->
+<p>有关 GPath 的更多内容请查阅<a target="_blank" rel="noopener" href="http://docs.groovy-lang.org/latest/html/documentation/core-semantics.html#gpath_expressions">这里</a>。</p>
+<!-- The following table gives an overview of the JSON types and the corresponding Groovy data types: -->
+<p>下表给出了 JSON 类型与其对应的 Groovy 数据类型：</p>
+<table class="table">
+    <tr>
+        <th>JSON</th>
+        <th>Groovy</th>
+    </tr>
+    <tr>
+        <td>字符串</td>
+        <td><code>java.lang.String</code></td>
+    </tr>
+    <tr>
+        <td>数字</td>
+        <td><code>java.lang.BigDecimal</code> 或 <code>java.lang.Integer</code></td>
+    </tr>
+    <tr>
+        <td>对象</td>
+        <td><code>java.util.LinkedHashMap</code></td>
+    </tr>
+    <tr>
+        <td>数组</td>
+        <td><code>java.util.ArrayList</code></td>
+    </tr>
+    <tr>
+        <td><code>true</code></td>
+        <td><code>true</code></td>
+    </tr>
+    <tr>
+        <td><code>false</code></td>
+        <td><code>false</code></td>
+    </tr>
+    <tr>
+        <td><code>null</code></td>
+        <td><code>null</code></td>
+    </tr>
+    <tr>
+        <td>日期</td>
+        <td>基于 <code>yyyy-MM-dd'T'HH:mm:ssZ</code> 日期格式的 <code>java.util.Date</code></td>
+    </tr>
+</table>
+
+<!-- Whenever a value in JSON is null, JsonSlurper supplements it with the Groovy null value. This is in contrast to other JSON parsers that represent a null value with a library-provided singleton object. -->
+<p>当 JSON 中出现 <code>null</code> 值时，<code>JsonSlurper</code> 则会在转换结果中的对应位置放入一个 Groovy <code>null</code> 值。这一点和部分用特定的单例对象表示 JSON <code>null</code> 值的 JSON 解析库有所不同。</p>
+<h3 id="1-1-解析器变体"><a href="#1-1-解析器变体" class="headerlink" title="1.1 解析器变体"></a>1.1 解析器变体</h3><!-- JsonSlurper comes with a couple of parser implementations. Each parser fits different requirements, it could well be that for certain scenarios the JsonSlurper default parser is not the best bet for all situations. Here is an overview of the shipped parser implementations: -->
+<p><code>JsonSlurper</code> 自带了各种不同的解析器实现。每种解析器有着不同的特性，考虑到 <code>JsonSlurper</code> 默认的解析器可能不是在任何情况下都是最好的。如下是对各种不同解析器实现的简单介绍：</p>
+<ul>
+<li><code>JsonParserCharArray</code> 解析器接受传入的 JSON 字符串并直接对其底层的字符数组进行操作。在进行值转换时它会复制字符子数组（利用一种叫做“斩断”的机制）并对其进行操作。</li>
+<li><code>JsonFastParser</code> 是 <code>JsonParserCharArray</code> 的变体，也是最快的解析器，但它未被用作默认的解析器是有原因的。<code>JsonFastParser</code> 实际上是所谓的索引覆盖解析器。在对给定的 JSON <code>String</code> 进行解析时，它会尽可能地不去创建新的 <code>String</code> 或字符数组实例。它只会维持一些指向底层字符数组的指针。除此之外，它也会尽可能地推迟对象的创建。如果解析出来的结果映射会被长时间用作缓存，那么你就需要意识到映射中的对象很可能还未被创建，映射本身只包含了对原本的字符缓冲的指针。不过，<code>JsonFastParser</code> 还包含一种特殊的斩断模式，在这个模式中它会很早就对原本的字符缓冲进行切分并维持对其的一小部分拷贝。如此，我们更推荐你对小于 2MB 的 JSON 缓冲使用 <code>JsonFastParser</code> 并记住其在长时间缓存方面的限制。</li>
+<li><code>JsonParserLax</code> 是 <code>JsonParserCharArray</code> 的特殊变体。它的性能特征和 <code>JsonFastParser</code> 十分相似，但它不止依赖于 ECMA-404 JSON 语法。例如，它还能处理注释和不带引号的字符串等。</li>
+<li><code>JsonParserUsingCharacterSource</code> 是一种用于大文件的特殊解析器。它使用了一种叫做“字符窗口”的技术来解析较大的 JSON 文件（所谓“较大”即指大小在 2MB 以上的文件）并使得其性能特征保持恒定不变。</li>
+</ul>
+<!-- The default parser implementation for JsonSlurper is JsonParserCharArray. The JsonParserType enumeration contains constants for the parser implementations described above: -->
+<p><code>JsonSlurper</code> 默认的解析器实现是 <code>JsonParserCharArray</code>。<code>JsonParserType</code> 枚举中包含了对应上述所有实现的常量：</p>
+<table class="table">
+    <tr>
+        <th>实现</th>
+        <th>常量</th>
+    </tr>
+    <tr>
+        <td><code>JsonParserCharArray</code></td>
+        <td><code>JsonParserType#CHAR_BUFFER</code></td>
+    </tr>
+    <tr>
+        <td><code>JsonFastParser</code></td>
+        <td><code>JsonParserType#INDEX_OVERLAY</code></td>
+    </tr>
+    <tr>
+        <td><code>JsonParserLax</code></td>
+        <td><code>JsonParserType#LAX</code></td>
+    </tr>
+    <tr>
+        <td><code>JsonParserUsingCharacterSource</code></td>
+        <td><code>JsonParserType#CHARACTER_SOURCE</code></td>
+    </tr>
+</table>
+
+<!-- Changing the parser implementation is as easy as setting the JsonParserType with a call to JsonSlurper#setType(). -->
+<p>改变解析器实现只需要调用 <code>JsonSlurper#setType()</code> 改变 <code>JsonParserType</code> 值即可：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> jsonSlurper = <span class="keyword">new</span> JsonSlurper(<span class="attr">type:</span> JsonParserType.INDEX_OVERLAY)</span><br><span class="line"><span class="keyword">def</span> object = jsonSlurper.parseText(<span class="string">&#x27;&#123; &quot;myList&quot;: [4, 8, 15, 16, 23, 42] &#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> object <span class="keyword">instanceof</span> Map</span><br><span class="line"><span class="keyword">assert</span> object.myList <span class="keyword">instanceof</span> List</span><br><span class="line"><span class="keyword">assert</span> object.myList == [<span class="number">4</span>, <span class="number">8</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">23</span>, <span class="number">42</span>]</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-JsonOutput"><a href="#2-JsonOutput" class="headerlink" title="2 JsonOutput"></a>2 JsonOutput</h2><!-- JsonOutput is responsible for serialising Groovy objects into JSON strings. It can be seen as companion object to JsonSlurper, being a JSON parser. -->
+<p><code>JsonOutput</code> 用于将 Groovy 对象序列化为 JSON 字符串。它可以被视为 JSON 解析器 <code>JsonSlurper</code> 的伴生对象。</p>
+<!-- JsonOutput comes with overloaded, static toJson methods. Each toJson implementation takes a different parameter type. The static method can either be used directly or by importing the methods with a static import statement. -->
+<p><code>JsonOutput</code> 包括几种不同版本的静态 <code>toJson</code> 方法，每种方法都接受不同的参数类型。这些静态方法可以被直接使用，也可以使用静态引入语句进行引入。</p>
+<!-- The result of a toJson call is a String containing the JSON code. -->
+<p>调用 <code>toJson</code> 方法的结果为包含结果 JSON 代码的 <code>String</code>。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> json = JsonOutput.toJson([<span class="attr">name:</span> <span class="string">&#x27;John Doe&#x27;</span>, <span class="attr">age:</span> <span class="number">42</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> json == <span class="string">&#x27;&#123;&quot;name&quot;:&quot;John Doe&quot;,&quot;age&quot;:42&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<!-- JsonOutput does not only support primitive, maps or list data types to be serialized to JSON, it goes further and even has support for serialising POGOs, that is, plain-old Groovy objects. -->
+<p><code>JsonOutput</code> 并不支持基本数据类型，还支持映射和列表，甚至还能对 POGO 进行序列化，也就是普通的 Groovy 对象。</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> &#123;</span> String name &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> json = JsonOutput.toJson([ <span class="keyword">new</span> Person(<span class="attr">name:</span> <span class="string">&#x27;John&#x27;</span>), <span class="keyword">new</span> Person(<span class="attr">name:</span> <span class="string">&#x27;Max&#x27;</span>) ])</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> json == <span class="string">&#x27;[&#123;&quot;name&quot;:&quot;John&quot;&#125;,&#123;&quot;name&quot;:&quot;Max&quot;&#125;]&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<!-- As we saw in previous examples, the JSON output is not pretty printed per default. However, the prettyPrint method in JsonOutput comes to rescue for this task. -->
+<p>在上一个例子中我们看到，输出的 JSON 字符串默认是没有任何换行或缩进之类的格式符号的。通过调用 <code>JsonOutput</code> 的 <code>prettyPrint</code> 方法即可完成此任务：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> json = JsonOutput.toJson([<span class="attr">name:</span> <span class="string">&#x27;John Doe&#x27;</span>, <span class="attr">age:</span> <span class="number">42</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> json == <span class="string">&#x27;&#123;&quot;name&quot;:&quot;John Doe&quot;,&quot;age&quot;:42&#125;&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> JsonOutput.prettyPrint(json) == <span class="string">&#x27;&#x27;&#x27;\</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">    &quot;name&quot;: &quot;John Doe&quot;,</span></span><br><span class="line"><span class="string">    &quot;age&quot;: 42</span></span><br><span class="line"><span class="string">&#125;&#x27;&#x27;&#x27;</span>.stripIndent()</span><br></pre></td></tr></table></figure>
+
+<!-- prettyPrint takes a String as single parameter; therefore, it can be applied on arbitrary JSON String instances, not only the result of JsonOutput.toJson. -->
+<p><code>prettyPrint</code> 方法只接受一个 <code>String</code> 作为参数，因此它可用于任意的 JSON <code>String</code> 而不局限于 <code>JsonOutput.toJson</code> 的结果。</p>
+<!-- Another way to create JSON from Groovy is to use JsonBuilder or StreamingJsonBuilder. Both builders provide a DSL which allows to formulate an object graph which is then converted to JSON. -->
+<p>除此之外，在 Groovy 中创建 JSON 还可以使用 <code>JsonBuilder</code> 或 <code>StreamingJsonBuilder</code>。两种 <code>Builder</code> 都提供了各自的 DSL 用于构建对象图并最后将其转换为 JSON。</p>
+<!-- For more details on builders, have a look at the builders chapter which covers both JsonBuilder and StreamingJsonBuilder. -->
+<p>有关这些 <code>Builder</code> 的详细信息请查阅 <a target="_blank" rel="noopener" href="http://docs.groovy-lang.org/latest/html/documentation/core-domain-specific-languages.html#_jsonbuilder"><code>JsonBuilder</code></a> 和 <a target="_blank" rel="noopener" href="http://docs.groovy-lang.org/latest/html/documentation/core-domain-specific-languages.html#_streamingjsonbuilder"><code>StreamingJsonBuilder</code></a>。</p>
+</div><div class="article-licensing box"><div class="licensing-title"><p>Groovy 模块 - JSON 解析与生成</p><p><a href="https://mr-dai.github.io/groovy-module-json/">https://mr-dai.github.io/groovy-module-json/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>Robert Peng</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2018-04-24</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2018-04-24</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Groovy/">Groovy</a></div><!--!--></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/img/alipay-qrcode.png" alt="支付宝"></span></a><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/img/wechat-qrcode.png" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/spark-rdd/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">Spark RDD 论文简析</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/groovy-differences-with-java/"><span class="level-item">Groovy 教程 - 与 Java 的差异</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div id="disqus_thread"><noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript></div><script>var disqus_config = function () {
+            this.page.url = 'https://mr-dai.github.io/groovy-module-json/';
+            this.page.identifier = 'groovy-module-json/';
+        };
+        (function() {
+            var d = document, s = d.createElement('script');  
+            s.src = '//' + 'robertpsblog' + '.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();</script></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="/img/avatar.png" alt="呆呆"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">呆呆</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>中国广州</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">49</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">9</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">35</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://www.zhihu.com/people/robert.peng" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="知乎" href="https://www.zhihu.com/people/robert.peng"><i class="fab fa-zhihu"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Bash/"><span class="tag">Bash</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Bigtable/"><span class="tag">Bigtable</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/GC/"><span class="tag">GC</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Git/"><span class="tag">Git</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Go/"><span class="tag">Go</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Gradle/"><span class="tag">Gradle</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Groovy/"><span class="tag">Groovy</span><span class="tag">5</span></a></div><div class="control"><a class="tags has-addons" href="/tags/HBase/"><span class="tag">HBase</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hadoop/"><span class="tag">Hadoop</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Hive-ThriftServer/"><span class="tag">Hive ThriftServer</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/JVM/"><span class="tag">JVM</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Java/"><span class="tag">Java</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Linux/"><span class="tag">Linux</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MIT-6-824/"><span class="tag">MIT 6.824</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Mesos/"><span class="tag">Mesos</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/MongoDB/"><span class="tag">MongoDB</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Paxos/"><span class="tag">Paxos</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Python/"><span class="tag">Python</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Raft/"><span class="tag">Raft</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SQL/"><span class="tag">SQL</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spark/"><span class="tag">Spark</span><span class="tag">13</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spark-SQL/"><span class="tag">Spark SQL</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SparkSQL/"><span class="tag">SparkSQL</span><span class="tag">10</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Windows/"><span class="tag">Windows</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Yarn/"><span class="tag">Yarn</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/ZooKeeper/"><span class="tag">ZooKeeper</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/etcd/"><span class="tag">etcd</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E4%B8%BB%E4%BB%8E%E5%A4%87%E4%BB%BD/"><span class="tag">主从备份</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%85%B1%E8%AF%86/"><span class="tag">分布式共识</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%86%85%E5%AD%98/"><span class="tag">分布式内存</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AD%98%E5%82%A8/"><span class="tag">分布式存储</span><span class="tag">7</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F/"><span class="tag">分布式系统</span><span class="tag">12</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/"><span class="tag">分布式计算</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%9B%A2%E9%98%9F%E5%8D%8F%E4%BD%9C/"><span class="tag">团队协作</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E9%9B%86%E7%BE%A4%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6/"><span class="tag">集群资源调度</span><span class="tag">2</span></a></div></div></div></div></div><div class="column-right-shadow is-hidden-widescreen is-sticky"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3 is-sticky"><div class="card widget" id="toc" data-type="toc"><div class="card-content"><div class="menu"><h3 class="menu-label">目录</h3><ul class="menu-list"><li><a class="level is-mobile" href="#1-JsonSlurper"><span class="level-left"><span class="level-item">1</span><span class="level-item">1 JsonSlurper</span></span></a><ul class="menu-list"><li><a class="level is-mobile" href="#1-1-解析器变体"><span class="level-left"><span class="level-item">1.1</span><span class="level-item">1.1 解析器变体</span></span></a></li></ul></li><li><a class="level is-mobile" href="#2-JsonOutput"><span class="level-left"><span class="level-item">2</span><span class="level-item">2 JsonOutput</span></span></a></li></ul></div></div><style>#toc .menu-list > li > a.is-active + .menu-list { display: block; }#toc .menu-list > li > a + .menu-list { display: none; }</style><script src="/js/toc.js" defer></script></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/avatar.png" alt="Robert Peng&#039;s Blog" height="28"></a><p class="is-size-7"><span>&copy; 2021 Robert Peng</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="我的 Github" href="https://github.com/Mr-Dai"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.6.8/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.7.0/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><script type="text/x-mathjax-config">MathJax.Hub.Config({
+            'HTML-CSS': {
+                matchFontHeight: false
+            },
+            SVG: {
+                matchFontHeight: false
+            },
+            CommonHTML: {
+                matchFontHeight: false
+            },
+            tex2jax: {
+                inlineMath: [
+                    ['$','$'],
+                    ['\\(','\\)']
+                ]
+            }
+        });</script><script src="https://cdn.jsdelivr.net/npm/mathjax@2.7.5/unpacked/MathJax.js?config=TeX-MML-AM_CHTML" defer></script><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
