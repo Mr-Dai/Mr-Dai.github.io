@@ -15,7 +15,7 @@ jobs:
           ref: source
       - uses: actions/setup-node@v1
         with:
-          node-version: '10.x'
+          node-version: '14.x'
 
       - name: Setup and Build Hexo
         run: |
