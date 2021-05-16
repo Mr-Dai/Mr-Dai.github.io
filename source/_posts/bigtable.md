@@ -7,6 +7,7 @@ tags:
  - Bigtable
  - HBase
 date: 2018-04-14
+toc: true
 ---
 
 在这篇博文中，我会详细阐释[《Bigtable: A Distributed Storage System for Structured Data》](http://static.usenix.org/events/osdi06/tech/chang/chang_html/?em_x=22)一文中所提及的 Bigtable 的开发背景以及工作原理。

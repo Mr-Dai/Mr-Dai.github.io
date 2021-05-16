@@ -7,6 +7,7 @@ tags:
  - 分布式存储
  - MIT 6.824
 date: 2018-07-29
+toc: true
 ---
 
 在 MIT 6.824 的 Lecture 7 中，我们将阅读[《Using Paxos to Build a Scalable, Consistent, and Highly Available Datastore》](http://nil.csail.mit.edu/6.824/2018/papers/spinnaker.pdf)一文，看看 LinkedIn 的工程师是如何利用 Paxos 和 ZooKeeper 构建一个名为 Spinnaker 的 KV 数据库的。

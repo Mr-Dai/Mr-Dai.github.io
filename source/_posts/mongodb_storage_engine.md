@@ -3,6 +3,7 @@ title: MongoDB 存储引擎
 category: MongoDB
 tags: MongoDB
 date: 2015-11-01
+toc: true
 ---
 
 2015 年 3 月份，MongoDB 发布了 3.0.1 版，从原本的 2.2、2.4、2.6 升级到了最新的 3.0。大量的新功能在 3.0 版本中引入，其中包括了 MongoDB Java 驱动的大幅更新。但对于 MongoDB 数据库本身来说，可更换的数据存储引擎算得上是 3.0 最重大的更新之一。

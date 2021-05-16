@@ -6,6 +6,7 @@ tags:
  - 集群资源调度
  - 分布式系统
 date: 2017-09-04
+toc: true
 ---
 
 这篇文章的内容主要基于 [Mesos 的论文](http://static.usenix.org/events/nsdi11/tech/full_papers/Hindman_new.pdf)总结而来。未来若有机会继续深入使用 Mesos，我会直接更新这篇文章的内容。

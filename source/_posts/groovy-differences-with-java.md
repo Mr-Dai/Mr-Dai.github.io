@@ -5,6 +5,7 @@ tags: Groovy
 date: 2018-04-24
 org_title: "Groovy Getting Started - Differences with Java"
 org_url: "http://www.groovy-lang.org/differences.html"
+toc: true
 ---
 
 这是一篇译文，读者可前往 [Groovy Getting Started - Differences with Java](http://www.groovy-lang.org/differences.html) 阅读原文。

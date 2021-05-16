@@ -7,6 +7,7 @@ tags:
   - Spark
   - SparkSQL
   - Hive ThriftServer
+toc: true
 ---
 
 此文接[上文](/2015/07/27/sparksql_hive_thriftserver_source_1)，继续讲解 SparkSQL Hive ThriftServer 源码。

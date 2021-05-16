@@ -3,6 +3,7 @@ title: MongoDB Aggregation
 category: MongoDB
 tags: MongoDB
 date: 2015-11-12
+toc: true
 ---
 
 在[之前的文章](/mongodb/2015/06/11/MongoDB-CRUD.html)中，我总结了 MongoDB CRUD 操作的基本方法，而本文将会介绍 MongoDB 的 Aggregation Framework。

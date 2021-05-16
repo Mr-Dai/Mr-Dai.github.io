@@ -7,6 +7,7 @@ tags:
  - 分布式系统
  - MIT 6.824
 date: 2018-01-01
+toc: true
 ---
 
 这篇文章是本人按照 MIT 6.824 的课程安排阅读[《The Design of a Practical System for Fault-Tolerant Virtual Machines》](http://nil.csail.mit.edu/6.824/2017/papers/vm-ft.pdf)一文以及相关课程资料并总结而来。

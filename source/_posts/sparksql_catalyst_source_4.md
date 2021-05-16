@@ -5,6 +5,7 @@ tags:
   - Spark
   - SparkSQL
 date: 2015-08-20
+toc: true
 ---
 
 在[上一篇文章](/sparksql_catalyst_source_3)中，我们详细了解了 SparkSQL 中特殊的 TreeNode 们以及核心类 LogicalPlan，完整理解了整个执行计划树的组成。

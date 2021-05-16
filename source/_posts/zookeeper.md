@@ -8,6 +8,7 @@ tags:
  - 分布式存储
  - MIT 6.824
 date: 2019-02-05
+toc: true
 ---
 
 来到 MIT 6.824 的 Lecture 8，我们终于要开始读大名鼎鼎的 ZooKeeper 的论文了。Introducing... [《ZooKeeper: Wait-free Coordination for Internet-scale Systems》](http://nil.csail.mit.edu/6.824/2018/papers/zookeeper.pdf).
@@ -18,11 +19,11 @@ date: 2019-02-05
 
 点击这里可以阅读我之前的几篇 MIT 6.824 系列文章：
 
-- Lecture 1：[MapReduce](https://mr-dai.github.io/mapreduce_summary/)
-- Lecture 3：[Google File System](https://mr-dai.github.io/gfs/)
-- Lecture 4：[Primary-Backup Replication](https://mr-dai.github.io/primary-backup-replication/)
-- Lecture 5 & 6：[Raft](https://mr-dai.github.io/raft/)
-- Lecture 7：[Spinnaker](https://mr-dai/github.io/spinnaker/)
+- Lecture 1：[MapReduce](/mapreduce_summary/)
+- Lecture 3：[Google File System](/gfs/)
+- Lecture 4：[Primary-Backup Replication](/primary-backup-replication/)
+- Lecture 5 & 6：[Raft](/raft/)
+- Lecture 7：[Spinnaker](/spinnaker/)
 
 ## Zab
 

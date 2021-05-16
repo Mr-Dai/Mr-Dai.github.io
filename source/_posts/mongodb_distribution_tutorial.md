@@ -3,6 +3,7 @@ title: MongoDB 分布式部署教程
 category: MongoDB
 tags: MongoDB
 date: 2015-11-23
+toc: true
 ---
 
 本文将介绍如何使用 MongoDB 提供的 Replica Set 和 Shards 功能构建一个分布式 MongoDB 集群。

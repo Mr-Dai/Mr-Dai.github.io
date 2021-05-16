@@ -6,6 +6,7 @@ tags:
   - 分布式存储
   - 分布式系统
 date: 2017-03-28
+toc: true
 ---
 
 在[上一篇](/mongodb_replica_set)博文中，我详细讲解了 MongoDB Replica Set 相关的概念。作为 MongoDB 分布式解决方案之一，

@@ -3,6 +3,7 @@ title: Groovy 教程 - 整合 Groovy 至应用程序
 category: Groovy
 tags: Groovy
 date: 2018-04-24
+toc: true
 ---
 
 这是一篇译文，读者可前往 [Groovy Getting Started - Integrating Groovy into applications](http://www.groovy-lang.org/integrating.html) 阅读原文。

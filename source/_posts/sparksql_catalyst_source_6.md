@@ -5,6 +5,7 @@ tags:
   - Spark
   - SparkSQL
 date: 2015-08-22
+toc: true
 ---
 
 在之前的 SparkSQL Catalyst 源码解析中，我大致的讲解了 SparkSQL 的执行流程，用户输入的 SQL 语句如何一步一步地变为 Logical Plan 再变为 Physical Plan，再执行成为结果 RDD。上一个系列旨在抛砖引玉，该流程中的每个重要部件如 `Parser` 、 `Analyzer` 、`Optimizer` 、 `Planner` 等仅仅讲解了它们是如何管理和运行一些列的 rule，但并未仔细讲解每一个 rule 的功能。

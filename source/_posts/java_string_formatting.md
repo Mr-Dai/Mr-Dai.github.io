@@ -3,6 +3,7 @@ title: Java String Formatting
 category: Java
 tags: Java
 date: 2016-03-26
+toc: true
 ---
 
 Printing or producing a simple `String` message has been really trivial in Java. Most of the time, we use concatenation to create `String` instance we want:

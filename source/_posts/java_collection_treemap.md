@@ -3,6 +3,7 @@ title: Java TreeMap 源码解析
 category: Java
 tags: Java
 date: 2017-02-27
+toc: true
 ---
 
 在本文中，我们将详细解析 `java.util.TreeMap` 的源代码。本文将首先讲述红黑树及其相关操作的基本原理，并结合 `TreeMap` 中的相关代码加深印象，继而再对 `TreeMap` 中的其他代码进行详析。

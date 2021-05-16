@@ -5,6 +5,7 @@ tags:
  - Linux
  - Bash
 date: 2017-12-26
+toc: true
 ---
 
 我写这篇文章主要是用来作为我的 Linux Bash 工具书的，希望这篇文章对你也能起到同样的效果。随着我学习到更多有关 Linux Bash 的知识，我会不断地更新这篇文章。

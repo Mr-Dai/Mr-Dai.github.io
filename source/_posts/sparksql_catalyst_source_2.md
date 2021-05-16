@@ -5,6 +5,7 @@ tags:
   - Spark
   - SparkSQL
 date: 2015-08-18
+toc: true
 ---
 
 在[上一篇文章](/sparksql_catalyst_source_1/)中，我们了解了 SparkSQL 查询的基本执行过程，并了解到 `SQLContext` 的内部类 `QueryExecution` 包含了整个执行过程的每一个执行步骤。

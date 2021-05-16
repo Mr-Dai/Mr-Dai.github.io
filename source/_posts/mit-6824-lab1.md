@@ -6,6 +6,7 @@ tags:
  - 分布式系统
  - MIT 6.824
 date: 2021-05-13
+toc: true
 ---
 
 在这篇文章中，我们将按照 MIT-6.824 2021 Spring 的安排，完成 Lab 1，用 Golang 实现 MapReduce 分布式计算框架。
@@ -117,7 +118,7 @@ Coordinator 与 Worker 间的需要进行的通信主要有两块：
 >      - 总 REDUCE Task 数量，用于生成中间结果文件
 >    * 如果是 REDUCE Task，需要总 MAP Task 数量，用于生成对应中间结果文件的文件名
 
-可点击链接 <https://github.com/Mr-Dai/MIT-6.824/blob/master/src/mr/rpc.go> 参考我的完成实现。
+可点击链接 <https://github.com/Mr-Dai/MIT-6.824/blob/master/src/mr/rpc.go> 查看我的完整实现。
 
 ### Coordinator
 
@@ -336,7 +337,7 @@ func MakeCoordinator(files []string, nReduce int) *Coordinator {
 }
 ```
 
-可点击链接 <https://github.com/Mr-Dai/MIT-6.824/blob/master/src/mr/coordinator.go> 参考我的完成实现。
+可点击链接 <https://github.com/Mr-Dai/MIT-6.824/blob/master/src/mr/coordinator.go> 查看我的完整实现。
 
 ### Worker
 
@@ -482,7 +483,7 @@ for i < len(kva) {
 ofile.Close()
 ```
 
-可点击链接 <https://github.com/Mr-Dai/MIT-6.824/blob/master/src/mr/worker.go> 参考我的完成实现。
+可点击链接 <https://github.com/Mr-Dai/MIT-6.824/blob/master/src/mr/worker.go> 查看我的完整实现。
 
 ## 思考延伸
 

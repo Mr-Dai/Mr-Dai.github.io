@@ -2,6 +2,7 @@
 title: SQL Reference
 tags: SQL
 date: 2017-03-05
+toc: true
 ---
 
 My personal reference for the SQL language. Much of the post's content comes from [W3Schools.com](https://www.w3schools.com/sql/default.asp).

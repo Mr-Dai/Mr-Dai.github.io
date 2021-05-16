@@ -3,6 +3,7 @@ title: Java8 时间 API
 category: Java
 tags: Java
 date: 2016-01-07
+toc: true
 ---
 
 Java8 中最为人津津乐道的新改变恐怕当属函数式 API 的加入。但实际上，Java8 所加入的新功能远不止这个。本文将基于《[Java SE8 for the Really Impatient](http://t.cn/R4ZQRBh)》的第 5 章，归纳一下 Java8 加入的位于 `java.time` 包下的日期和时间 API。

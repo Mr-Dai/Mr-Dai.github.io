@@ -1,10 +1,11 @@
 ---
 title: 有效的 Git 分支模式
-date: 2018-06-11
 category: Git
 tags:
  - Git
  - 团队协作
+date: 2018-06-11
+toc: true
 ---
 
 本文译自 [Vincent Driessen](http://nvie.com/about/) 的[《A Successful Git Branch Model》](http://nvie.com/posts/a-successful-git-branching-model/)，转载时请注明原文链接。

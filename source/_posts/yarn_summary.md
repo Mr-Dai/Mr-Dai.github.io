@@ -7,6 +7,7 @@ tags:
  - 集群资源调度
  - 分布式系统
 date: 2017-09-07
+toc: true
 ---
 
 这篇文章的内容主要基于 [Yarn 的论文](http://web.eecs.umich.edu/~mosharaf/Readings/YARN.pdf)总结而来。未来若有机会继续深入使用 Yarn，我会直接更新这篇文章的内容。

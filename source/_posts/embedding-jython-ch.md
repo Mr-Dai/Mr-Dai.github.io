@@ -5,6 +5,7 @@ tags:
  - Java
  - Python
 date: 2019-02-19
+toc: true
 ---
 
 教你如何使用 Jython 在 Java 程序中嵌入 Python 代码。

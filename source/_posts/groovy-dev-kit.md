@@ -3,6 +3,7 @@ title: Groovy 教程 - GDK
 category: Groovy
 tags: Groovy
 date: 2018-04-24
+toc: true
 ---
 
 这是一篇译文，读者可前往 [Groovy Getting Started - The Groovy Development Kit](http://www.groovy-lang.org/groovy-dev-kit.html) 阅读原文。

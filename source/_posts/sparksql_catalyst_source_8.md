@@ -5,6 +5,7 @@ tags:
   - Spark
   - SparkSQL
 date: 2015-08-24
+toc: true
 ---
 
 在之前的文章中，我们已经了解了 SparkSQL 把 SQL 语句变为 SparkJob 的过程。这个过程我们只是做了一个 Overview，具体不同的语句会变为怎样的 Job 我们并未一一列举。实际上列举起来是一件相当大工程的事。

@@ -3,6 +3,7 @@ title: MongoDB CRUD Cookbook
 category: MongoDB
 tags: MongoDB
 date: 2017-03-27
+toc: true
 ---
 
 This post is just a cookbook for me to look up all those MongoDB operations, so there won't be too many basic concepts about MongoDB or advanced usage. I'll try to make this post perfect for those who don't know MongoDB at all to get the hang of it as easily as possible.

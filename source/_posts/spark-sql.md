@@ -5,6 +5,7 @@ tags:
  - Spark
  - Spark SQL
 date: 2018-04-29
+toc: true
 ---
 
 先前在读过 [Spark RDD 的论文](/spark-rdd)后，我从 MIT 6.824 的课程笔记中了解到，RDD 在 Apache Spark 中已经不那么常用，开发重心渐渐转移到了 Spark SQL 的 DataFrame API 上。在我第一次实习的时候其实也有读过 [Spark SQL 的论文](https://amplab.cs.berkeley.edu/wp-content/uploads/2015/03/SparkSQLSigmod2015.pdf)，那这次就重新读读这篇论文，总结一下吧。

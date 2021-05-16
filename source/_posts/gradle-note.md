@@ -3,6 +3,7 @@ title: Gradle 学习笔记
 category: Gradle
 tags: Gradle
 date: 2018-04-24
+toc: true
 ---
 
 本文为我个人的 Gradle 学习笔记，包含了 [Gradle User Guide](https://docs.gradle.org/current/userguide/userguide.html) 各章节的重点归纳。归纳的内容从 User Guide 的第 4 章开始。

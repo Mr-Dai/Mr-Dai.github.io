@@ -6,6 +6,7 @@ tags:
  - 分布式系统
  - MIT 6.824
 date: 2017-09-03
+toc: true
 ---
 
 这篇文章是本人在按照 MIT 6.824 的课程安排学习 Google MapReduce 并完成对应 Lab 的基础之上总结而成。本文会详细介绍 Google MapReduce 的原理，但考虑到 Lab1 较为简单，本文不会提及 Lab1 的相关内容。部分有关 Google MapReduce 和具体代码实现的细节不会在本文中提及，读者可自行查阅 Google MapReduce 的论文原文以及本人的 [MIT 6.824 Lab 代码仓库](https://github.com/Mr-Dai/MIT-6.824)。

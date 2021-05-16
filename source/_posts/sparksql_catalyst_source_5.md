@@ -5,6 +5,7 @@ tags:
   - Spark
   - SparkSQL
 date: 2015-08-21
+toc: true
 ---
 
 在[上一篇文章](/sparksql_catalyst_source_4)中，我们详细了解了 SparkSQL 如何利用 Analyzer 和 Optimizer，一步一步将 Unresolved Logical Plan 变为 Analyzed Logical Plan 再变为 Optimized Logical Plan。到了这一步，Logical Plan 的生命历程就走到了终点。

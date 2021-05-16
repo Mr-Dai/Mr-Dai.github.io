@@ -7,6 +7,7 @@ tags:
  - 分布式系统
  - MIT 6.824
 date: 2018-02-09
+toc: true
 ---
 
 这篇文章是本人按照 MIT 6.824 的课程安排阅读[《In Search of an Understandable Consensus Algorithm》](http://nil.csail.mit.edu/6.824/2017/papers/raft-extended.pdf)一文以及相关课程资料并总结而来。

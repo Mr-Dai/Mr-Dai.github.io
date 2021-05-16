@@ -5,6 +5,7 @@ tags:
  - Java
  - Python
 date: 2018-09-11
+toc: true
 ---
 
 In the past few days, I managed to find a way to dynamically load and run Python code in a Java program. In this post, I will briefly explain how I achieve this.

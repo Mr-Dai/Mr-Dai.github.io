@@ -6,6 +6,7 @@ tags:
  - 分布式存储
  - 分布式系统
 date: 2017-03-28
+toc: true
 ---
 
 本篇文章将脱离基本的 MongoDB 数据存储和操作，立足于 MongoDB 提供的高可用方案。MongoDB 的高可用方案包括 Replica Set 和 Sharding，这篇文章将介绍 MongoDB 的 Replica Set。

@@ -5,6 +5,7 @@ tags:
   - Spark
   - SparkSQL
 date: 2015-08-23
+toc: true
 ---
 
 在[上一篇文章](/sparksql_catalyst_source_6)中，我们详细讲解了 SparkSQL 如何一步一步地将用户输入的 SQL 语句变为 LogicalPlan 再变为 PhysicalPlan。

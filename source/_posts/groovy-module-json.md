@@ -3,6 +3,7 @@ title: Groovy 模块 - JSON 解析与生成
 category: Groovy
 tags: Groovy
 date: 2018-04-24
+toc: true
 ---
 
 这是一篇译文，读者可前往 [Groovy Module Guide - Parsing and producing JSON](http://www.groovy-lang.org/json.html) 阅读原文。

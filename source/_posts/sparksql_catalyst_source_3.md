@@ -5,6 +5,7 @@ tags:
   - Spark
   - SparkSQL
 date: 2015-08-19
+toc: true
 ---
 
 在[上一篇文章](/sparksql_catalyst_source_2)中，我们了解了 SparkSQL 如何将各式语句分别委派到三个不同的 Parser 中进行解析，并返回一个 Unresolved Logical Plan。

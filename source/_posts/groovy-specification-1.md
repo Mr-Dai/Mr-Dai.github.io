@@ -3,6 +3,7 @@ title: Groovy 语言规范 - 第一章：语法
 category: Groovy
 tags: Groovy
 date: 2018-04-24
+toc: true
 ---
 
 这是一篇译文，读者可前往 [The Apache Groovy programming language - Syntax](http://www.groovy-lang.org/syntax.html) 阅读原文。
